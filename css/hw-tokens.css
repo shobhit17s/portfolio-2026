@@ -1,0 +1,51 @@
+﻿/* hw-tokens.css — every colour, size and typeface the page is allowed to use.
+   Change a value here and it changes everywhere; nothing below hard-codes a hex. */
+:root {
+  /* the paper we are drawing on: a night sky, toned rather than black */
+  --hw-sky:        #131829;
+  --hw-sky-deep:   #0C1120;
+  --hw-ink:        #0B0F1C;
+  --hw-chalk:      #F2EDE1;
+  --hw-chalk-soft: #D8D2C6;
+  --hw-chalk-dim:  #97A0B8;
+
+  /* one gouache colour per world */
+  --hw-moss:       #7CB07C;
+  --hw-ochre:      #DCA54F;
+  --hw-peri:       #8B84DD;
+  --hw-coral:      #CE7561;
+  --hw-accent:     var(--hw-moss);
+
+  /* ---- type ----
+     The families and the scale come from common/type.css, which the case
+     study reads too. The page's own design pixel is set below; every size on
+     the page is that pixel times a number from the shared scale, so the
+     landing page and a case study are set from one ruler. */
+  --hw-display: var(--t-display-face);
+  --hw-body:    var(--t-body-face);
+  --hw-hand:    var(--t-hand-face);
+
+  /* one design pixel for this page: grows with the window, but never so far
+     down that running text stops being comfortable */
+  --t-u: clamp(0.56px, 0.30vw + 0.34px, 0.68px);
+
+  --hw-step--1: calc(var(--t-meta) * var(--t-u));
+  --hw-step-0:  calc(var(--t-body-sm) * var(--t-u));
+  --hw-step-1:  calc(var(--t-body) * var(--t-u));
+  --hw-step-2:  calc(var(--t-h2) * var(--t-u));
+  --hw-step-3:  calc(var(--t-display) * var(--t-u));
+
+  /* rhythm */
+  --hw-gutter: clamp(20px, 4vw, 46px);
+  --hw-panel-w: 23rem;
+
+  /* how many screens of scrolling the whole journey takes */
+  --hw-travel-length: 4.4;
+}
+
+/* the page quietly takes on the colour of whichever world you are at */
+body[data-hw-world='home']   { --hw-accent: var(--hw-moss); }
+body[data-hw-world='work']   { --hw-accent: var(--hw-ochre); }
+body[data-hw-world='play']   { --hw-accent: var(--hw-peri); }
+body[data-hw-world='signal'] { --hw-accent: var(--hw-coral); }
+
