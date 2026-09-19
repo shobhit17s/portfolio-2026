@@ -1,0 +1,32 @@
+﻿/* cs-strokes.css — how the hand-drawn stroke layer sits on an element.
+   The layer draws an SVG outline on top of the element's box; the element's
+   own CSS border is hidden while drawn lines are on, so the two never double
+   up. Press `s` to switch between drawn and plain lines. */
+
+[data-cs-stroke] { position: relative; }
+
+/* The layer sits a few pixels outside the element on every side — cs-strokes.js
+   sets its own left/top — so the whole drawn line is visible even where the
+   element clips its own contents. */
+.cs-stroke {
+  position: absolute;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+  color: inherit;
+}
+
+.cs-stroke path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+[data-cs-stroke] > *:not(.cs-stroke) { position: relative; z-index: 1; }
+
+/* A box that carries a drawn outline hides its plain CSS border, so the two
+   never show at once. There is no switch for this any more: the drawn line is
+   the page, not a display option. */
+[data-cs-stroke] { border-color: transparent !important; }
+

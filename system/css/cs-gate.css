@@ -1,0 +1,125 @@
+﻿/* cs-gate.css — the password gate. Drawn like everything else here: a card
+   with a hand-inked outline, sitting on the same paper. */
+
+.cs-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--cs-bg-1);
+}
+
+.cs-gate-card {
+  position: relative;
+  width: min(100%, 440px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 38px 34px 30px;
+  background: var(--cs-bg-2);
+  border-radius: 18px;
+  /* a calmer pen than the image frames use */
+  --cs-stroke-width: 1.3;
+  --cs-stroke-rough: 1.6;
+}
+
+.cs-gate-eyebrow {
+  margin: 0;
+  font-family: var(--t-body-face);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cs-accent-1);
+}
+
+.cs-gate-title {
+  margin: 0;
+  font-family: var(--t-display-face);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--cs-text-1);
+}
+
+.cs-gate-note {
+  margin: 0;
+  font-family: var(--t-body-face);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--cs-text-2);
+}
+
+.cs-gate-input {
+  width: 100%;
+  margin-top: 6px;
+  padding: 13px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--cs-bg-1);
+  color: var(--cs-text-1);
+  font-family: var(--t-body-face);
+  font-size: 1.05rem;
+  outline: 2px solid transparent;
+  transition: outline-color 160ms;
+}
+
+.cs-gate-input:focus { outline-color: var(--cs-accent-1); }
+.cs-gate-input::placeholder { color: var(--cs-text-3, var(--cs-text-2)); opacity: 0.6; }
+
+.cs-gate-go {
+  padding: 12px 28px;
+  border: 0;
+  border-radius: 40px;
+  background: var(--cs-accent-1);
+  color: var(--cs-bg-1);
+  font-family: var(--t-body-face);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 180ms var(--cs-ease), opacity 180ms;
+}
+
+.cs-gate-go:hover:not(:disabled) { transform: translateY(-2px); }
+.cs-gate-go:disabled { opacity: 0.6; cursor: progress; }
+
+.cs-gate-say {
+  min-height: 1.2em;
+  margin: 0;
+  font-family: var(--t-body-face);
+  font-size: 0.9rem;
+  color: var(--cs-text-2);
+}
+
+.cs-gate-card.is-wrong { animation: cs-gate-no 380ms var(--cs-ease); }
+.cs-gate-card.is-wrong .cs-gate-say { color: var(--cs-accent-1); }
+
+@keyframes cs-gate-no {
+  0%, 100% { transform: translateX(0) }
+  22% { transform: translateX(-7px) }
+  58% { transform: translateX(6px) }
+  82% { transform: translateX(-3px) }
+}
+
+.cs-gate-back {
+  margin-top: 4px;
+  font-family: var(--t-body-face);
+  font-size: 0.86rem;
+  color: var(--cs-text-2);
+  text-decoration: none;
+}
+
+.cs-gate-back:hover { color: var(--cs-text-1); }
+
+.cs-gate-broken {
+  margin: 20vh auto;
+  max-width: 30ch;
+  font-family: var(--t-body-face);
+  text-align: center;
+  color: var(--cs-text-2);
+}
+
