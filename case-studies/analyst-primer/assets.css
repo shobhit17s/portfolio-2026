@@ -1,0 +1,13 @@
+﻿/* assets.css — which file fills which picture box on this page.
+
+   Nothing here yet, so every picture slot renders as its drawn placeholder and
+   the hero stencil stays out of the way. When you have a drawing, drop it in
+   assets/ and name it here, exactly as the industry dashboard does:
+
+     .fig-hero-rule {
+       -webkit-mask-image: url('assets/hero-rule.svg');
+       mask-image: url('assets/hero-rule.svg');
+       --cs-has-figure: 1;
+     }
+*/
+
