@@ -1,0 +1,141 @@
+﻿/* cs-base.css — reset and the seven type roles from the typography spec. */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--cs-bg-1);
+  color: var(--cs-text-1);
+  font-family: var(--cs-font-body);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+p, h1, h2, h3, figure, ul { margin: 0; padding: 0; }
+ul { list-style: none; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+:focus-visible { outline: 2px dashed var(--cs-accent-1); outline-offset: 4px; }
+
+.cs-sr {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------- the type roles ----------
+   Every size, line height and weight comes from common/type.css. The classes
+   below are the case study's own names for those roles, so the markup reads
+   in its own language while the system stays single-sourced.
+
+   NOTE, worth a look: the high-fidelity sheet sets body at 24, caption at 16
+   and meta at 12. The system runs larger than that — body 30, caption 22,
+   meta 19 — because the brief was to make running text more legible. The
+   headings are unchanged. */
+
+.cs-hero-title {
+  font-family: var(--t-display-face);
+  font-size: calc(var(--t-display) * var(--t-u));
+  line-height: var(--t-display-lh);
+  letter-spacing: var(--t-display-ls);
+  font-weight: var(--t-display-w);
+  color: var(--cs-accent-1);
+  text-wrap: balance;
+}
+
+.cs-impact {
+  font-family: var(--t-display-face);
+  font-size: calc(var(--t-h1) * var(--t-u));
+  line-height: var(--t-h1-lh);
+  letter-spacing: var(--t-h1-ls);
+  font-weight: var(--t-h1-w);
+  color: var(--cs-accent-1);
+  text-wrap: balance;
+}
+
+/* A section title carries a short upright rule to its left, as the
+   high-fidelity sheets draw it. */
+.cs-section-title {
+  position: relative;
+  font-family: var(--t-display-face);
+  font-size: calc(var(--t-h2) * var(--t-u));
+  line-height: var(--t-h2-lh);
+  letter-spacing: var(--t-h2-ls);
+  font-weight: var(--t-h2-w);
+  color: var(--cs-accent-2);
+  padding-left: calc(22 * var(--u));
+}
+
+.cs-section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.06em;
+  bottom: 0.1em;
+  width: calc(4 * var(--u));
+  border-radius: calc(2 * var(--u));
+  background: var(--cs-accent-1);
+}
+
+/* a sub-heading: a tile's name, a phase label's partner */
+.cs-sub-title {
+  font-family: var(--t-display-face);
+  font-size: calc(var(--t-h3) * var(--t-u));
+  line-height: var(--t-h3-lh);
+  letter-spacing: var(--t-h3-ls);
+  font-weight: var(--t-h3-w);
+  color: var(--cs-text-1);
+}
+
+.cs-lead {
+  font-family: var(--t-body-face);
+  font-size: calc(var(--t-lead) * var(--t-u));
+  line-height: var(--t-lead-lh);
+  font-weight: var(--t-lead-w);
+  color: var(--cs-text-1);
+}
+
+.cs-body {
+  font-family: var(--t-body-face);
+  font-size: calc(var(--t-body) * var(--t-u));
+  line-height: var(--t-body-lh);
+  font-weight: var(--t-body-w);
+  color: var(--cs-text-1);
+}
+
+.cs-body--small { font-size: calc(var(--t-body-sm) * var(--t-u)); }
+.cs-body--secondary { color: var(--cs-text-2); }
+
+.cs-caption {
+  font-family: var(--t-body-face);
+  font-size: calc(var(--t-caption) * var(--t-u));
+  line-height: var(--t-caption-lh);
+  font-weight: var(--t-caption-w);
+  color: var(--cs-text-1);
+}
+
+.cs-meta {
+  font-family: var(--t-body-face);
+  font-size: calc(var(--t-meta) * var(--t-u));
+  line-height: var(--t-meta-lh);
+  letter-spacing: var(--t-meta-ls);
+  font-weight: var(--t-meta-w);
+  text-transform: uppercase;
+  color: var(--cs-text-1);
+}
+
+/* an aside pencilled in the margin */
+.cs-hand {
+  font-family: var(--t-hand-face);
+  font-size: calc(var(--t-lead) * var(--t-u));
+  line-height: 1.25;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
+
