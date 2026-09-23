@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-cs-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How an analyst works</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=Shantell+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+
+<!-- the shared type system, read by every surface in the portfolio -->
+<link rel="stylesheet" href="../../common/type.css">
+<!-- In the head on purpose: it sets light or dark before the first paint,
+     and it remembers the choice across every page of the site. -->
+<script src="../../common/theme.js"></script>
+<!-- the panels shared with the landing page -->
+<script src="../../common/drawers.js"></script>
+
+<!-- the case study engine: identical for every case study -->
+<link rel="stylesheet" href="../../system/css/cs-tokens.css">
+<link rel="stylesheet" href="../../system/css/cs-base.css">
+<link rel="stylesheet" href="../../system/css/cs-layout.css">
+<link rel="stylesheet" href="../../system/css/cs-slides.css">
+<link rel="stylesheet" href="../../system/css/cs-components.css">
+<link rel="stylesheet" href="../../system/css/cs-prototype.css">
+<link rel="stylesheet" href="../../system/css/cs-strokes.css">
+
+<!-- the light / dark switch, shared with the landing page -->
+<link rel="stylesheet" href="../../common/switch.css">
+
+<!-- this study's own two accents, and the paths to its artwork -->
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="assets.css">
+</head>
+<body>
+
+<!-- ============================================================
+     This page holds no content. Every slide on it is built from
+     content.js by the engine's renderer. The markup below is only
+     the frame: a top bar, the two view tabs, and the two empty
+     containers the views are drawn into.
+     ============================================================ -->
+
+<div id="cs-window">
+
+  <header id="cs-topbar">
+    <div id="cs-topbar-left">
+      <a id="cs-back" href="#">back</a>
+      <p id="cs-topbar-title"></p>
+    </div>
+    <div id="cs-topbar-right">
+      <!-- The light / dark switch for the whole site. It keeps no state of its
+           own: everything you see it do is driven by data-cs-mode on <html>, which
+           common/theme.js sets. Styling and motion: common/switch.css. -->
+      <button type="button" id="theme-switch" class="theme-switch"
+              role="switch" aria-checked="false" aria-label="Switch to light mode"
+              data-theme-toggle data-theme-switch>
+        <span class="theme-switch-track">
+          <span class="theme-switch-label theme-switch-label--light" aria-hidden="true">Light</span>
+          <span class="theme-switch-label theme-switch-label--dark" aria-hidden="true">Dark</span>
+          <span class="theme-switch-knob">
+            <span class="theme-switch-icon theme-switch-icon--sun" aria-hidden="true"></span>
+            <span class="theme-switch-icon theme-switch-icon--moon" aria-hidden="true"></span>
+          </span>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <div id="cs-progress" aria-hidden="true"></div>
+
+  <div id="cs-viewbar">
+    <div id="cs-view-tabs" role="tablist" aria-label="How to read this case study">
+      <button type="button" class="cs-view-tab" id="cs-tab-nutshell" role="tab"
+              aria-selected="false" aria-controls="cs-view-nutshell"
+              data-cs-view="nutshell" data-cs-stroke>In a nutshell</button>
+      <button type="button" class="cs-view-tab" id="cs-tab-story" role="tab"
+              aria-selected="true" aria-controls="cs-view-story"
+              data-cs-view="story" data-cs-stroke>The detailed story</button>
+    </div>
+    <p class="cs-meta" id="cs-view-note"></p>
+  </div>
+
+  <main id="cs-all-slides">
+    <div class="cs-view" id="cs-view-nutshell" role="tabpanel" aria-labelledby="cs-tab-nutshell" hidden></div>
+    <div class="cs-view" id="cs-view-story" role="tabpanel" aria-labelledby="cs-tab-story"></div>
+  </main>
+</div>
+
+
+<div id="cs-scrim"></div>
+<aside id="cs-drawer" aria-hidden="true" aria-label="Further detail">
+  <div id="cs-drawer-close-area">
+    <button type="button" id="cs-drawer-close" aria-label="Close">&times;</button>
+  </div>
+  <div id="cs-drawer-title-panel"><h2 id="cs-drawer-title"></h2></div>
+  <div id="cs-drawer-body">
+    <div id="cs-drawer-image-and-caption">
+      <div id="cs-drawer-image" class="cs-slot"></div>
+      <p id="cs-drawer-caption"></p>
+    </div>
+    <div id="cs-drawer-text"></div>
+  </div>
+</aside>
+
+<!-- the engine -->
+<script src="../../system/js/cs-strokes.js"></script>
+<script src="../../system/js/cs-prototype.js"></script>
+<script src="../../system/js/cs-templates.js"></script>
+<script src="../../system/js/cs-panels.js"></script>
+
+<!-- this page's content, before the renderer runs -->
+<script src="content.js"></script>
+
+<!-- the engine again: everything that needs the content to exist -->
+<script src="../../system/js/cs-render.js"></script>
+<script src="../../system/js/cs-carousels.js"></script>
+<script src="../../system/js/cs-drawer.js"></script>
+<script src="../../system/js/cs-views.js"></script>
+<script src="../../system/js/cs-parallax.js"></script>
+<script src="../../system/js/cs-chrome.js"></script>
+<script src="../../system/js/cs-main.js"></script>
+
+</body>
+</html>
+
+

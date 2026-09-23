@@ -1,0 +1,138 @@
+﻿/* ============================================================================
+   type.css — ONE typographic system for the whole experience.
+
+   Both the worlds landing page and every case study read this file, so a
+   change here changes the type everywhere. Nothing else in the project is
+   allowed to invent a font size.
+
+   HOW THE SCALE WORKS
+   The sizes below are plain numbers, not pixels. Each surface multiplies them
+   by its own design pixel:
+
+       the case study   --u      one pixel of a 1920-wide slide
+       the landing page --hw-u   one pixel of the page's own ruler
+
+   That way a single ruler governs both, while each surface keeps scaling the
+   way it needs to. To resize the whole system, change the numbers here.
+
+   THE THREE HANDS
+   display  Shantell Sans — drawn by hand but properly built, so it holds up
+            at 120 and still reads at 34
+   body     Nunito — rounded and warm, and legible at length, which a truly
+            handwritten face is not
+   hand     Caveat — for marginalia only: an aside pencilled in the margin,
+            never a paragraph
+   ========================================================================= */
+
+:root {
+  --t-display-face: 'Shantell Sans', 'Bradley Hand', 'Segoe Print', cursive;
+  --t-body-face:    'Nunito', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif;
+  --t-hand-face:    'Caveat', 'Bradley Hand', cursive;
+
+  /* ---- the scale, in design pixels ---- */
+  --t-display:  120;   /* the one biggest thing on a page          */
+  --t-h1:        80;   /* an opening statement, an impact line     */
+  --t-h2:        48;   /* a section title                          */
+  --t-h3:        34;   /* a sub-heading, a tile label              */
+  --t-lead:      38;   /* the paragraph that introduces            */
+  --t-body:      30;   /* running text                             */
+  --t-body-sm:   25;   /* dense or secondary text                  */
+  --t-caption:   24;   /* what a picture is                        */
+  --t-meta:      20;   /* labels, eyebrows, tags                   */
+
+  /* ---- how each role is set ---- */
+  --t-display-lh: 1.1;   --t-display-ls: 0.01em;  --t-display-w: 600;
+  --t-h1-lh:      1.15;  --t-h1-ls:      0.01em;  --t-h1-w:      600;
+  --t-h2-lh:      1.2;   --t-h2-ls:      0.015em; --t-h2-w:      600;
+  --t-h3-lh:      1.3;   --t-h3-ls:      0.02em;  --t-h3-w:      600;
+  --t-lead-lh:    1.55;  --t-lead-w:     400;
+  --t-body-lh:    1.65;  --t-body-w:     400;
+  --t-caption-lh: 1.45;  --t-caption-w:  400;
+  --t-meta-lh:    1.3;   --t-meta-ls:    0.1em;   --t-meta-w:    600;
+}
+
+/* ----------------------------------------------------------------------------
+   The roles as classes. A surface sets --t-u to its own design pixel and then
+   anything wearing these classes is set correctly.
+   -------------------------------------------------------------------------- */
+
+.t-display, .t-h1, .t-h2, .t-h3 {
+  font-family: var(--t-display-face);
+  text-wrap: balance;
+}
+
+.t-display {
+  font-size: calc(var(--t-display) * var(--t-u));
+  line-height: var(--t-display-lh);
+  letter-spacing: var(--t-display-ls);
+  font-weight: var(--t-display-w);
+}
+
+.t-h1 {
+  font-size: calc(var(--t-h1) * var(--t-u));
+  line-height: var(--t-h1-lh);
+  letter-spacing: var(--t-h1-ls);
+  font-weight: var(--t-h1-w);
+}
+
+.t-h2 {
+  font-size: calc(var(--t-h2) * var(--t-u));
+  line-height: var(--t-h2-lh);
+  letter-spacing: var(--t-h2-ls);
+  font-weight: var(--t-h2-w);
+}
+
+.t-h3 {
+  font-size: calc(var(--t-h3) * var(--t-u));
+  line-height: var(--t-h3-lh);
+  letter-spacing: var(--t-h3-ls);
+  font-weight: var(--t-h3-w);
+}
+
+.t-lead, .t-body, .t-body-sm, .t-caption, .t-meta {
+  font-family: var(--t-body-face);
+}
+
+.t-lead {
+  font-size: calc(var(--t-lead) * var(--t-u));
+  line-height: var(--t-lead-lh);
+  font-weight: var(--t-lead-w);
+}
+
+.t-body {
+  font-size: calc(var(--t-body) * var(--t-u));
+  line-height: var(--t-body-lh);
+  font-weight: var(--t-body-w);
+}
+
+.t-body-sm {
+  font-size: calc(var(--t-body-sm) * var(--t-u));
+  line-height: var(--t-body-lh);
+  font-weight: var(--t-body-w);
+}
+
+.t-caption {
+  font-size: calc(var(--t-caption) * var(--t-u));
+  line-height: var(--t-caption-lh);
+  font-weight: var(--t-caption-w);
+}
+
+.t-meta {
+  font-size: calc(var(--t-meta) * var(--t-u));
+  line-height: var(--t-meta-lh);
+  letter-spacing: var(--t-meta-ls);
+  font-weight: var(--t-meta-w);
+  text-transform: uppercase;
+}
+
+/* an aside pencilled in the margin */
+.t-hand {
+  font-family: var(--t-hand-face);
+  font-size: calc(var(--t-lead) * var(--t-u));
+  line-height: 1.25;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+
