@@ -1,0 +1,109 @@
+﻿/* cs-tokens.css — every colour, size and typeface a case study may use.
+   Values come straight from the spec sheets.
+
+   THIS FILE IS PART OF THE ENGINE. It contains nothing about any particular
+   case study: no titles, no copy, no image paths. A study supplies its own
+   theme.css (its two accents) and its own content.js (everything else). */
+
+:root {
+  /* ---- dark mode (the default the high-fidelity specs are drawn in) ---- */
+  --cs-bg-1: #0A0D0A;          /* primary background   */
+  --cs-bg-2: #0D1B18;          /* secondary background */
+  --cs-bg-3: #18241F;          /* tertiary background  */
+  --cs-text-1: #B1C4C6;        /* primary text   */
+  --cs-text-2: #57798D;        /* secondary text */
+  --cs-line: #B1C4C6;          /* what hand-drawn strokes are drawn in */
+
+  /* ---- the accents, common to both modes ----
+     Six of these come from the spec sheets. --cs-moon is the seventh, added
+     for the light/dark switch: the sun needed an opposite number. It is the
+     one colour on this list that is not off a spec sheet - it was picked for
+     the switch and is used by the moon badge on it. Change it here and the
+     switch follows; nothing else reads it. */
+  --cs-moon:   #E4E4A6;
+  --cs-sun:    #E49204;
+  --cs-fire:   #D3644A;
+  --cs-water:  #3A768B;
+  --cs-forest: #849E59;
+  --cs-stone:  #8A92A0;
+  --cs-mist:   #8F4471;
+
+  /* Only two accents per case study. The engine ships a neutral default;
+     each case study names its own pair in its own theme.css, which is the
+     only colour decision a study is allowed to make. */
+  --cs-accent-1: var(--cs-stone);
+  --cs-accent-2: var(--cs-water);
+
+  /* ---- typography ----
+     The families and the whole scale live in common/type.css, which the
+     landing page reads too. These three names are kept so that older rules
+     still resolve; each one simply points at the shared face.
+     'Font_kk_version_1' is Caraxes's own face; Shantell Sans stands in until
+     the real file is dropped into assets/fonts and named in type.css. */
+  --cs-font-display: var(--t-display-face);
+  --cs-font-body: var(--t-body-face);
+  --cs-font-meta: var(--t-body-face);
+  --cs-font-hand: var(--t-hand-face);
+
+  /* ---- the slide grid, exactly as specced ---- */
+  --cs-slide-w: 1920;
+  --cs-slide-h: 1080;
+
+  /* How wide a slide is drawn on screen.
+     Spec #0.2: a 1920px slide inside a 3840px window — the slide is half the
+     window. Held to that, with a floor so the type stays readable on a laptop
+     and a ceiling at the slide's own design width. */
+  --cs-slide-floor: 1200px;
+  --cs-slide-drawn: clamp(
+      min(100%, var(--cs-slide-floor)),
+      50vw,
+      calc(var(--cs-slide-w) * 1px));
+  --cs-slide-margin: 40;
+  --cs-slide-gutter: 16;
+  --cs-slide-cols: 12;
+  --cs-slide-rows: 8;
+
+  /* ---- the window grid (8 columns), which the drawer width comes from ---- */
+  --cs-win-margin: 40px;
+  /* how tall the bar carrying the two view tabs is, all-in. The page below
+     it reserves exactly this much, so the two never disagree. */
+  --cs-viewbar-h: 78px;
+  --cs-win-gutter: 16px;
+  --cs-win-col: calc((100vw - 2 * var(--cs-win-margin) - 7 * var(--cs-win-gutter)) / 8);
+  --cs-drawer-w: calc(3 * var(--cs-win-col) + 2 * var(--cs-win-gutter) + var(--cs-win-margin));
+
+  /* How far outside its own edge the drawn line sits. cs-strokes.js reads
+     this, so the number lives in one place and anything that has to leave
+     room for a drawn line can do the arithmetic in CSS. */
+  --cs-stroke-out: 3px;
+
+  /* ---- motion ---- */
+  --cs-drawer-ms: 1200ms;
+  --cs-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- light mode ---- */
+:root[data-cs-mode='light'] {
+  --cs-bg-1: #FCF9D9;
+  --cs-bg-2: #E3EDCF;
+  --cs-bg-3: #AECAAD;
+  --cs-text-1: #3F5757;
+  --cs-text-2: #999F74;
+  --cs-line: #3F5757;
+}
+
+/* One design pixel, expressed against the slide's own width, so every number
+   from the spec sheets can be written exactly as it was drawn. The shared
+   type system measures itself against the same pixel. */
+/* Layout uses --u exactly: the grid, the gutters and the padding must stay in
+   proportion to the slide or the design comes apart.
+   Type uses --t-u, which is the same pixel with a floor under it. Between a
+   full-size slide and a phone there is a band where the slide is drawn small
+   enough that 30 design pixels of body text would fall under 13 real ones,
+   and no amount of faithfulness to the grid is worth text nobody can read. */
+.cs-slide {
+  --u: 0.0520833cqw;
+  --t-u: max(0.5px, 0.0520833cqw);
+}
+
+
