@@ -1,0 +1,11 @@
+﻿/* theme.css — this page's two accents.
+
+   Deliberately NOT the same pair as the industry dashboard: this is the shared,
+   open page, so it reads as its own thing rather than as part of either case
+   study. */
+:root {
+  --cs-accent-1: var(--cs-sun);     /* headings, impact text, picture slots */
+  --cs-accent-2: var(--cs-water);   /* section titles, the drawer */
+}
+
+
