@@ -1,0 +1,107 @@
+﻿/* hw-drawer.css — the panel that slides in over the worlds.
+
+   Deliberately the same MOVE as the case study's drawer: in from the right
+   on a desktop, up from the bottom on a phone, with the scrim arriving a
+   beat before the panel. A reader who has seen one should recognise the
+   other without being told they are the same thing. */
+
+#hw-drawer-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: color-mix(in srgb, var(--hw-sky) 72%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 420ms var(--hw-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+#hw-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 61;
+  width: min(520px, 92vw);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 26px 28px 34px;
+  overflow-y: auto;
+  background: var(--cs-bg-1);
+  border-left: 1.5px solid color-mix(in srgb, var(--hw-chalk) 26%, transparent);
+  transform: translateX(102%);
+  transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+body.hw-drawer-open #hw-drawer-scrim { opacity: 1; pointer-events: auto; }
+body.hw-drawer-open #hw-drawer { transform: translateX(0); }
+
+/* The writing arrives a beat after the panel, so the panel is read as
+   arriving and the words as being inside it. */
+#hw-drawer > * {
+  opacity: 0;
+  transition: opacity 320ms ease;
+}
+body.hw-drawer-open #hw-drawer > * { opacity: 1; transition-delay: 300ms; }
+
+#hw-drawer-close-row { display: flex; justify-content: flex-end; }
+
+#hw-drawer-close {
+  font-family: var(--hw-body);
+  font-size: 1.4rem;
+  line-height: 1;
+  width: 38px;
+  height: 38px;
+  border-radius: 14px 11px 15px 10px;
+  border: 1.4px solid var(--hw-chalk-dim);
+  background: none;
+  color: var(--hw-chalk-dim);
+  cursor: pointer;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+#hw-drawer-close:hover { color: var(--hw-accent); border-color: var(--hw-accent); }
+
+#hw-drawer-title {
+  font-family: var(--hw-display, var(--t-display-face));
+  font-size: var(--hw-step-2, 1.6rem);
+  line-height: 1.18;
+  color: var(--hw-chalk);
+  margin: 0;
+}
+
+#hw-drawer-body { color: var(--hw-chalk-soft); }
+#hw-drawer-body p { margin: 0 0 0.9em; line-height: 1.6; }
+#hw-drawer-body p:last-child { margin-bottom: 0; }
+
+#hw-drawer-note {
+  font-family: var(--hw-body);
+  font-size: var(--hw-step--1, 0.82rem);
+  line-height: 1.5;
+  color: var(--hw-chalk-dim);
+  border-top: 1.2px solid color-mix(in srgb, var(--hw-chalk) 18%, transparent);
+  padding-top: 12px;
+  margin: 4px 0 0;
+}
+
+/* ---------- phones: up from the bottom, not in from the side ---------- */
+@media (max-width: 820px) {
+  #hw-drawer {
+    top: auto;
+    left: 0;
+    right: 0;
+    width: auto;
+    max-height: 82vh;
+    border-left: 0;
+    border-top: 1.5px solid color-mix(in srgb, var(--hw-chalk) 26%, transparent);
+    border-radius: 20px 16px 0 0;
+    transform: translateY(102%);
+  }
+  body.hw-drawer-open #hw-drawer { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hw-drawer, #hw-drawer-scrim, #hw-drawer > * { transition-duration: 1ms; transition-delay: 0ms; }
+}
+
+
