@@ -1,0 +1,506 @@
+﻿/* hw-layout.css — where things sit. The sky is a fixed canvas; everything
+   written sits on a fixed layer above it and is positioned by hw-scroll.js. */
+
+/* the only element that actually scrolls: it gives the page its length */
+#hw-scroll-track {
+  height: calc(var(--hw-travel-length) * 100vh);
+  pointer-events: none;
+}
+
+#hw-sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+}
+
+.hw-ui {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.hw-ui > * { pointer-events: auto; }
+
+/* ---------- masthead ---------- */
+#hw-masthead {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  flex-wrap: wrap;
+  padding: clamp(18px, 2.6vw, 30px) var(--hw-gutter);
+}
+
+#hw-wordmark {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.6vw, 16px);
+  font-family: var(--hw-display);
+  font-size: calc(var(--t-h3) * var(--t-u));
+  line-height: var(--t-h3-lh);
+  font-weight: var(--t-h3-w);
+  letter-spacing: var(--t-h3-ls);
+}
+
+#hw-wordmark small {
+  display: block;
+  font-family: var(--hw-hand);
+  font-size: calc(var(--t-body) * var(--t-u));
+  font-weight: 500;
+  color: var(--hw-chalk-dim);
+  letter-spacing: 0;
+}
+
+/* ---------- the mark ----------
+
+   A SLOT, not a drawing. Nothing is in it, so nothing shows and it takes no
+   room - the name sits exactly where it sat before.
+
+   TO PUT YOUR MARK IN, add this one rule at the bottom of this file:
+
+       #hw-logo { display: block; background-image: url('assets/logo.png'); }
+
+   Put the file in assets/ beside everything else. A square PNG with a
+   transparent background is the right thing; it is drawn to fit, so its own
+   pixel size does not matter as long as it is at least 120 across. Nothing
+   else has to change, on this page or any other.
+
+   If you would rather the mark took the colour of whichever world you are
+   on - green on About, yellow on Work - say so and it becomes a stencil
+   instead, the same trick the sun and moon in the switch use. */
+#hw-logo {
+  display: none;
+  flex: 0 0 auto;
+  width: calc(var(--t-h1) * var(--t-u) * 0.86);
+  height: calc(var(--t-h1) * var(--t-u) * 0.86);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  /* NO round crop. The slot is a square the drawing is fitted inside, so a
+     mark of any shape survives whole. If you want it cut to a circle -
+     because the drawing is a badge and the circle is part of it - add
+     `border-radius: 50%` in the same rule that names the file. */
+}
+
+/* ---------- the light / dark switch ----------
+   Where the four tabs used to be. They have gone: the rail along the bottom
+   already names all four worlds, and saying it twice on one screen gave the
+   eye two places to look for the same thing. */
+.hw-chip {
+  font-family: var(--hw-body);
+  font-size: var(--hw-step--1);
+  font-weight: var(--t-meta-w);
+  letter-spacing: 0.09em;
+  padding: 7px 16px 8px;
+  border-radius: 20px 16px 22px 14px;
+  border: 1.4px solid var(--hw-chalk-dim);
+  background: none;
+  color: var(--hw-chalk-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 240ms ease, border-color 240ms ease;
+}
+
+.hw-chip:hover { color: var(--hw-accent); border-color: var(--hw-accent); }
+
+
+/* ---------- world panels ---------- */
+.hw-panel {
+  position: absolute;
+  top: 0; left: 0;
+  width: var(--hw-panel-w);
+  max-width: calc(100vw - 2 * var(--hw-gutter));
+  padding: 18px 22px 20px;
+  /* a wash of dark behind the words, faded out well before the box edges so
+     there is never a visible rectangle sitting on the sky */
+  background: radial-gradient(58% 52% at 46% 48%,
+              color-mix(in srgb, var(--hw-sky) 80%, transparent) 0%,
+              color-mix(in srgb, var(--hw-sky) 50%, transparent) 55%,
+              transparent 100%);
+  text-shadow: 0 1px 16px color-mix(in srgb, var(--hw-sky) 90%, transparent), 0 0 3px color-mix(in srgb, var(--hw-sky) 70%, transparent);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  will-change: transform, opacity;
+}
+
+.hw-panel-title {
+  font-family: var(--hw-display);
+  font-size: var(--hw-step-2);
+  line-height: var(--t-h2-lh);
+  font-weight: var(--t-h2-w);
+  letter-spacing: var(--t-h2-ls);
+  margin: 2px 0 6px;
+}
+
+.hw-panel-body {
+  color: var(--hw-chalk-soft);
+  font-size: calc(var(--t-body-sm) * var(--t-u));
+  line-height: var(--t-body-lh);
+  max-width: 30ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hw-panel-body + .hw-panel-body { margin-top: 0.85em; }
+
+/* ===========================================================================
+   THE RAIL - FOUR WORLDS, ALWAYS WITHIN REACH
+
+   One bar, 80 pixels tall, four marks in it. Each mark carries the colour of
+   the world it goes to, so the rail is a map of the journey rather than four
+   identical buttons: --hw-dot is set per tab below, in the order the worlds
+   appear, and it does not change with where you currently are.
+
+   IT SITS DIFFERENTLY ON THE TWO SIZES, on purpose.
+
+     desktop   a floating pill, clear of the bottom edge. There is room to
+               spare, and a bar welded to the edge of a big window looks like
+               browser furniture rather than part of the page.
+     phone     pinned flat to the bottom, full width. There is no room to
+               spare, and a thumb reaches the bottom edge more easily than
+               anything above it.
+
+   THE GLASS. The pill is the page's own background at two thirds strength
+   with a blur behind it, so the planet passing underneath shows through as
+   colour without ever showing through as detail. `backdrop-filter` is the
+   whole trick; where a browser does not have it, the fallback is simply a
+   more solid pill, which is why the background colour is given first and the
+   filter after.
+   =========================================================================== */
+#hw-rail {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(26px, 4vh, 40px);
+  transform: translateX(-50%);
+  height: 80px;
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 3vw, 40px);
+  padding: 0 clamp(26px, 3.4vw, 42px);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--hw-sky) 72%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--hw-chalk-dim) 30%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  backdrop-filter: blur(14px) saturate(1.25);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--hw-sky) 40%, transparent);
+}
+
+.hw-rail-dot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--hw-hand);
+  font-size: calc(var(--t-body) * var(--t-u));
+  line-height: 1;
+  color: var(--hw-chalk-dim);
+  background: none;
+  border: 0;
+  padding: 0 4px;
+  cursor: pointer;
+  transition: color 240ms ease;
+  --hw-dot: var(--hw-chalk-dim);
+}
+
+/* each tab, in the colour of the world it goes to */
+#hw-rail .hw-rail-dot:nth-child(1) { --hw-dot: var(--hw-moss); }
+#hw-rail .hw-rail-dot:nth-child(2) { --hw-dot: var(--hw-ochre); }
+#hw-rail .hw-rail-dot:nth-child(3) { --hw-dot: var(--hw-peri); }
+#hw-rail .hw-rail-dot:nth-child(4) { --hw-dot: var(--hw-coral); }
+
+/* the mark: a filled planet of its own, never quite a circle */
+.hw-rail-dot::before {
+  content: '';
+  width: 26px; height: 26px;
+  border-radius: 60% 40% 55% 45%;
+  background: color-mix(in srgb, var(--hw-dot) 34%, transparent);
+  transition: background-color 240ms ease, transform 300ms cubic-bezier(.34,1.3,.5,1);
+}
+
+.hw-rail-dot:hover { color: var(--hw-dot); }
+.hw-rail-dot:hover::before { background: color-mix(in srgb, var(--hw-dot) 62%, transparent); }
+
+.hw-rail-dot.is-active { color: var(--hw-dot); }
+
+.hw-rail-dot.is-active::before {
+  background: var(--hw-dot);
+  transform: scale(1.18) rotate(12deg);
+}
+
+#hw-scroll-hint {
+  position: absolute;
+  left: 50%;
+  /* clear of the rail, which carries a rule along its top edge - and the
+     hint has to clear the RULE, not the tabs, or it sits on the line */
+  bottom: clamp(116px, 14vh, 150px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--hw-chalk-dim);
+  transition: opacity 400ms ease;
+}
+
+#hw-scroll-hint.is-gone { opacity: 0; }
+
+/* ===========================================================================
+   NARROW SCREENS - ONE COLUMN, IN A FIXED ORDER
+
+   The trouble with the old phone layout was not any one thing being too big.
+   It was that four things - planet, dial, writing, rail - were each placed by
+   a different rule, so on a small screen they arrived on top of one another
+   and the page read as a pile.
+
+   So the bottom of the screen is now divided up ONCE, from the floor
+   upwards, and everything is hung off that:
+
+       rail          bottom, its own reserved band
+       the writing   directly above the rail
+       the dial      directly above the writing
+       the planet    whatever is left, which the camera already aims at
+
+   --hw-stack-rail is how much floor the rail keeps. --hw-panel-h is the
+   height of the TALLEST world's writing, measured once by hw-scroll.js and
+   written onto <body>. Using the tallest for all four is deliberate: the
+   dial is a control, and a control that moved up and down as you travelled
+   would be maddening. It also means every world's title lands on the same
+   line, so travelling does not make the page jump.
+   =========================================================================== */
+body.hw-narrow {
+  /* the bar is 80 tall and welded to the floor, plus a little air above it */
+  --hw-stack-rail: 96px;
+}
+
+/* On a phone the rail stops floating and becomes the floor of the screen:
+   full width, flat to the bottom edge, with a hairline above it. A thumb
+   reaches the bottom edge more easily than anything hovering above it, and
+   the space a floating pill wastes on either side is space the writing
+   needs. */
+body.hw-narrow #hw-rail {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform: none;
+  width: 100%;
+  border-radius: 0;
+  border: 0;
+  border-top: 1.5px solid color-mix(in srgb, var(--hw-chalk-dim) 38%, transparent);
+  background: color-mix(in srgb, var(--hw-sky) 86%, transparent);
+  box-shadow: none;
+  justify-content: space-around;
+  gap: 0;
+  padding: 0 8px;
+}
+
+/* the label above the dial goes: on a phone the three words underneath say
+   what it is, and the line above them was costing a whole row of height */
+body.hw-narrow .hw-spin-label { display: none; }
+
+body.hw-narrow .hw-panel {
+  transform: none !important;
+  top: auto;
+  bottom: var(--hw-stack-rail);
+  left: 0;
+  right: 0;
+  width: auto;
+  max-width: none;
+  min-height: var(--hw-panel-h, 0px);
+  padding: 4px var(--hw-gutter) 0;
+  text-align: center;
+  /* The wash is gone. It existed to hold writing off a planet it was sitting
+     on top of; now the writing has the bottom of the screen to itself, and a
+     gradient there only made the sky look dirty. The soft glow behind the
+     letters, which does the same job for a fraction of the weight, stays. */
+  background: none;
+}
+
+body.hw-narrow .hw-panel-title {
+  font-size: var(--hw-step-2);
+  margin: 0 0 10px;
+}
+
+body.hw-narrow .hw-panel-body {
+  max-width: 34ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* the dial, above the writing, in the same place on every world */
+body.hw-narrow #hw-spin {
+  left: 50%;
+  top: auto;
+  bottom: calc(var(--hw-stack-rail) + var(--hw-panel-h, 0px) + clamp(14px, 2.4vh, 26px));
+  transform: translateX(-50%) !important;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* on a phone the pill holds only the three choices; the label sits above it */
+body.hw-narrow .hw-spin-set {
+  gap: 4px;
+  padding: 4px 6px 5px;
+  border: 1.5px solid var(--hw-chalk-dim);
+  border-radius: 24px 18px 26px 16px;
+  background: color-mix(in srgb, var(--hw-sky) 60%, transparent);
+}
+
+/* a bar for the name and the switch, so they never sit on a planet */
+body.hw-narrow #hw-masthead {
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 12px;
+  padding: 12px var(--hw-gutter) 13px;
+  background: color-mix(in srgb, var(--hw-sky) 92%, transparent);
+  border-bottom: 1.5px solid color-mix(in srgb, var(--hw-chalk-dim) 45%, transparent);
+}
+
+/* The name comes down to about half the size it is on a desktop. It is not
+   the reason anyone is here, and at heading size it was eating the top fifth
+   of the screen - which is exactly the room the planet wanted. */
+body.hw-narrow #hw-wordmark {
+  /* grows a little between a phone and a small tablet, but never back up to
+     the size it is on a desktop */
+  font-size: clamp(calc(var(--t-caption) * var(--t-u)), 3.6vw,
+                   calc(var(--t-h3) * var(--t-u)));
+  gap: 10px;
+  min-width: 0;
+}
+
+body.hw-narrow #hw-wordmark small {
+  font-size: calc(var(--t-meta) * var(--t-u));
+  margin-top: 2px;
+}
+
+body.hw-narrow #hw-logo {
+  width: calc(var(--t-h1) * var(--t-u) * 0.62);
+  height: calc(var(--t-h1) * var(--t-u) * 0.62);
+}
+
+@media (max-width: 560px) {
+  #hw-scroll-hint { display: none; }
+  .hw-rail-dot { font-size: var(--hw-step-0); }
+}
+
+@media (max-height: 620px) {
+  body.hw-narrow .hw-panel-body:nth-of-type(n + 2) { display: none; }
+}
+
+/* ---------- no JavaScript: the worlds are still a readable list ---------- */
+.hw-noscript {
+  position: relative;
+  z-index: 5;
+  margin: 0 auto;
+  padding: 140px var(--hw-gutter) 60px;
+  max-width: 42rem;
+}
+
+.hw-noscript li { margin-bottom: 14px; }
+
+/* ---------- the case-study doors, as real links ----------
+   The objects on the Drafting Fields are painted into the canvas, which a
+   keyboard cannot reach. These are the same links in the page itself: out of
+   sight until one of them is tabbed to, then they appear as a small card. */
+#hw-doors {
+  position: absolute;
+  left: var(--hw-gutter);
+  bottom: 96px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  padding: 0;
+}
+
+#hw-doors:focus-within {
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  padding: 14px 18px 16px;
+  background: color-mix(in srgb, var(--hw-sky) 95%, transparent);
+  border: 1.5px solid var(--hw-accent);
+  border-radius: 18px 14px 20px 12px;
+}
+
+.hw-doors-title {
+  font-family: var(--hw-hand);
+  font-size: calc(var(--t-body) * var(--t-u));
+  color: var(--hw-accent);
+  margin-bottom: 6px;
+}
+
+#hw-doors ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#hw-doors a {
+  font-size: var(--hw-step-0);
+  color: var(--hw-chalk-soft);
+  border-bottom: 1px solid transparent;
+}
+
+#hw-doors a:hover,
+#hw-doors a:focus-visible { color: var(--hw-chalk); border-bottom-color: var(--hw-accent); }
+
+/* ---------- the spin dial, under whichever planet you are reading ---------- */
+#hw-spin {
+  position: absolute;
+  top: 0; left: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 12px 7px;
+  border: 1.5px solid var(--hw-chalk-dim);
+  border-radius: 24px 18px 26px 16px;
+  background: color-mix(in srgb, var(--hw-sky) 60%, transparent);
+  opacity: 0;
+  transition: opacity 260ms ease;
+  will-change: transform;
+}
+
+#hw-spin.is-on { opacity: 1; }
+
+.hw-spin-label {
+  font-family: var(--hw-hand);
+  font-size: calc(var(--t-body-sm) * var(--t-u));
+  color: var(--hw-chalk-dim);
+}
+
+.hw-spin-set { display: flex; gap: 2px; }
+
+.hw-spin-btn {
+  font-family: var(--hw-hand);
+  font-size: calc(var(--t-body-sm) * var(--t-u));
+  line-height: 1;
+  color: var(--hw-chalk-dim);
+  padding: 4px 8px 5px;
+  border-radius: 14px 11px 15px 10px;
+  transition: color 200ms, background-color 200ms;
+}
+
+.hw-spin-btn:hover { color: var(--hw-chalk); }
+
+.hw-spin-btn.is-active {
+  color: var(--hw-accent);
+  background: color-mix(in srgb, var(--hw-accent) 16%, transparent);
+}
+
+@media (max-width: 560px) {
+  .hw-spin-label, .hw-spin-btn { font-size: var(--hw-step-0); }
+}
+
+
