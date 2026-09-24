@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Four Small Worlds</title>
+<meta name="description" content="A design portfolio you travel through: four hand-drawn low-poly planets, one traveller, and a jump between each.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=Shantell+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<link rel="stylesheet" href="common/type.css">
+<!-- The site's palette. The landing page and every case study read their
+     colours from this one file, so light and dark are the same everywhere. -->
+<link rel="stylesheet" href="system/css/cs-tokens.css">
+<link rel="stylesheet" href="css/hw-tokens.css">
+<!-- the light / dark switch, shared with every case study -->
+<link rel="stylesheet" href="common/switch.css">
+<!-- In the head on purpose: it sets light or dark before the first paint, so
+     the page is never drawn in the wrong mode and then corrected. -->
+<script src="common/theme.js"></script>
+<link rel="stylesheet" href="css/hw-base.css">
+<link rel="stylesheet" href="css/hw-layout.css">
+<link rel="stylesheet" href="css/hw-handdrawn.css">
+<link rel="stylesheet" href="css/hw-drawer.css">
+</head>
+<body data-hw-world="home">
+
+<!-- The pen. Three near-identical noise filters; hw-handdrawn.css cycles
+     between them so any stroked element wavers the way ink does. -->
+<svg id="hw-filters" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <filter id="hw-rough-1" x="-14%" y="-14%" width="128%" height="128%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.021" numOctaves="3" seed="6" result="n"></feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.4" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+  </filter>
+  <filter id="hw-rough-2" x="-14%" y="-14%" width="128%" height="128%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.024" numOctaves="3" seed="23" result="n"></feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.0" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+  </filter>
+  <filter id="hw-rough-3" x="-14%" y="-14%" width="128%" height="128%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.019" numOctaves="3" seed="47" result="n"></feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.6" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+  </filter>
+</svg>
+
+<canvas id="hw-sky" aria-hidden="true"></canvas>
+<div id="hw-grain" aria-hidden="true"></div>
+<div id="hw-vignette" aria-hidden="true"></div>
+
+<div class="hw-ui">
+
+  <header id="hw-masthead">
+    <!-- The mark, the name, and nothing else.
+
+         #hw-logo is a SLOT, not a drawing. It is empty until a file is put
+         in css/hw-layout.css - one line, marked there - so swapping the mark
+         never means touching this page. Until then it shows nothing and
+         takes up no room. -->
+    <a id="hw-wordmark" href="#hw-world-home">
+      <span id="hw-logo" aria-hidden="true"></span>
+      <span id="hw-wordmark-name">
+        Shobhit Kenath
+        <small>UX Design, pencil first</small>
+      </span>
+    </a>
+    <!-- The light / dark switch for the whole site. It keeps no state of its
+         own: everything you see it do is driven by data-cs-mode on <html>, which
+         common/theme.js sets. Styling and motion: common/switch.css. -->
+    <button type="button" id="theme-switch" class="theme-switch"
+            role="switch" aria-checked="false" aria-label="Switch to light mode"
+            data-theme-toggle data-theme-switch>
+      <span class="theme-switch-track">
+        <span class="theme-switch-label theme-switch-label--light" aria-hidden="true">Light</span>
+        <span class="theme-switch-label theme-switch-label--dark" aria-hidden="true">Dark</span>
+        <span class="theme-switch-knob">
+          <span class="theme-switch-icon theme-switch-icon--sun" aria-hidden="true"></span>
+          <span class="theme-switch-icon theme-switch-icon--moon" aria-hidden="true"></span>
+        </span>
+      </span>
+    </button>
+  </header>
+
+  <!-- ONE SHAPE FOR EVERY WORLD: a title, and what the world is.
+
+       The chapter lines, place names, opening statement and buttons that
+       used to be here have gone. On a phone they filled the screen below the
+       planet and left nothing to breathe; on a desktop they were saying the
+       same four things the rail at the foot already says. What is left is
+       the only part that carries information. -->
+
+  <article class="hw-panel" id="hw-world-home">
+    <h1 class="hw-panel-title">About Me</h1>
+    <p class="hw-panel-body">A senior designer, an experienced illustrator, a novice worldbuilder and a fantasy enthusiast.</p>
+  </article>
+
+  <article class="hw-panel" id="hw-world-work">
+    <h2 class="hw-panel-title">Case Studies</h2>
+    <p class="hw-panel-body">Here&rsquo;s some of the work that I&rsquo;m proud to have been a part of at JP Morgan Chase.</p>
+    <p class="hw-panel-body">Click the moon to view a case study.</p>
+  </article>
+
+  <article class="hw-panel" id="hw-world-play">
+    <h2 class="hw-panel-title">Experiments</h2>
+    <p class="hw-panel-body">Here you&rsquo;ll find things that I like to do in my free time.</p>
+    <p class="hw-panel-body">My absolute favourites: Sketching; taking notes; Worldbuilding</p>
+  </article>
+
+  <article class="hw-panel" id="hw-world-signal">
+    <h2 class="hw-panel-title">Get In Touch</h2>
+    <p class="hw-panel-body">Want to make something beautiful together? Reach out to me and let&rsquo;s connect!</p>
+  </article>
+
+  <div id="hw-scroll-hint" aria-hidden="true">
+    <span class="hw-hand">scroll to travel</span>
+    <svg width="14" height="24" viewBox="0 0 14 24" class="hw-rough hw-rough--boil" aria-hidden="true">
+      <path d="M7 1 C6 8 8 14 7 21 M2 16 C4 19 6 21 7 22 C8 21 10 19 12 16"
+            fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+    </svg>
+  </div>
+
+  <nav id="hw-doors" aria-label="Case studies" hidden>
+    <p class="hw-doors-title">Case studies</p>
+    <ul></ul>
+  </nav>
+
+  <!-- The label sits ABOVE the pill rather than inside it. Inside, it made
+       the control wider than a phone had to spare, and the pill had to shrink
+       the words to fit. Above, the pill is only as wide as its three
+       choices. -->
+  <div id="hw-spin">
+    <span class="hw-spin-label" aria-hidden="true">Speed of spin</span>
+    <div class="hw-spin-set" role="group" aria-label="How fast the planets turn">
+      <button type="button" class="hw-spin-btn is-active" data-hw-spin="0.5" aria-pressed="true">Slow</button>
+      <button type="button" class="hw-spin-btn" data-hw-spin="1" aria-pressed="false">Normal</button>
+      <button type="button" class="hw-spin-btn" data-hw-spin="2.5" aria-pressed="false">Fast</button>
+    </div>
+  </div>
+
+  <!-- The panel that slides in over the worlds. Its words come from
+       common/drawers.js, which the case studies read too, so the same
+       explanation cannot drift apart between the two places it appears. -->
+  <div id="hw-drawer-scrim" aria-hidden="true"></div>
+  <aside id="hw-drawer" aria-hidden="true" aria-labelledby="hw-drawer-title">
+    <div id="hw-drawer-close-row">
+      <button type="button" id="hw-drawer-close" aria-label="Close">&times;</button>
+    </div>
+    <h2 id="hw-drawer-title"></h2>
+    <div id="hw-drawer-body"></div>
+    <p id="hw-drawer-note" hidden></p>
+  </aside>
+
+  <nav id="hw-rail" aria-label="Journey">
+    <button type="button" class="hw-rail-dot is-active">About</button>
+    <button type="button" class="hw-rail-dot">Work</button>
+    <button type="button" class="hw-rail-dot">Play</button>
+    <button type="button" class="hw-rail-dot">Contact</button>
+  </nav>
+
+</div>
+
+<div id="hw-scroll-track" aria-hidden="true"></div>
+
+<noscript>
+  <div class="hw-noscript">
+    <h2>Four small worlds</h2>
+    <p>The travelling version of this page needs JavaScript. The worlds themselves are still here:</p>
+    <ul>
+      <li><a href="#hw-world-home">About me — Home Hollow</a></li>
+      <li><a href="#hw-world-work">Case studies — The Drafting Fields</a></li>
+      <li><a href="#hw-world-play">Experiments — The Tinker Belt</a></li>
+      <li><a href="#hw-world-signal">Get in touch — Signal Point</a></li>
+    </ul>
+  </div>
+</noscript>
+
+<!-- the panels both the landing page and the case studies can open -->
+<script src="common/drawers.js"></script>
+
+<script src="js/hw-math.js"></script>
+<script src="js/hw-config.js"></script>
+<script src="js/hw-planet.js"></script>
+<script src="js/hw-character.js"></script>
+<script src="js/hw-munch.js"></script>
+<script src="js/hw-scene.js"></script>
+<script src="js/hw-spin.js"></script>
+<script src="js/hw-hop.js"></script>
+<script src="js/hw-drawer.js"></script>
+<script src="js/hw-scroll.js"></script>
+<script src="js/hw-main.js"></script>
+</body>
+</html>
+
+
