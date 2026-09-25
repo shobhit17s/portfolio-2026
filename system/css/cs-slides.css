@@ -1,0 +1,848 @@
+﻿/* cs-slides.css — the ten slide templates, placed on the 12 x 8 grid.
+   Every row is 111 design px and every column 138.67, which is why the spec
+   sheets keep saying 111, 365, 746, 873, 1000 — they are whole row counts. */
+
+/* ---------- figures ----------
+   An illustration is used as a stencil: the SVG supplies the shape, the page
+   fills it with the current line colour, so every drawing follows dark/light
+   mode for free. Swap the file in one line below. */
+/* The engine says how a stencil BEHAVES. Which file it is comes from the case
+   study's own assets.css, and it must be set there as a real mask-image, not
+   through a custom property: a url() inside a custom property resolves
+   against the stylesheet that USES the property, which is this one, in a
+   different folder. That is a 404 waiting to happen. */
+/* A stencil is a shape cut out of a flat colour. Until a case study's own
+   assets.css names the file to cut with, there is no shape — so it takes up
+   its space and shows nothing, rather than sitting there as a grey slab. */
+.cs-figure {
+  width: 100%;
+  height: 100%;
+  background-color: var(--cs-line);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+
+
+
+.cs-figure--accent { background-color: var(--cs-accent-1); }
+
+/* A stencil only appears once a case study has named the file to cut it with.
+   The study's assets.css does that by setting `--cs-has-figure: 1` alongside
+   the mask, which switches it on. */
+.cs-figure { opacity: var(--cs-has-figure, 0); }
+
+/* ---------- artwork still to come ----------
+   Every picture in this case study is a slot waiting for a real file. The slot
+   states what kind of thing goes in it and the exact name to give the file, so
+   handing one over is just "here is img-04-existing-vs-new".
+
+   Red / maroon slots take still images. Purple / magenta slots take a video or
+   an embedded prototype. Those are the two accents of this case study, so the
+   colour coding from the spec sheets survives into the page itself. */
+.cs-media {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: calc(8 * var(--u));
+  padding: calc(26 * var(--u));
+  border: 1.6px solid currentColor;
+  border-radius: calc(22 * var(--u));
+}
+
+/* the hatch keeps its own rounded corners now that the slot no longer clips */
+.cs-media::before { border-radius: inherit; }
+
+.cs-media--image { color: var(--cs-accent-1); }
+.cs-media--video { color: var(--cs-accent-2); }
+
+.cs-media::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-42deg,
+              currentColor 0 1.2px, transparent 1.2px calc(16 * var(--u)));
+  opacity: 0.17;
+}
+
+.cs-media-kind {
+  font-family: var(--cs-font-meta);
+  font-size: calc(var(--t-meta) * var(--t-u));
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.cs-media-name {
+  font-family: var(--t-body-face);
+  font-size: calc(var(--t-body-sm) * var(--t-u));
+  color: var(--cs-text-1);
+  word-break: break-word;
+}
+
+.cs-media-note {
+  font-size: calc(var(--t-caption) * var(--t-u));
+  line-height: var(--t-caption-lh);
+  color: var(--cs-text-2);
+  max-width: 46ch;
+}
+
+/* ---------- shared pieces the templates lean on ---------- */
+
+/* A stage is simply "the thing you are meant to look at" — a picture slot, a
+   flow diagram, a row of tiles. Templates place the stage; the stage stretches
+   whatever is inside it. */
+.cs-stage {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 0;
+}
+
+.cs-stage > * { flex: 1 1 auto; min-height: 0; }
+
+/* A small chapter label that sits above a section title, inside the same
+   111px row. "Rapid prototyping" over "Quick & dirty prototype: Option A".
+   Set a shade larger than meta so it survives being scaled down. */
+.cs-eyebrow {
+  display: block;
+  font-size: calc(var(--t-meta) * var(--t-u));
+  letter-spacing: var(--t-meta-ls);
+  margin-bottom: calc(6 * var(--u));
+  color: var(--cs-text-2);
+}
+
+/* A stage holding a band of tiles rather than one tall picture: the band keeps
+   its own height and sits in the middle instead of stretching to 873px. */
+.cs-stage--band { align-items: center; }
+.cs-stage--band > * { flex: 0 1 auto; }
+
+/* ---------- the roadmap, and the chain that widened the scope ---------- */
+.cs-flow {
+  display: flex;
+  align-items: stretch;
+  gap: calc(20 * var(--u));
+  flex-wrap: wrap;
+}
+
+.cs-flow--stacked { flex-direction: column; align-items: stretch; }
+
+.cs-flow-step {
+  flex: 1 1 calc(220 * var(--u));
+  display: flex;
+  flex-direction: column;
+  gap: calc(10 * var(--u));
+  padding: calc(24 * var(--u));
+  border: 1.6px solid var(--cs-accent-2);
+  border-radius: calc(24 * var(--u));
+}
+
+.cs-flow-step--quiet { border-color: color-mix(in srgb, var(--cs-text-2) 55%, transparent); }
+
+/* The arrow between two steps: held in the middle of the gap, and the same
+   height whichever way the flow runs. */
+.cs-flow-arrow {
+  align-self: center;
+  justify-self: center;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: calc(112 * var(--u));
+  color: var(--cs-accent-1);
+}
+
+.cs-arrow-drawn {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  /* held at a real thickness whatever size the arrow is drawn at, so it stays
+     as present as the boxes it joins */
+  vector-effect: non-scaling-stroke;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cs-flow--stacked .cs-flow-arrow { transform: rotate(90deg); }
+
+/* four things held in balance, or four numbers worth reporting */
+.cs-tiles--static .cs-tile { cursor: default; }
+.cs-tiles--static { align-items: stretch; }
+.cs-tiles--static .cs-tile-label { color: var(--cs-text-1); font-size: calc(var(--t-body-sm) * var(--t-u)); }
+.cs-tiles--static .cs-tile-note {
+  font-size: calc(var(--t-caption) * var(--t-u));
+  color: var(--cs-text-2);
+  line-height: var(--t-caption-lh);
+}
+.cs-tiles--static .cs-tile { justify-content: flex-start; gap: calc(14 * var(--u)); }
+
+/* a pulled-out line of someone's own words, sitting inside a section body */
+/* A quote is a statement, and every statement on this site is centred in
+   whatever it is sitting in. */
+.cs-quote {
+  text-align: center;
+  font-family: var(--cs-font-display);
+  font-size: calc(var(--t-h3) * var(--t-u));
+  line-height: var(--t-h3-lh);
+  font-weight: var(--t-h3-w);
+  letter-spacing: var(--t-h3-ls);
+  color: var(--cs-accent-1);
+}
+
+.cs-split-aside { align-self: start; }
+
+/* A section body that holds a statement and nothing else is SET like one:
+   larger, and centred in its block both ways rather than sitting at the top
+   of it with empty space underneath. Used by the north-star / constraints
+   slide, where the sentence is the whole of the section. */
+.cs-body > .cs-quote:only-child {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--t-h2) * var(--t-u));
+  line-height: var(--t-h2-lh);
+}
+
+/* a question list that reads as a list of questions */
+.cs-questions { display: flex; flex-direction: column; gap: calc(12 * var(--u)); }
+
+/* the same list, spread across a full-width section body */
+.cs-questions--wide {
+  display: block;
+  columns: 2;
+  column-gap: calc(64 * var(--u));
+}
+.cs-questions--wide li { break-inside: avoid; margin-bottom: calc(12 * var(--u)); }
+.cs-questions li { display: flex; gap: calc(12 * var(--u)); }
+.cs-questions li::before { content: '?'; color: var(--cs-accent-1); flex: 0 0 auto; }
+.cs-questions--points li::before { content: '\2014'; }
+
+/* the same list again, numbered, for a sequence where the order is the
+   point. The count is CSS's own, so nothing has to be typed twice. */
+.cs-questions--numbers { counter-reset: cs-n; list-style: none; padding: 0; }
+.cs-questions--numbers li { counter-increment: cs-n; }
+.cs-questions--numbers li::before { content: counter(cs-n) '.'; }
+
+
+/* ---------- artwork ----------
+   A stencil (.cs-figure) throws away everything but the shape, which is right
+   for flat line drawings but wrong for a drawing that carries its own tone and
+   colour. Those are shown as themselves, with .cs-art.
+
+   NO FILE PATHS LIVE IN THIS FILE. Each case study names its own drawings in
+   its own assets.css — the engine only says how a drawing behaves. */
+.cs-art {
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+
+/* ======================= the slide templates ==============================
+   Every number below is straight off a spec sheet. They are all whole counts
+   of the 12 x 8 grid, so they land exactly:
+
+     rows     1 = 111    2 = 238    3 = 365    4 = 492
+              6 = 746    7 = 873    8 = 1000
+     columns  1 = 140    5 = 757    7 = 1067   10 = 1530   12 = 1840
+   ========================================================================= */
+
+/* ---------- Template 1: hero ----------
+   Straight off the spec sheet: three stacked blocks 1376 wide (nine columns)
+   down the left, a 448-wide picture (three columns) standing beside all
+   three, and a 111-tall band along the very bottom for the long horizontal
+   drawing that separates the title from everything after it. */
+/* The title and the line under it are one block (the sub-line is inside the
+   h1), so they take the first four rows between them - spec boxes 1 and 2.
+   The skills take the next three, spec box 3. */
+.t-hero .cs-hero-title { grid-column: 1 / 10; grid-row: 1 / 5; align-self: center; }
+.t-hero .cs-hero-lead  { grid-column: 1 / 10; grid-row: 5 / 8; align-self: center; }
+.t-hero .cs-hero-tags  { grid-column: 1 / 10; grid-row: 5 / 8; align-self: center; }
+.t-hero .cs-hero-image { grid-column: 10 / 13; grid-row: 1 / 8; }
+/* The ornamental separator. With no drawing named for it the slot simply
+   stands as a labelled placeholder; leave the slot out of content.js
+   altogether and this row is empty, which is also fine. */
+.t-hero .cs-hero-rule-slot { grid-column: 1 / 13; grid-row: 8 / 9; }
+/* One row is not tall enough for the placeholder's three lines, so in this
+   slot it says its name and nothing else. */
+.t-hero .cs-hero-rule-slot .cs-media-note { display: none; }
+.t-hero .cs-hero-rule-slot .cs-media { padding: calc(14 * var(--u)) calc(24 * var(--u)); }
+
+.cs-hero-tags { display: flex; flex-wrap: wrap; gap: calc(16 * var(--u)); }
+
+.cs-tag {
+  font-family: var(--cs-font-meta);
+  font-size: calc(var(--t-meta) * var(--t-u));
+  letter-spacing: 0.08em;
+  padding: calc(10 * var(--u)) calc(22 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(24 * var(--u));
+  border: 1.4px solid var(--cs-text-2);
+  color: var(--cs-text-2);
+}
+
+/* ---------- Template 2.1: a picture, two sections beside it ----------
+   Picture 1067 wide (7 columns), column of writing 757 (5 columns).
+   Each section is a title of 111 over a body of 365. */
+.t-context-2 > .cs-slot.cs-context-figure,
+.t-context-2 > .cs-figure   { grid-column: 1 / 8;  grid-row: 1 / 9; }
+/* template 2.3 is 2.1 with a picture where the second body would be */
+.t-context-2 > .cs-slot.cs-sec-2-body { grid-column: 8 / 13; grid-row: 6 / 9; }
+.t-context-2 .cs-sec-1-title  { grid-column: 8 / 13; grid-row: 1 / 2; align-self: center; }
+.t-context-2 .cs-sec-1-body   { grid-column: 8 / 13; grid-row: 2 / 5; }
+.t-context-2 .cs-sec-2-title  { grid-column: 8 / 13; grid-row: 5 / 6; align-self: center; }
+.t-context-2 .cs-sec-2-body   { grid-column: 8 / 13; grid-row: 6 / 9; }
+
+/* ---------- Template 2.2: a picture, one section beside it ---------- */
+.t-context-1 > .cs-slot,
+.t-context-1 > .cs-figure    { grid-column: 1 / 8;  grid-row: 1 / 9; }
+.t-context-1 .cs-sec-1-title { grid-column: 8 / 13; grid-row: 1 / 2; align-self: center; }
+.t-context-1 .cs-sec-1-body  { grid-column: 8 / 13; grid-row: 2 / 9; }
+
+/* ---------- Template 2.3: a picture, one section and a second picture ------
+   No rules of its own: it is template 2.1 with a picture slot wearing the
+   class cs-sec-2-body instead of a paragraph. Placement does not care what
+   kind of thing sits in a slot, which is the whole point of naming slots. */
+
+/* ---------- Template 3.1: section title, picture, caption ---------- */
+.t-title-figure-caption .cs-sec-1-title { grid-column: 1 / 13; grid-row: 1 / 2; align-self: center; }
+.t-title-figure-caption > .cs-stage,
+.t-title-figure-caption > .cs-slot      { grid-column: 1 / 13; grid-row: 2 / 8; }
+.t-title-figure-caption .cs-caption     { grid-column: 1 / 13; grid-row: 8 / 9; align-self: center; text-align: center; }
+
+/* ---------- Template 3.2: picture and caption, no title ---------- */
+.t-figure > .cs-slot,
+.t-figure > .cs-stage { grid-column: 1 / 13; grid-row: 1 / 8; }
+.t-figure .cs-caption { grid-column: 1 / 13; grid-row: 8 / 9; align-self: center; }
+
+/* ---------- Template 3.3: section title and picture, no caption ---------- */
+.t-title-figure .cs-sec-1-title { grid-column: 1 / 13; grid-row: 1 / 2; align-self: center; }
+.t-title-figure > .cs-stage,
+.t-title-figure > .cs-slot      { grid-column: 1 / 13; grid-row: 2 / 9; }
+
+/* ---------- #3.4 — section title, a statement, a picture ----------
+   Spec #3.4: 111px of title, 238px of statement, 619px of picture. On the
+   eight-row grid that is one row, two rows and five rows exactly. The
+   statement is centred inside its own band, which is what the spec means by
+   "centered to the container" - not centred on the slide. */
+.t-title-impact-figure .cs-sec-1-title { grid-column: 1 / 13; grid-row: 1 / 2; align-self: center; }
+.t-title-impact-figure > .cs-impact {
+  grid-column: 1 / 13;
+  grid-row: 2 / 4;
+  align-self: center;
+  text-align: center;
+}
+.t-title-impact-figure > .cs-stage,
+.t-title-impact-figure > .cs-slot { grid-column: 1 / 13; grid-row: 4 / 9; }
+
+/* ---------- Templates 4.1 and 4.2: two sections, nothing else ----------
+   Both sections run the full 1840 width and stack: title 111, body 365,
+   title 111, body 365. In 4.1 the bodies are writing; in 4.2 they are
+   pictures. Same placement either way. */
+.t-sections .cs-sec-1-title { grid-column: 1 / 13; grid-row: 1 / 2; align-self: center; }
+.t-sections .cs-sec-1-body  { grid-column: 1 / 13; grid-row: 2 / 5; }
+.t-sections .cs-sec-2-title { grid-column: 1 / 13; grid-row: 5 / 6; align-self: center; }
+.t-sections .cs-sec-2-body  { grid-column: 1 / 13; grid-row: 6 / 9; }
+
+/* Where a section body is two blocks set side by side rather than one run of
+   writing — the brief against the open questions — it splits in two. */
+.cs-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(40 * var(--u));
+  align-items: start;
+  min-height: 0;
+}
+
+/* ---------- Template 5.1: impact text with a small mark ---------- */
+.t-impact-text .cs-impact-mark {
+  grid-column: 6 / 8; grid-row: 2 / 4;
+  justify-self: center; align-self: center;
+  width: calc(292 * var(--u)); height: calc(292 * var(--u));
+}
+.t-impact-text .cs-impact  { grid-column: 1 / 13; grid-row: 4 / 7; align-self: center; text-align: center; }
+.t-impact-text .cs-caption { grid-column: 1 / 13; grid-row: 7 / 8; align-self: center; text-align: center; }
+
+/* ---------- Template 5.2: impact text over a picture ----------
+   The picture fills the whole slide, 1840 x 1000. The words sit on top of it
+   in a band 1530 wide and 238 tall, held in the middle. */
+.t-impact-bg > .cs-slot,
+.t-impact-bg > .cs-art   { grid-column: 1 / 13; grid-row: 1 / 9; }
+
+.t-impact-bg .cs-impact {
+  grid-column: 2 / 12; grid-row: 4 / 6;
+  align-self: center; text-align: center;
+  z-index: 2;
+  padding: calc(24 * var(--u));
+  background: color-mix(in srgb, var(--cs-bg-1) 76%, transparent);
+  border-radius: calc(28 * var(--u));
+}
+
+/* ---------- Template 6: the interactive persona slide ----------
+   IPS03 and IPS04 are the 140-wide click strips, IPS01 the 604-wide picture,
+   IPS02 the row of four tiles, IPS05 the title and body that follow them. */
+.t-persona .cs-persona-carousel { grid-column: 1 / 7;  grid-row: 1 / 9; }
+.t-persona .cs-tiles            { grid-column: 7 / 13; grid-row: 1 / 4; }
+.t-persona .cs-sec-1-title      { grid-column: 7 / 13; grid-row: 4 / 5; align-self: center; }
+.t-persona .cs-sec-1-body       { grid-column: 7 / 13; grid-row: 5 / 9; }
+
+.cs-persona-carousel {
+  position: relative;
+  display: grid;
+  grid-template-columns: calc(140 * var(--u)) 1fr calc(140 * var(--u));
+  align-items: stretch;
+}
+
+/* IPS03 / IPS04: the 140-wide strips either side of the picture. They are the
+   click area only — what is seen is the shared .cs-arrow ring inside them. */
+.cs-persona-step { min-width: 0; }
+
+.cs-persona-stage {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  min-height: 0;
+}
+
+.cs-persona-stage > .cs-slot {
+  grid-area: 1 / 1;
+  min-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 320ms var(--cs-ease);
+}
+
+.cs-persona-stage > .cs-slot { opacity: 1; }
+
+/* ---------- the scrim over a persona portrait ----------
+   The portraits are painted on nothing, so on a dark page they end abruptly
+   at whatever edge the drawing happens to have. The scrim settles them into
+   the page: it darkens the bottom, and the left and right edges, while
+   leaving the face and the top of the head alone.
+
+   Three gradients stacked, not one - a single gradient can only run in one
+   direction. The one from the bottom does most of the work; the two side ones
+   are short, so they bite the edges without reaching the shoulders.
+
+   It sits on the PICTURE's box rather than on the slot, so it lines up with
+   the drawing itself and not with the empty space either side of it. That is
+   why each persona names its own `ratio` in content.js. */
+.cs-persona-stage .cs-embed--image {
+  position: relative;
+  isolation: isolate;
+}
+
+.cs-persona-stage .cs-embed--image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top,
+      var(--cs-bg-1) 0%,
+      color-mix(in srgb, var(--cs-bg-1) 72%, transparent) 14%,
+      transparent 46%),
+    linear-gradient(to right,
+      var(--cs-bg-1) 0%,
+      color-mix(in srgb, var(--cs-bg-1) 55%, transparent) 7%,
+      transparent 20%),
+    linear-gradient(to left,
+      var(--cs-bg-1) 0%,
+      color-mix(in srgb, var(--cs-bg-1) 55%, transparent) 7%,
+      transparent 20%);
+}
+
+.cs-persona-name {
+  grid-row: 2;
+  text-align: center;
+  padding-top: calc(10 * var(--u));
+}
+
+/* ---------- Template 7: the app logo slide ----------
+   A flow chart running down the page: the start tile, the auth tile, then the
+   app itself, and then on past the bottom edge of this slide into the Kingdom
+   of the Apps below. The picture fills the app's frame edge to edge — the
+   frame is the only outline, there is no second box inside it. */
+.t-logo .cs-flow-tile--start { grid-column: 1 / 13; grid-row: 1 / 2; }
+.t-logo .cs-flow-tile--auth  { grid-column: 1 / 13; grid-row: 3 / 4; }
+
+.t-logo .cs-logo-row {
+  grid-column: 1 / 13;
+  grid-row: 5 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(140 * var(--u));
+  z-index: 3;
+}
+
+/* The AL component: a thick frame with the artwork filling it. Its outline is
+   heavier than a control's, in keeping with it being a container. */
+.cs-logo-box {
+  flex: 0 0 auto;
+  width: calc(400 * var(--u));
+  height: calc(400 * var(--u));
+  padding: calc(24 * var(--u));
+  border-radius: calc(48 * var(--u));
+  background: var(--cs-bg-2);
+  color: var(--cs-accent-2);
+  border-color: var(--cs-accent-2);
+  --cs-stroke-width: 3.4;
+  --cs-stroke-rough: 2.2;
+}
+
+.cs-logo-flow {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  /* begins behind the start tile and runs to well past the bottom edge; the
+     kingdom sits on a higher layer and paints over the excess, so the line
+     always arrives exactly at its top edge whatever the gap measures */
+  top: calc(60 * var(--u));
+  bottom: calc(-140 * var(--u-al, 0px));
+  width: calc(16 * var(--u));
+  background: var(--cs-accent-2);
+  border-radius: calc(8 * var(--u));
+  z-index: 1;
+}
+
+.cs-flow-tile {
+  align-self: center;
+  justify-self: center;
+  z-index: 2;
+  height: calc(111 * var(--u));
+  min-width: calc(300 * var(--u));
+  display: grid;
+  place-items: center;
+  padding: 0 calc(32 * var(--u));
+  font-family: var(--t-body-face);
+  font-size: calc(var(--t-meta) * var(--t-u));
+  background: var(--cs-bg-2);
+  /* The drawn outline sits a few pixels outside the tile, which would leave a
+     hairline gap for the line behind to show through. This ring of the slide's
+     own colour fills that gap, so the line passes cleanly behind the tile. */
+  box-shadow: 0 0 0 calc(7 * var(--u)) var(--cs-bg-2);
+  border: 1.6px solid var(--cs-accent-1);
+  border-radius: calc(56 * var(--u));
+  color: var(--cs-text-1);
+  --cs-stroke-width: 1.3;
+  --cs-stroke-rough: 1.6;
+}
+
+.cs-flow-tile > .cs-stroke { color: var(--cs-accent-1); }
+
+/* the line, the frame it arrives at and the kingdom below are all one colour */
+.cs-logo-box > .cs-stroke,
+.cs-kingdom > .cs-stroke { color: var(--cs-accent-2); }
+
+/* the frame is the slot itself, so whatever fills it wears no box of its own */
+.cs-logo-box .cs-media { border: 0; padding: 0; }
+.cs-logo-box .cs-media > .cs-stroke { display: none; }
+
+/* ---------- Template 8: the wireframe slide ----------
+   WS01 tab panel 111, WS02 and WS04 the 140-wide click strips, WS03 the
+   1530 x 746 stage, WS05 the caption. */
+/* the control panel sits at the top of its row and the stage starts a little
+   lower, so the tabs are not pressed against the picture */
+/* Templates #8 and #3.5 are the same slide with a different top row: #8 has
+   the tab panel, #3.5 has a section title. Everything below that row is
+   identical, so both wear these rules. */
+.t-wireframe .cs-control-panel,
+.t-title-wireframe .cs-sec-1-title { grid-column: 1 / 13; grid-row: 1 / 2; }
+.t-wireframe .cs-control-panel     { align-self: start; }
+.t-title-wireframe .cs-sec-1-title { align-self: center; }
+
+.t-wireframe .cs-step--prev,
+.t-title-wireframe .cs-step--prev  { grid-column: 1 / 2;  grid-row: 2 / 8; }
+.t-wireframe .cs-wire-stage,
+.t-title-wireframe .cs-wire-stage  { grid-column: 2 / 12; grid-row: 2 / 8; padding-top: calc(22 * var(--u)); }
+.t-wireframe .cs-step--next,
+.t-title-wireframe .cs-step--next  { grid-column: 12 / 13; grid-row: 2 / 8; }
+.t-wireframe .cs-caption,
+.t-title-wireframe .cs-caption     { grid-column: 1 / 13; grid-row: 8 / 9; align-self: center; text-align: center; }
+
+.cs-wire-stage {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: calc(40 * var(--u));
+}
+
+.cs-wire-stage > .cs-slot { flex: 1 1 auto; min-width: 0; }
+
+/* WS02 / WS04: same idea — the click area, with the shared ring inside. */
+.cs-step { min-width: 0; }
+
+/* ---------- Template 9: the backend diagram slide ---------- */
+.t-backend .cs-control-panel { grid-column: 1 / 13; grid-row: 1 / 2; align-self: start; }
+.t-backend .cs-diagram-stage {
+  grid-column: 1 / 13; grid-row: 2 / 8;
+  position: relative; display: grid;
+  padding-top: calc(22 * var(--u));
+}
+.t-backend .cs-caption       { grid-column: 1 / 13; grid-row: 8 / 9; align-self: center; text-align: center; }
+
+.cs-diagram-stage > .cs-slot {
+  grid-area: 1 / 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 360ms var(--cs-ease);
+}
+
+.cs-diagram-stage > .cs-slot { opacity: 1; }
+
+/* ---------- Template 11: switchable diagram, with a section beside it ------
+   The left seven columns are the backend slide (#9) shrunk: tabs on row 1,
+   the stage under them, its caption on the last row. The right five are the
+   writing column of #2.2, unchanged. Both halves keep the row positions they
+   have on their own slides, so a reader who has seen either one already
+   knows where to look. */
+.t-toggle-figure-section .cs-control-panel {
+  grid-column: 1 / 8; grid-row: 1 / 2; align-self: start;
+}
+.t-toggle-figure-section .cs-diagram-stage {
+  grid-column: 1 / 8; grid-row: 2 / 8;
+  position: relative; display: grid;
+  padding-top: calc(22 * var(--u));
+}
+.t-toggle-figure-section .cs-caption {
+  grid-column: 1 / 8; grid-row: 8 / 9; align-self: center; text-align: center;
+}
+.t-toggle-figure-section .cs-sec-1-title {
+  grid-column: 8 / 13; grid-row: 1 / 2; align-self: center;
+}
+.t-toggle-figure-section .cs-sec-1-body {
+  grid-column: 8 / 13; grid-row: 2 / 9;
+}
+
+/* ---------- Template 10.3: the way back ----------
+   A strip whose whole area is the control. The label rides over the bottom
+   of the drawing on a wash, so it is legible whatever the drawing turns out
+   to be, and it is the only part that moves on hover - the drawing itself
+   stays still, because a picture that slides when you point at it reads as
+   a carousel rather than a door. */
+.t-strip-back > .cs-strip-back { grid-column: 1 / 13; grid-row: 1 / 5; }
+
+.cs-strip-back {
+  position: relative;
+  display: block;
+  height: 100%;
+  min-height: 0;
+  text-decoration: none;
+  border-radius: calc(18 * var(--u));
+  overflow: hidden;
+}
+
+.cs-strip-back > .cs-slot { height: 100%; }
+
+.cs-strip-back-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: calc(46 * var(--u)) calc(40 * var(--u)) calc(22 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(14 * var(--u));
+  font-family: var(--cs-font-meta);
+  font-size: calc(var(--t-meta) * var(--t-u));
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--cs-text-1);
+  background: linear-gradient(to bottom,
+              transparent 0%,
+              color-mix(in srgb, var(--cs-bg-1) 70%, transparent) 55%,
+              color-mix(in srgb, var(--cs-bg-1) 92%, transparent) 100%);
+  transition: color 240ms var(--cs-ease);
+}
+
+.cs-strip-back-arrow {
+  display: inline-block;
+  transition: transform 320ms var(--cs-ease);
+}
+
+.cs-strip-back:hover .cs-strip-back-label,
+.cs-strip-back:focus-visible .cs-strip-back-label { color: var(--cs-accent-1); }
+.cs-strip-back:hover .cs-strip-back-arrow { transform: translateX(calc(8 * var(--u))); }
+
+.cs-strip-back:focus-visible {
+  outline: 2px solid var(--cs-accent-1);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-strip-back-arrow { transition: none; }
+}
+
+/* ---------- Template 10.1: slide strip, picture and caption ----------
+   A strip is the same grid, 570 tall, four rows instead of eight. */
+.t-strip-figure > .cs-slot   { grid-column: 1 / 13; grid-row: 1 / 4; }
+.t-strip-figure .cs-caption  { grid-column: 1 / 13; grid-row: 4 / 5; align-self: center; }
+
+/* ---------- Template 10.2: slide strip, header text only ---------- */
+.t-strip-text .cs-sec-1-title { grid-column: 1 / 13; grid-row: 1 / 2; align-self: end; }
+.t-strip-text .cs-impact {
+  /* Every impact line on every template is centred in the space it is given.
+     This one used to be left-aligned across eleven of the twelve columns,
+     which made the strips read differently from the slides. */
+  grid-column: 1 / 13; grid-row: 2 / 5;
+  align-self: center;
+  font-size: calc(var(--t-h1) * 0.72 * var(--t-u));
+  text-align: center;
+}
+
+/* A strip carrying a diagram instead of a statement. The diagram keeps its
+   own height and sits in the middle of the band, rather than stretching to
+   fill three rows - four steps of one line each stretched tall reads as four
+   empty boxes with writing at the top of them. */
+.t-strip-text > .cs-stage {
+  grid-column: 1 / 13;
+  grid-row: 2 / 5;
+  align-items: center;
+}
+.t-strip-text > .cs-stage > * { flex: 0 1 auto; }
+
+/* ---------- Grouping template 1: the App Landscape ---------- */
+.cs-app-landscape {
+  padding: calc(64 * var(--u-al));
+  border-radius: calc(40 * var(--u-al));
+  background: var(--cs-bg-2);
+  box-shadow: 0 calc(18 * var(--u-al)) calc(46 * var(--u-al)) rgba(0, 0, 0, 0.45),
+              inset 0 1px 0 color-mix(in srgb, var(--cs-line) 22%, transparent);
+  display: flex;
+  flex-direction: column;
+  --u-al: 0.0520833cqw;
+  container-type: inline-size;
+}
+
+/* Everything inside the App Landscape shares one background, so the whole
+   thing reads as a single surface with a line running down it — not as a
+   stack of separate dark panels. */
+.cs-app-landscape,
+.cs-app-landscape .cs-kingdom,
+.cs-app-landscape .cs-slide { background: var(--cs-bg-2); }
+
+/* The spacing between the pieces is a margin on the pieces, not a gap on the
+   container. It has to be, because the design pixel --u-al measures itself
+   against the App Landscape — which works for anything INSIDE the landscape
+   but not for the landscape's own gap. Using a margin puts the spacing and
+   the line of flow that has to cross it in the same units, so they meet. */
+.cs-app-landscape > * + * { margin-top: calc(40 * var(--u-al)); }
+
+.cs-kingdom {
+  position: relative;
+  z-index: 2;                 /* covers the flow line's overshoot from above */
+  padding: calc(40 * var(--u-al));
+  border-radius: calc(28 * var(--u-al));
+  display: flex;
+  flex-direction: column;
+}
+
+/* The separators between the pieces inside the kingdom. They shorten as you
+   go down, which is what the reference shows — the first nearly the full
+   width, the next about two thirds, centred. */
+.cs-kingdom-sep {
+  flex: 0 0 auto;
+  height: calc(10 * var(--u-al));
+  border-radius: calc(5 * var(--u-al));
+  background: var(--cs-accent-2);
+  align-self: center;
+}
+
+.cs-kingdom-sep--wide   { width: 100%; }
+.cs-kingdom-sep--medium { width: 64%; }
+.cs-kingdom-sep--narrow { width: 38%; }
+
+@media (max-width: 820px) {
+  .cs-kingdom-sep { height: 5px; border-radius: 3px; }
+}
+
+.cs-kingdom > * + * { margin-top: calc(40 * var(--u-al)); }
+
+/* ---------- phones ---------- */
+@media (max-width: 820px) {
+  .cs-slide > * { grid-column: auto !important; grid-row: auto !important; }
+
+  .cs-media { height: auto; aspect-ratio: 16 / 10; padding: 14px; border-radius: 14px; }
+  .cs-media-kind { font-size: 0.66rem; }
+  .cs-media-name { font-size: 0.82rem; }
+  .cs-media-note { font-size: 0.8rem; }
+  .cs-stage { display: block; }
+  .cs-flow { flex-direction: column; }
+  .cs-flow-arrow { transform: rotate(90deg); align-self: center; width: 60px; }
+  .cs-flow-step { padding: 14px; border-radius: 16px; }
+  .t-strip-text .cs-impact { font-size: 1.35rem; }
+  .cs-split { grid-template-columns: 1fr; gap: 18px; }
+  .cs-tiles--static { grid-template-columns: repeat(2, 1fr); }
+
+  .cs-figure { height: auto; aspect-ratio: 16 / 10; }
+  .t-context-2 .cs-figure, .t-context-1 .cs-figure { aspect-ratio: 4 / 5; }
+  .t-hero .cs-hero-rule { aspect-ratio: 16 / 1; }
+  .t-hero .cs-hero-image { height: auto; aspect-ratio: 5 / 3; }
+  /* the separator stays a band on a phone rather than becoming a box */
+  .t-hero .cs-hero-rule-slot .cs-media { aspect-ratio: 16 / 2; }
+
+  .cs-persona-carousel { grid-template-columns: 1fr; }
+  .cs-persona-step { display: none; }
+  .cs-persona-stage .cs-media { aspect-ratio: 3 / 4; }
+
+  .cs-wire-stage { flex-direction: column; gap: 14px; }
+  .cs-step { display: none; }
+
+  /* the flow runs down the page on a phone too — the slides are already
+     stacked, so the line and its tiles still make sense */
+  .cs-logo-box { width: 150px; height: 150px; padding: 10px; border-radius: 26px; }
+  /* more room between the pieces so the line between them reads */
+  .t-logo { align-items: center; gap: 30px; }
+  .t-logo .cs-logo-row { gap: 18px; }
+  .cs-flow-tile {
+    min-width: 150px;
+    height: 46px;
+    font-size: 0.78rem;
+    border-radius: 24px;
+    box-shadow: 0 0 0 5px var(--cs-bg-2);
+  }
+
+  .cs-app-landscape { --u-al: 0.55px; padding: 16px; border-radius: 20px; gap: 16px; }
+  .cs-kingdom { padding: 12px; border-radius: 16px; gap: 16px; }
+}
+
+/* running copy inside a section body */
+.cs-sec-1-body p + p, .cs-sec-2-body p + p { margin-top: 1em; }
+
+/* a quiet mark on any slide whose words are mine rather than yours */
+.cs-draft {
+  position: absolute;
+  top: calc(18 * var(--u));
+  right: calc(24 * var(--u));
+  color: var(--cs-accent-2);
+  opacity: 0.8;
+  z-index: 5;
+}
+
+@media (max-width: 820px) { .cs-draft { position: static; margin-bottom: -8px; } }
+
+/* the second line of the hero title, from the spec sheet */
+.cs-hero-sub {
+  display: block;
+  font-size: calc(var(--t-h2) * var(--t-u));
+  letter-spacing: var(--t-h2-ls);
+  color: var(--cs-accent-2);
+  margin-top: calc(14 * var(--u));
+}
+
+@media (max-width: 820px) { .cs-hero-sub { font-size: 1.05rem; margin-top: 8px; } }
+
+
