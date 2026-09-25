@@ -1,0 +1,68 @@
+﻿/* hw-tokens.css — the landing page's own names for the site's colours.
+
+   THE COLOURS THEMSELVES ARE NOT HERE ANY MORE. They live in
+   system/css/cs-tokens.css, which this page now loads first, because the
+   landing page and the case studies are one website and should not each keep
+   a private palette that can drift out of step.
+
+   What is left here is a mapping: the names the landing page already uses,
+   pointing at the site's tokens. That keeps every rule in hw-layout.css and
+   hw-base.css working untouched, and it means light mode arrives for free -
+   cs-tokens redefines its values under data-cs-mode='light', and everything
+   below follows. */
+:root {
+  /* The paper we are drawing on: the site's SECONDARY background, whichever
+     mode the reader has chosen. Not the primary - that is the colour a page
+     of writing sits on, and out here the writing floats over a drawing. The
+     secondary reads one step further back, which is what space should be.
+
+     Everything on the landing page that washes the sky behind something
+     reads this one name, so this line is the only place that decides. */
+  --hw-sky:        var(--cs-bg-2);
+  --hw-sky-deep:   var(--cs-bg-2);
+  --hw-ink:        var(--cs-bg-2);
+  --hw-chalk:      var(--cs-text-1);
+  --hw-chalk-soft: color-mix(in srgb, var(--cs-text-1) 82%, var(--cs-text-2));
+  --hw-chalk-dim:  var(--cs-text-2);
+
+  /* one accent per world, from the site's six */
+  --hw-moss:       var(--cs-forest);   /* about    */
+  --hw-ochre:      var(--cs-sun);      /* work     */
+  --hw-peri:       var(--cs-mist);     /* play     */
+  --hw-coral:      var(--cs-fire);     /* contact  */
+  --hw-accent:     var(--hw-moss);
+
+  /* ---- type ----
+     The families and the scale come from common/type.css, which the case
+     study reads too. The page's own design pixel is set below; every size on
+     the page is that pixel times a number from the shared scale, so the
+     landing page and a case study are set from one ruler. */
+  --hw-display: var(--t-display-face);
+  --hw-body:    var(--t-body-face);
+  --hw-hand:    var(--t-hand-face);
+
+  /* one design pixel for this page: grows with the window, but never so far
+     down that running text stops being comfortable */
+  --t-u: clamp(0.56px, 0.30vw + 0.34px, 0.68px);
+
+  --hw-step--1: calc(var(--t-meta) * var(--t-u));
+  --hw-step-0:  calc(var(--t-body-sm) * var(--t-u));
+  --hw-step-1:  calc(var(--t-body) * var(--t-u));
+  --hw-step-2:  calc(var(--t-h2) * var(--t-u));
+  --hw-step-3:  calc(var(--t-display) * var(--t-u));
+
+  /* rhythm */
+  --hw-gutter: clamp(20px, 4vw, 46px);
+  --hw-panel-w: 23rem;
+
+  /* how many screens of scrolling the whole journey takes */
+  --hw-travel-length: 4.4;
+}
+
+/* the page quietly takes on the colour of whichever world you are at */
+body[data-hw-world='home']   { --hw-accent: var(--hw-moss); }
+body[data-hw-world='work']   { --hw-accent: var(--hw-ochre); }
+body[data-hw-world='play']   { --hw-accent: var(--hw-peri); }
+body[data-hw-world='signal'] { --hw-accent: var(--hw-coral); }
+
+

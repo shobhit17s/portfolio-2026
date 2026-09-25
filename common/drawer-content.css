@@ -1,0 +1,340 @@
+﻿/* drawer-content.css — how the contents of any drawer are set.
+
+   Every rule here is written against ONE assumption: the container it is
+   inside has set --dc-accent to whatever colour that drawer should feel
+   like. The landing page sets it to the colour of the world you are on; a
+   case study sets it to the study's own accent. Nothing in this file knows
+   which page it is on, and it does not need to.
+
+   Colours come from the site's tokens (system/css/cs-tokens.css) so light
+   and dark arrive for free.
+   ========================================================================= */
+
+.dc-content {
+  --dc-accent: var(--cs-accent, currentColor);
+  --dc-gap: clamp(22px, 3.4vh, 38px);
+
+  position: relative;           /* the mascot hangs off this */
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain; /* the page behind must not scroll with it */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.dc-flow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dc-gap);
+  /* The container the text asks about. It has to be an ANCESTOR of the text,
+     never the text itself - an element cannot answer a query about its own
+     size, which is the one mistake this always starts as. */
+  container-type: inline-size;
+  container-name: dc-column;
+}
+
+/* ---------------------------------------------------------------- the bar
+
+   Thin, quiet, and the drawer's own accent. Two syntaxes, because Firefox
+   and Safari have never agreed: the standard two properties first, then the
+   WebKit pseudo-elements for everyone else. Both are here on purpose; where
+   one is understood the other is ignored.
+
+   The track is left transparent. A rail drawn down the side of a panel adds
+   a line the design did not ask for, and the thumb alone is enough to say
+   how far down you are. */
+.dc-content {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--dc-accent) 55%, transparent) transparent;
+}
+.dc-content::-webkit-scrollbar { width: 8px; }
+.dc-content::-webkit-scrollbar-track { background: transparent; }
+.dc-content::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--dc-accent) 45%, transparent);
+  border-radius: 99px;
+  /* the border is transparent, so it reads as padding and the thumb looks
+     narrower than the space it is allowed to be grabbed by */
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.dc-content:hover::-webkit-scrollbar-thumb,
+.dc-content::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--dc-accent) 78%, transparent);
+  background-clip: content-box;
+}
+
+/* ------------------------------------------------------------------ text
+
+   TWO COLUMNS WHEN THERE IS ROOM FOR TWO, and it is a container query, not
+   a media query: what matters is how wide the DRAWER is, not the window. The
+   same drawer is a wide panel on a desktop and a full-height sheet on a
+   phone, and the text should answer to the panel.
+
+   `columns` rather than a grid, because the browser balances the text
+   itself: no block has to be split by hand, and the count can change with
+   the width without anything being measured in script. */
+.dc-text p { margin: 0 0 0.85em; }
+.dc-text p:last-child { margin-bottom: 0; }
+
+/* 540, not 620: the drawer is 680 wide and its padding takes about 66 of
+   that, so a threshold of 620 would have been one the panel could never
+   reach. A phone's drawer is about 340 across and stays in one column. */
+@container dc-column (min-width: 540px) {
+  .dc-text:not(.dc-text--single) {
+    columns: 2;
+    column-gap: clamp(26px, 3vw, 46px);
+    /* a rule between them, in the drawer's accent, very faint */
+    column-rule: 1px solid color-mix(in srgb, var(--dc-accent) 22%, transparent);
+  }
+  /* a paragraph broken across the fold is harder to read than a short column */
+  .dc-text:not(.dc-text--single) p { break-inside: avoid; }
+}
+
+/* Where container queries are not understood, one column. That is the
+   honest fallback: it is never wrong, only sometimes narrow. */
+
+/* --------------------------------------------------------------- figures */
+.dc-figure { margin: 0; }
+
+/* A STATIC IMAGE HAS A CEILING.
+
+   A tall drawing at full drawer width can fill the whole panel and more, so
+   the reader scrolls past a wall of picture with no idea how much is left.
+   A static image is therefore allowed the full width but never more than
+   about two-thirds of the screen's height; anything taller is fitted inside
+   that, whole, rather than cropped. Carousels are exempt - they set their
+   own shape - and a drawer can opt one picture out with `tall: true`. */
+.dc-image .dc-figure img {
+  max-height: 62svh;
+  width: auto;
+  max-width: 100%;
+  margin-inline: auto;
+}
+.dc-image--tall .dc-figure img { max-height: none; width: 100%; }
+.dc-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px 8px 11px 7px;   /* never quite a rectangle */
+}
+.dc-figure figcaption {
+  margin-top: 0.6em;
+  font-size: 0.86em;
+  line-height: 1.45;
+  opacity: 0.72;
+}
+
+/* -------------------------------------------------------------- carousel */
+.dc-carousel { position: relative; }
+
+.dc-carousel-track { position: relative; }
+
+/* FIXED: the track is a box of a known shape and the slides are stacked
+   inside it. Nothing below ever moves, because the box never changes. */
+.dc-carousel--fixed .dc-carousel-track {
+  aspect-ratio: var(--dc-ratio, 16 / 10);
+  overflow: hidden;
+  border-radius: 10px 8px 11px 7px;
+}
+.dc-carousel--fixed .dc-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.015);
+  transition: opacity 420ms ease, transform 620ms ease;
+  pointer-events: none;
+}
+.dc-carousel--fixed .dc-slide.is-on { opacity: 1; transform: none; pointer-events: auto; }
+.dc-carousel--fixed .dc-slide img { height: 100%; object-fit: cover; border-radius: 0; }
+.dc-carousel--fixed .dc-slide figcaption {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  margin: 0;
+  padding: 26px 14px 10px;
+  background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
+  color: #fff;
+  opacity: 1;
+}
+
+/* PUSH: the track takes the height of the slide that is showing, and that
+   height is animated - so everything under it moves, visibly and on purpose.
+   The height itself is set in script, because CSS cannot transition to or
+   from `auto`. */
+.dc-carousel--push .dc-carousel-track {
+  overflow: hidden;
+  transition: height 520ms cubic-bezier(.4, 0, .2, 1);
+}
+.dc-carousel--push .dc-slide {
+  position: absolute;
+  inset: 0 0 auto 0;
+  opacity: 0;
+  transition: opacity 380ms ease;
+  pointer-events: none;
+}
+.dc-carousel--push .dc-slide.is-on { position: relative; opacity: 1; pointer-events: auto; }
+
+/* the controls */
+.dc-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  font: 22px/1 system-ui, sans-serif;
+  color: var(--cs-text-1, currentColor);
+  background: color-mix(in srgb, var(--cs-bg-1, #fff) 82%, transparent);
+  border: 1.4px solid color-mix(in srgb, var(--dc-accent) 45%, transparent);
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 240ms ease, background-color 240ms ease;
+}
+.dc-carousel:hover .dc-carousel-arrow,
+.dc-carousel:focus-within .dc-carousel-arrow { opacity: 1; }
+.dc-carousel-arrow:hover { background: var(--cs-bg-1, #fff); }
+.dc-carousel-arrow--prev { left: 10px; }
+.dc-carousel-arrow--next { right: 10px; }
+
+/* on a touch screen there is no hover to reveal them, so they simply stay */
+@media (hover: none) {
+  .dc-carousel-arrow { opacity: 1; }
+}
+
+.dc-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.dc-carousel-dot {
+  width: 8px; height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 60% 40% 55% 45%;
+  background: color-mix(in srgb, var(--dc-accent) 28%, transparent);
+  cursor: pointer;
+  transition: background-color 240ms ease, transform 240ms ease;
+}
+.dc-carousel-dot.is-on { background: var(--dc-accent); transform: scale(1.3) rotate(10deg); }
+
+/* --------------------------------------------------------------- marquee
+
+   A band whose contents drift one way forever. The strip is built twice and
+   slid by exactly half its own width, so the restart lands the second copy
+   where the first one began and the seam is invisible. The distance is set
+   in script (--dc-marquee-shift) because only script knows how wide the
+   pictures turned out. */
+.dc-marquee {
+  --dc-marquee-h: 240px;
+  height: var(--dc-marquee-h);
+  overflow: hidden;
+  border-radius: 10px 8px 11px 7px;
+  /* fade at both ends, so pictures arrive and leave rather than being cut */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+
+.dc-marquee-strip {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.4vw, 34px);
+  height: 100%;
+  width: max-content;
+  animation: dc-drift linear infinite;
+}
+.dc-marquee--right .dc-marquee-strip { animation-name: dc-drift-right; }
+
+.dc-marquee-item { height: 100%; display: grid; place-items: center; }
+.dc-marquee-item img { height: 100%; width: auto; display: block; }
+
+@keyframes dc-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(-1 * var(--dc-marquee-shift, 50%))); }
+}
+@keyframes dc-drift-right {
+  from { transform: translateX(calc(-1 * var(--dc-marquee-shift, 50%))); }
+  to   { transform: translateX(0); }
+}
+
+/* Somebody who has asked for less movement gets a still row of pictures
+   rather than a band that never stops. */
+@media (prefers-reduced-motion: reduce) {
+  .dc-marquee-strip { animation: none; }
+}
+
+/* ---------------------------------------------------------------- mascot
+
+   Decoration, and treated as such: it is over everything, it catches no
+   clicks, and it is hidden from screen readers. A drawing strolling past is
+   a pleasure to see and an interruption to hear.
+
+   It is positioned by `transform`, not by top/left, so the walk happens on
+   the compositor and costs nothing while somebody is reading. */
+/* The layer the mascots live in. No height of its own and stuck to the top
+   of the visible area, so it stays with the reader while the words scroll
+   past underneath it. Everything in it is decoration and catches nothing. */
+.dc-mascot-layer {
+  position: sticky;
+  top: 0;
+  height: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.dc-mascot {
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 3;
+  transition: transform 3s cubic-bezier(.45, 0, .25, 1);
+  will-change: transform;
+}
+.dc-mascot--small  { width: 64px;  height: 64px; }
+.dc-mascot--medium { width: 120px; height: 120px; }
+.dc-mascot--large  { width: 240px; height: 240px; }
+
+.dc-mascot-art {
+  width: 100%; height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  /* a slow bob, so it is alive even while it is standing still */
+  animation: dc-bob 2.6s ease-in-out infinite;
+}
+
+/* facing the way it is walking - the one thing that turns a sticker into a
+   character */
+.dc-mascot.is-facing-left .dc-mascot-art { scale: -1 1; }
+
+/* A SPRITE STRIP. The drawing is one row of frames; the background is as
+   many times wider than the box as there are frames, and `steps()` walks it
+   across. Exactly the traveller's hop sheet, at a smaller scale. */
+.dc-mascot--sprite .dc-mascot-art {
+  background-repeat: no-repeat;
+  animation: dc-frames 0.9s steps(var(--dc-frames, 4)) infinite;
+}
+@keyframes dc-frames {
+  from { background-position: 0% 0; }
+  to   { background-position: 100% 0; }
+}
+@keyframes dc-bob {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dc-mascot { transition: none; }
+  .dc-mascot-art { animation: none; }
+}
+
+/* ------------------------------------------------------------------ note */
+.dc-note {
+  margin: 0;
+  padding-top: 0.4em;
+  font-size: 0.85em;
+  line-height: 1.5;
+  opacity: 0.66;
+  border-top: 1px solid color-mix(in srgb, var(--dc-accent) 24%, transparent);
+}
+
+

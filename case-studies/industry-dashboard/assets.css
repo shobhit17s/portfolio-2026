@@ -1,0 +1,37 @@
+﻿/* assets.css — where this case study's own drawings live.
+
+   File paths belong in a stylesheet that sits beside the files, and they must
+   be written as the real property — mask-image, background-image — not routed
+   through a custom property. A url() inside a custom property resolves
+   against whichever stylesheet reads the property, which would be the
+   engine's, in another folder entirely.
+
+   To swap a drawing: change the file name on one line. */
+
+/* a stencil: the shape only, filled with the current line colour */
+/* THE HERO'S ORNAMENTAL SEPARATOR IS NOT IN USE.
+
+   Spec #1 puts a long horizontal illustration between the hero's title and
+   its body. A stencil like this one is a flat block of the line colour with a
+   drawing used as a cookie-cutter, so until there IS a drawing the block is
+   all you see - which is what was happening: a grey slab across the slide.
+
+   (The mask was written in here as a data URI, and it never worked: the SVG
+   inside it used double quotes, inside a url("...") that was itself double
+   quoted, so the browser read the value as ending at the first inner quote
+   and threw the whole declaration away. Worth remembering - a data URI in
+   CSS must use single quotes inside, or be percent-encoded.)
+
+   To bring it back: draw the separator, save it beside this file, and write
+
+       .fig-hero-rule {
+         -webkit-mask-image: url('assets/hero-rule.svg');
+         mask-image: url('assets/hero-rule.svg');
+         --cs-has-figure: 1;
+       }
+
+   then put the line back in the `hero` template in cs-templates.js. */
+
+.art-hero-desk { background-image: url('assets/hero-desk.png'); }
+
+
