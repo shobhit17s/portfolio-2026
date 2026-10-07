@@ -1,0 +1,582 @@
+﻿/* hw-catalogue.css — the modal that opens from the pantheon.
+
+   ONE PANEL, TWO STATES. `data-hw-state` on #hw-catalogue says which, and
+   these rules are the whole of what that attribute does. Nothing is built
+   or torn down when you move between them: both states are in the page and
+   one of them is hidden, so going back to the catalogue returns you to
+   exactly the panel you left.
+
+   It arrives the way the drawer does - the scrim a beat before the panel -
+   so a reader who has seen one recognises the other.
+
+   COLOURS. Every word in here reads an -ink or a text token, never a raw
+   accent, because an accent is a colour to look at and not one to read.
+   The one exception is the filled button, where the accent IS the
+   background and the label takes --cs-on-fill. */
+
+#hw-catalogue-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: color-mix(in srgb, var(--hw-sky) 78%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 380ms var(--hw-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+#hw-catalogue {
+  position: fixed;
+  z-index: 71;
+  top: 50%;
+  left: 50%;
+  /* NARROWER THAN IT WAS, and the card decides it rather than the other way
+     round. A card wants to be about 590 wide: wider than that and the one
+     sentence in the middle stretches into a line you have to track across,
+     which is the thing a card is supposed to save you from. So the panel is
+     that, plus its own padding and the room the scrollbar needs. */
+  width: min(650px, 92vw);
+
+  /* ONE HEIGHT, WHICHEVER STATE IS SHOWING. It used to take the height of
+     whatever was inside it, so pressing a card made the panel shrink around
+     its own middle on the way to the password screen - the page jumped and
+     the eye had to find the writing again. Fixed, the panel stays exactly
+     where it is and only its contents change, which is what "two states of
+     one modal" is supposed to feel like.
+     THE NUMBER IS MEASURED, NOT GUESSED. Left to size themselves, the
+     catalogue came out at 408 and the password screen at 427 - within twenty
+     of each other, which is why the jump was small enough to be annoying
+     rather than obviously wrong. 470 clears the taller of the two with a
+     little air for a case study name long enough to take two lines, and it
+     is near enough the height the panel already had that nothing about the
+     composition changes.
+
+     Add a third and fourth card and the catalogue will out-grow this. That
+     is the right outcome: the list scrolls inside a panel that stays put,
+     rather than the panel growing down the screen. */
+  height: min(84vh, 470px);
+  display: flex;
+  flex-direction: column;
+  /* The uneven corners are the hand's, not the ruler's: four radii that do
+     not match is what a rectangle drawn by eye looks like. Same trick as
+     the drawer's close button, so the page keeps one voice. */
+  border-radius: 22px 18px 24px 19px;
+  border: 1.4px solid color-mix(in srgb, var(--hw-chalk) 24%, transparent);
+  background: var(--cs-bg-1);
+  padding: 22px 24px 24px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -46%) scale(0.98);
+  transition: opacity 320ms ease, transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.hw-catalogue-open #hw-catalogue-scrim { opacity: 1; pointer-events: auto; }
+body.hw-catalogue-open #hw-catalogue {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* WHICH STATE IS SHOWING, and both of them fill the panel. The panel has a
+   fixed height now, so a state that only filled as much as its words needed
+   would sit in the top of an obviously empty box. Each one is a column that
+   takes the whole height instead, and decides for itself what goes at the
+   bottom: the catalogue gives the leftover room to its scrolling list, the
+   password screen pushes its footer down to the edge. */
+#hw-catalogue[data-hw-state='company'] #hw-catalogue-gate { display: none; }
+#hw-catalogue[data-hw-state='gate'] #hw-catalogue-company-state { display: none; }
+
+#hw-catalogue-company-state {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+/* a wrong password: a short shake, and nothing else moves */
+@keyframes hw-catalogue-wrong {
+  0%, 100% { transform: translate(-50%, -50%); }
+  20%      { transform: translate(calc(-50% - 7px), -50%); }
+  60%      { transform: translate(calc(-50% + 7px), -50%); }
+}
+#hw-catalogue.is-wrong { animation: hw-catalogue-wrong 420ms ease; }
+
+/* ---------- the close control ---------- */
+#hw-catalogue-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  font-family: var(--hw-body);
+  font-size: 1.25rem;
+  line-height: 1;
+  border: 0;
+  background: none;
+  color: var(--cs-fire-ink);
+  cursor: pointer;
+  border-radius: 10px 8px 11px 9px;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+#hw-catalogue-close:hover,
+#hw-catalogue-close:focus-visible {
+  background: color-mix(in srgb, var(--cs-fire) 16%, transparent);
+}
+
+/* ---------- the company's name, on both states ---------- */
+#hw-catalogue-company,
+#hw-catalogue-gate-company {
+  margin: 0 0 10px;
+  /* YOUR OWN HAND, not the body face. It is the company's name, which is a
+     name like any other on this site, and names are set in the drawn face. */
+  font-family: var(--hw-display);
+  font-size: var(--hw-step-0);
+  letter-spacing: 0.01em;
+  color: var(--cs-fire-ink);
+}
+
+/* ---------- the tabs ---------- */
+#hw-catalogue-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  border-bottom: 1.2px solid color-mix(in srgb, var(--hw-chalk) 18%, transparent);
+  padding-bottom: 0;
+}
+
+.hw-catalogue-tab {
+  font-family: var(--hw-body);
+  font-size: var(--hw-step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  border: 1.2px solid transparent;
+  border-bottom: 0;
+  border-radius: 12px 10px 0 0;
+  background: none;
+  color: var(--cs-text-2);
+  cursor: pointer;
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+.hw-catalogue-tab:hover { color: var(--cs-text-1); }
+
+/* The chosen tab is a RAISED PIECE OF PAPER, not a coloured pill: it takes
+   the panel's own surface and the line under it, so it reads as the front
+   sheet of two rather than as a selected button. */
+.hw-catalogue-tab.is-active {
+  color: var(--cs-text-1);
+  background: var(--cs-bg-3);
+  border-color: color-mix(in srgb, var(--hw-chalk) 24%, transparent);
+}
+
+/* ---------- the body, which is the only thing that scrolls ----------
+
+   THE BAR IS THE SITE'S OWN, not the browser's. A default scrollbar is a
+   wide grey slab that belongs to the operating system, and it was the one
+   thing on this panel that had not been drawn by anybody.
+
+   It takes the `dc-scroll` class, which is the thin accent-coloured bar
+   every drawer on the site already uses - written once in
+   common/drawer-content.css and read here. One bar, one place to change it,
+   and the modal matches the panels it sits alongside.
+
+   `--dc-accent` is the only thing that has to be said here: the bar takes
+   the colour of whichever world you are looking at, like everything else on
+   this page. */
+#hw-catalogue-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 8px;
+  --dc-accent: var(--hw-accent);
+}
+
+#hw-catalogue-intro,
+.hw-catalogue-para {
+  margin: 0 0 14px;
+  font-family: var(--hw-body);
+  font-size: var(--hw-step-0);
+  line-height: 1.62;
+  color: var(--hw-chalk-soft);
+}
+
+#hw-catalogue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ---------- one case study card ----------
+   A GRID OF THREE COLUMNS, and the middle one is the only one that can
+   grow. That is what makes the description decide the card's height: the
+   picture and the metrics are both stretched to whatever height the words
+   in the middle came out at, rather than setting a height of their own. */
+.hw-case-card {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  align-items: stretch;
+  width: 100%;
+  text-align: left;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1.2px solid color-mix(in srgb, var(--hw-chalk) 20%, transparent);
+  border-radius: 16px 13px 17px 12px;
+  background: var(--cs-bg-2);
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 200ms ease, background-color 200ms ease,
+              transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hw-case-card.has-metrics { grid-template-columns: 128px minmax(0, 1fr) 196px; }
+
+.hw-case-card:hover,
+.hw-case-card:focus-visible {
+  border-color: var(--hw-accent);
+  background: var(--cs-bg-3);
+  transform: translateY(-2px);
+}
+
+.hw-case-card-figure {
+  position: relative;
+  min-height: 92px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #4A2A2A;      /* the maroon stand-in, until a drawing arrives */
+}
+.hw-case-card-figure img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* the name of the file this card is waiting for */
+.hw-case-card-slot {
+  font-family: var(--hw-body);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  padding: 6px;
+  /* Solid, not 74 per cent of solid. It was faded for looks, which left it
+     no headroom: on a card that is itself faded it fell straight through
+     the floor. A colour that may have to survive being dimmed later should
+     not spend its contrast in advance. */
+  color: #FCF9D9;
+}
+
+/* ---------- A CASE STUDY THAT IS NOT UP YET ----------
+
+   IT HAS TO LOOK UNAVAILABLE, so it is faded, the way an unavailable control
+   is always faded. The hatch that was here before has gone: it is the site's
+   word for "this drawing has not arrived", which is a different statement
+   from "this work is not published yet", and borrowing it blurred both.
+
+   WHY THE FADE IS NOT SIMPLY ON THE WHOLE CARD, which is what it should have
+   been and is not. Opacity applies to everything inside, words included, and
+   the words still have to be read - somebody has to be able to tell WHICH
+   case study is coming. I measured it rather than guessing:
+
+       card at 1.00   name reads 5.91 in dark, 5.32 in light
+       card at 0.90   name reads 5.03 in dark, 4.34 in light   light fails
+       card at 0.80   name reads 4.24 in dark, 3.56 in light   both fail
+
+   Light mode fails before the fade is deep enough to be worth having. So the
+   fade is spent where it costs nothing - on the picture, which carries no
+   information yet, and on the metrics, which are placeholders - and the name
+   steps back by CHANGING COLOUR instead, from the world's accent to the
+   secondary reading colour. The card reads as held back; every word in it
+   still clears 4.5 to 1.
+
+   The card is faded, NOT disabled. See the note in js/hw-catalogue.js: it is
+   still a button, still reachable by keyboard, still announced - and it
+   carries a label of its own telling a screen reader the study is coming. */
+.hw-case-card.is-coming-soon {
+  cursor: default;
+  background: none;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--hw-chalk) 22%, transparent);
+}
+
+/* nothing happens under the cursor, because nothing happens. The commonest
+   way a dead control lies is by still behaving like a live one. */
+.hw-case-card.is-coming-soon:hover,
+.hw-case-card.is-coming-soon:focus-visible {
+  transform: none;
+  background: none;
+  border-color: color-mix(in srgb, var(--hw-chalk) 22%, transparent);
+}
+
+/* THE PICTURE IS DIMMED BY A WASH, NOT BY OPACITY, and the difference is
+   the filename printed on the empty tile. Opacity fades everything inside,
+   that line included, and it fell below the readable bar as soon as it did.
+   A wash of the page colour laid OVER the picture dims the picture and
+   nothing else; the label sits above the wash at full strength. When a real
+   drawing arrives there is no label, and the wash is simply a dimmed
+   drawing. */
+.hw-case-card.is-coming-soon .hw-case-card-figure::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--cs-bg-1) 58%, transparent);
+}
+.hw-case-card.is-coming-soon .hw-case-card-slot { position: relative; z-index: 1; }
+
+/* The writing steps back by CHANGING COLOUR rather than by fading, for the
+   same reason: a colour can be chosen to stay readable, and a fade cannot.
+   The name gives up the world's accent and the metric labels give up theirs;
+   both land on the secondary reading colour, which is what every other
+   quiet line on this site is set in. */
+.hw-case-card.is-coming-soon .hw-case-card-name { color: var(--cs-text-2); }
+
+/* The right-hand column on a card that is not up yet: the same room the
+   metrics take on a card that is, with the same line down its left so the
+   two states of the card are built the same way and line up with each
+   other. */
+.hw-case-card-state {
+  display: grid;
+  /* level with the writing beside it, for the same reason */
+  place-items: start center;
+  padding: 14px 12px;
+  border-left: 1.2px solid color-mix(in srgb, var(--hw-chalk) 20%, transparent);
+}
+
+.hw-case-card-badge {
+  padding: 3px 10px;
+  border-radius: 10px 8px 11px 9px;
+  border: 1.1px solid color-mix(in srgb, var(--hw-accent) 55%, transparent);
+  font-family: var(--hw-body);
+  font-size: var(--hw-step--1);
+  letter-spacing: 0.04em;
+  color: var(--hw-accent-ink);
+}
+
+/* ALL THREE COLUMNS START AT THE TOP, and that is the point of them.
+
+   They were centred, which looks identical while every card is one line
+   deep and falls apart the moment one is not: a long description grows the
+   card, and the two metric columns beside it float to the middle of the new
+   height, so three pieces of writing that begin on the same line end up on
+   three different ones. Reading across a row stops being possible.
+
+   Topped, they all begin level however tall the card becomes. */
+.hw-case-card-says {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.hw-case-card-name {
+  margin: 0;
+  font-family: var(--hw-display);
+  font-size: var(--hw-step-0);
+  line-height: 1.3;
+  color: var(--hw-accent-ink);
+}
+
+.hw-case-card-desc {
+  margin: 0;
+  font-family: var(--hw-body);
+  font-size: var(--hw-step-0);
+  line-height: 1.55;
+  color: var(--hw-chalk-soft);
+}
+
+/* THE METRICS SIT IN THEIR OWN ROOM. A line down the left of them, and two
+   equal columns inside - so two metrics read as a pair rather than as a
+   continuation of the sentence beside them. */
+.hw-case-card-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-left: 1.2px solid color-mix(in srgb, var(--hw-chalk) 20%, transparent);
+}
+
+.hw-case-card-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  justify-content: flex-start;
+  padding: 14px 12px;
+  min-width: 0;
+}
+.hw-case-card-metric + .hw-case-card-metric {
+  border-left: 1.2px solid color-mix(in srgb, var(--hw-chalk) 14%, transparent);
+}
+
+.hw-case-card-metric-label {
+  font-family: var(--hw-body);
+  font-size: var(--hw-step--1);
+  color: var(--hw-accent-ink);
+}
+.hw-case-card-metric-value {
+  font-family: var(--hw-body);
+  font-size: var(--hw-step--1);
+  line-height: 1.45;
+  color: var(--hw-chalk-soft);
+}
+
+/* ---------- the password state ---------- */
+#hw-catalogue-gate {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+#hw-catalogue-gate-title {
+  margin: 0;
+  font-family: var(--hw-display);
+  font-size: var(--hw-step-2);
+  line-height: 1.2;
+  color: var(--hw-accent-ink);
+}
+
+#hw-catalogue-gate-lead,
+#hw-catalogue-gate-note {
+  margin: 0;
+  font-family: var(--hw-body);
+  font-size: var(--hw-step-0);
+  line-height: 1.62;
+  color: var(--hw-chalk-soft);
+}
+#hw-catalogue-gate-lead { margin-top: 6px; }
+
+#hw-catalogue-gate-input {
+  width: 100%;
+  font-family: var(--hw-body);
+  font-size: var(--hw-step-0);
+  letter-spacing: 0.08em;
+  padding: 12px 16px;
+  margin-top: 6px;
+  border-radius: 14px 11px 15px 10px;
+  border: 1.3px solid color-mix(in srgb, var(--hw-chalk) 30%, transparent);
+  background: var(--cs-bg-2);
+  color: var(--cs-text-1);
+}
+#hw-catalogue-gate-input::placeholder {
+  color: var(--cs-text-2);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.86em;
+}
+#hw-catalogue-gate-input:focus-visible {
+  outline: none;
+  border-color: var(--hw-accent);
+}
+
+#hw-catalogue-gate-say {
+  margin: 0;
+  min-height: 1.2em;
+  font-family: var(--hw-body);
+  font-size: var(--hw-step--1);
+  color: var(--cs-fire-ink);
+}
+
+#hw-catalogue-gate-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  /* pushed to the bottom edge of the fixed-height panel */
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1.2px solid color-mix(in srgb, var(--hw-chalk) 18%, transparent);
+}
+
+#hw-catalogue-gate-back {
+  font-family: var(--hw-display);
+  font-size: var(--hw-step-0);
+  border: 0;
+  background: none;
+  padding: 4px 2px;
+  color: var(--cs-text-2);
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+#hw-catalogue-gate-back:hover,
+#hw-catalogue-gate-back:focus-visible { color: var(--cs-text-1); }
+
+/* THE ONE FILLED CONTROL IN HERE, and the one place a colour is a
+   background rather than a thing to read. The label takes --cs-on-fill,
+   which is the colour the palette keeps for exactly this.
+
+   LIGHT MODE NEEDED A DEEPER FILL. On the dark page the label is near-black
+   on fire and there is no argument; on the pale page it is cream on fire,
+   and that measured 3.46 to 1 - legal for a big heading, not for a 15px
+   button label. The fill drops to the -ink strength of the same colour
+   there, which reads as the same button a shade deeper and takes the cream
+   label to 6.06. Found by tools/contrast-check.js, not by eye. */
+#hw-catalogue-gate-go {
+  font-family: var(--hw-body);
+  font-size: var(--hw-step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 13px 10px 14px 11px;
+  background: var(--cs-fire);
+  color: var(--cs-on-fill);
+  cursor: pointer;
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+:root[data-cs-mode='light'] #hw-catalogue-gate-go { background: var(--cs-fire-ink); }
+
+#hw-catalogue-gate-go:hover { transform: translateY(-1px); }
+#hw-catalogue-gate-go:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+/* ---------- phones: the modal becomes the page ---------- */
+@media (max-width: 820px) {
+  #hw-catalogue {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: auto;
+    right: 0;
+    /* THE FIXED HEIGHT IS A DESKTOP RULE ONLY, and that is a judgement
+       rather than an oversight. On a desktop the panel is centred, so a
+       change of height moves it around its own middle and the writing walks
+       away from where you were reading. Here it is a sheet anchored to the
+       bottom edge: it grows upwards, nothing you are reading moves, and a
+       sheet held at 76% of a phone screen when it needs half of that is just
+       a lot of empty paper. */
+    height: auto;
+    max-height: 88vh;
+    transform: translateY(102%);
+    border-radius: 20px 16px 0 0;
+    padding: 18px 16px 22px;
+  }
+  body.hw-catalogue-open #hw-catalogue { transform: translateY(0); }
+  @keyframes hw-catalogue-wrong {
+    0%, 100% { transform: translateY(0); }
+    20%      { transform: translate(-7px, 0); }
+    60%      { transform: translate(7px, 0); }
+  }
+
+  /* A card stacks: picture across the top, words under it, metrics last.
+     Three columns at 148px each would leave the description a few words
+     wide, and the description is the point of the card. */
+  .hw-case-card,
+  .hw-case-card.has-metrics { grid-template-columns: 1fr; }
+  .hw-case-card-figure { min-height: 120px; aspect-ratio: 16 / 7; }
+  .hw-case-card-metrics,
+  .hw-case-card-state {
+    border-left: 0;
+    border-top: 1.2px solid color-mix(in srgb, var(--hw-chalk) 20%, transparent);
+  }
+  .hw-case-card-state { justify-items: start; padding: 12px 16px; }
+  .hw-catalogue-tab { padding: 8px 10px; font-size: 0.68rem; }
+  #hw-catalogue-gate-foot { flex-wrap: wrap; margin-top: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hw-catalogue, #hw-catalogue-scrim { transition-duration: 1ms; }
+  #hw-catalogue.is-wrong { animation: none; }
+  .hw-case-card:hover, .hw-case-card:focus-visible { transform: none; }
+}
+
+

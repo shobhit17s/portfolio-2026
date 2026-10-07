@@ -1,0 +1,344 @@
+﻿/* ============================================================================
+   type.css — ONE typographic system for the whole experience.
+
+   Both the worlds landing page and every case study read this file, so a
+   change here changes the type everywhere. Nothing else in the project is
+   allowed to invent a font size.
+
+   HOW THE SCALE WORKS
+   The sizes below are plain numbers, not pixels. Each surface multiplies them
+   by its own design pixel:
+
+       the case study   --u      one pixel of a 1920-wide slide
+       the landing page --hw-u   one pixel of the page's own ruler
+
+   That way a single ruler governs both, while each surface keeps scaling the
+   way it needs to. To resize the whole system, change the numbers here.
+
+   THE THREE HANDS  (typography spec sheet, 30 September)
+   display  Shobhit Regal — your own face. Every heading, every impact line,
+            every section title. Set at 500, tracked in by 6%.
+   body     Varela Round — rounded and warm, and legible at length, which a
+            truly handwritten face is not. Lead paragraphs and running text.
+   hand     Caveat — captions and small print now, as well as marginalia.
+
+   WHAT THE SPEC SHEET SAYS, ROLE BY ROLE
+
+       role            face           colour              size  lh    weight  tracking
+       hero title      Shobhit Regal  PRIMARY accent      120   1.2   500     -6%
+       impact text     Shobhit Regal  PRIMARY accent       80   1.2   500     -6%
+       section title   Shobhit Regal  SECONDARY accent     40   1.2   500     -6%
+       lead paragraph  Varela Round   primary text         32   1.5   400     auto
+       body            Varela Round   primary text         24   1.5   400     auto
+       caption         Caveat         primary text         20   auto  400     auto
+       meta / small    Caveat         primary text         16   auto  400     auto
+
+   Two roles below are NOT on that sheet - h3 and body-sm. They are the
+   in-between sizes the templates already lean on (a tile label, a dense
+   secondary column), and they are derived from the sheet rather than
+   invented: h3 sits between section title and lead, body-sm between body
+   and caption. They are marked where they appear.
+   ========================================================================= */
+
+/* ===========================================================================
+   THE DISPLAY FACE, CARRIED WITH THE SITE
+
+   This is Shobhit's own face. It is not a font anyone has installed, and it
+   is not one a font service hosts - so the site carries it. The file is in
+   common/fonts/, it is shipped with the pages, and every reader downloads it
+   along with everything else. Nothing about their machine matters.
+
+   THE FACE IS NOT A SEPARATE FILE. It is written into this stylesheet, as
+   the long line below. That looks odd and it is deliberate - it is the one
+   arrangement in which the font CANNOT fail to arrive:
+
+     * there is no second file to copy, so none can be left behind
+     * there is no path to get wrong, from any page, at any depth
+     * there is nothing for a web host to refuse to serve, or to serve with
+       the wrong type and have the browser reject
+     * it cannot 404, because there is no request
+
+   Everything that can go wrong with a web font goes wrong between asking for
+   the file and getting it. This removes the asking. The cost is about
+   sixteen kilobytes on a stylesheet that was already being downloaded before
+   anything could be drawn, which is a fair price for never wondering.
+
+   The real files are in common/fonts/ - woff2, woff and the original ttf.
+   No stylesheet points at them. They are the source: when this site moves to
+   a proper host and you would rather serve the font as a file the browser
+   can cache on its own, swap the `src` below for
+
+       src: url('fonts/shobhit-regal.woff2') format('woff2'),
+            url('fonts/shobhit-regal.woff') format('woff');
+
+   and put a <link rel="preload" ... as="font" crossorigin> in each page's
+   head. Until then, this is the safer arrangement.
+
+   WHY WOFF2 AND NOT ALSO WOFF HERE: every browser that understands the rest
+   of this site - which leans on colour-mix, custom properties and modern
+   grid - has understood woff2 since 2016. Carrying both would double the
+   weight to guard against a browser that cannot render the page anyway.
+
+   font-display: block. Left alone, a browser shows the fallback face at once
+   and swaps the real one in when it arrives, so the first thing a reader
+   sees is the wrong font and then the page jumps. `block` says the opposite:
+   hold the headings back until the real face is ready. Written in here it is
+   ready the instant this stylesheet is, so there is nothing to wait for.
+
+   ONE MORE THING, EASILY MISSED. The face has one weight, and every heading
+   on this site asks for 600. A browser handed a 400 and asked for a 600 will
+   INVENT the bold by smearing the letters sideways, which on a drawn face
+   looks like a printing fault. Declaring the range 100-900 below says "this
+   one file answers for every weight" - so the browser stops inventing and
+   just uses the drawing.
+   =========================================================================== */
+@font-face {
+  font-family: 'Shobhit Regal';
+  src: url(data:font/woff2;base64,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) format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  /* The drawn face first. The stack behind it is not a substitute for the
+     whole face - a browser falls back one CHARACTER at a time, and only for
+     characters this font does not contain. See the note at the bottom of
+     this file for which those are. */
+  --t-display-face: 'Shobhit Regal', 'Shantell Sans', 'Bradley Hand', 'Segoe Print', cursive;
+  --t-body-face:    'Varela Round', 'Nunito', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif;
+  --t-hand-face:    'Caveat', 'Bradley Hand', cursive;
+
+  /* =======================================================================
+     THE SCALE
+
+     Two numbers per role, and the second one is the important one.
+
+     THE DESIGN SIZE is the size on a full 1920-wide slide, which is the
+     size the slide was drawn at. It is multiplied by --t-u, the surface's
+     own design pixel, so it shrinks as the slide shrinks.
+
+     THE FLOOR is a real pixel size the role will never go below, whatever
+     happens to the slide.
+
+     The floor is what was missing, and it is why everything was unreadable
+     on a phone. A 1920 slide drawn into a 1200px laptop window is drawn at
+     0.625 of its design size; drawn into a 390px phone it was hitting a
+     floor of half a pixel per design pixel. Body text of 24 design pixels
+     came out at 15 real ones on a laptop and 12 on a phone; a caption of 20
+     came out at 12 and 10. Nobody can read a 10-pixel caption.
+
+     So each role is now written as a clamp: never below its floor, never
+     above its design size, and scaling with the slide in between.
+     ===================================================================== */
+
+  /* ---- design size (on a 1920 slide) ---- */
+  --t-display:  132;   /* hero title                               */
+  --t-h1:        88;   /* impact text                              */
+  --t-h2:        56;   /* section title                            */
+  --t-h3:        40;   /* a sub-heading, a tile label              */
+  --t-lead:      40;   /* lead paragraph                           */
+  --t-body:      30;   /* body                                     */
+  --t-body-sm:   25;   /* dense or secondary text                  */
+  --t-caption:   32;   /* caption          (Caveat - see note)     */
+  --t-meta:      24;   /* meta / small     (Caveat - see note)     */
+
+  /* ---- the floor: real pixels, never gone below ---- */
+  --t-display-min:  36px;
+  --t-h1-min:       28px;
+  --t-h2-min:       24px;
+  --t-h3-min:       20px;
+  --t-lead-min:     20px;
+  --t-body-min:     17px;
+  --t-body-sm-min:  16px;
+  --t-caption-min:  18px;
+  --t-meta-min:     15px;
+
+  /* WHY CAPTION AND META LOOK BIG IN THIS LIST.
+     They are set in Caveat, a handwritten face with a small x-height: at
+     the same nominal size it READS about 15% smaller than the rounded body
+     face beside it. A 32 caption next to 30 body therefore does not compete
+     with the body - it reads a shade smaller, which is what a caption should
+     do. Sizes measure the box, not the legibility.
+
+     Body came down from 32 and the two Caveat roles went up, because a
+     caption set at the same nominal size as the body was reading noticeably
+     smaller than it - which is how a caption ends up unreadable while the
+     numbers say it is fine. */
+
+  /* ---- how each role is set ----
+
+     TRACKING GOES THE OTHER WAY FROM SIZE. Letters set large need pulling
+     together; letters set small need letting apart. One flat -6% is right
+     for a 132px headline and cramped on a 40px sub-heading, which is what
+     was happening. So it eases off as the type gets smaller. */
+  --t-display-lh: 1.15;  --t-display-ls: -0.06em;  --t-display-w: 500;
+  --t-h1-lh:      1.18;  --t-h1-ls:      -0.05em;  --t-h1-w:      500;
+  --t-h2-lh:      1.2;   --t-h2-ls:      -0.03em;  --t-h2-w:      500;
+  --t-h3-lh:      1.25;  --t-h3-ls:      -0.02em;  --t-h3-w:      500;
+  --t-lead-lh:    1.5;   --t-lead-w:     400;
+  --t-body-lh:    1.5;   --t-body-w:     400;
+  --t-caption-lh: 1.35;  --t-caption-w:  400;
+  --t-meta-lh:    1.3;   --t-meta-ls:    0;        --t-meta-w:    400;
+}
+
+/* ============================================================================
+   THE FINISHED SIZES - and why this rule has two selectors
+
+   A custom property that contains var(--t-u) is worked out ON THE ELEMENT
+   THAT DECLARES IT, not on the element that finally uses it. Declare these
+   on :root alone and they are worked out with :root's --t-u - which on a
+   case study page does not exist, so every one of them comes out invalid and
+   every heading on the page silently falls back to 16px. (That is exactly
+   what happened, and it is a good thing to remember: an invalid custom
+   property does not warn, it just quietly gives you the browser default.)
+
+   So the block is declared in both places a design pixel is defined:
+
+       :root       the page's own ruler - the top bar, the drawer, the
+                   landing page
+       .cs-slide   a slide's ruler, which is a fraction of the slide's width
+
+   Each one works the sizes out with its own --t-u, and everything inside
+   inherits the right answer.
+   ========================================================================= */
+:root,
+.cs-slide {
+  /* ---- the finished sizes. Everything on the site reads these ---- */
+  --t-size-display: clamp(var(--t-display-min), calc(var(--t-display) * var(--t-u)), calc(var(--t-display) * 1px));
+  --t-size-h1:      clamp(var(--t-h1-min),      calc(var(--t-h1)      * var(--t-u)), calc(var(--t-h1)      * 1px));
+  --t-size-h2:      clamp(var(--t-h2-min),      calc(var(--t-h2)      * var(--t-u)), calc(var(--t-h2)      * 1px));
+  --t-size-h3:      clamp(var(--t-h3-min),      calc(var(--t-h3)      * var(--t-u)), calc(var(--t-h3)      * 1px));
+  --t-size-lead:    clamp(var(--t-lead-min),    calc(var(--t-lead)    * var(--t-u)), calc(var(--t-lead)    * 1px));
+  --t-size-body:    clamp(var(--t-body-min),    calc(var(--t-body)    * var(--t-u)), calc(var(--t-body)    * 1px));
+  --t-size-body-sm: clamp(var(--t-body-sm-min), calc(var(--t-body-sm) * var(--t-u)), calc(var(--t-body-sm) * 1px));
+  --t-size-caption: clamp(var(--t-caption-min), calc(var(--t-caption) * var(--t-u)), calc(var(--t-caption) * 1px));
+  --t-size-meta:    clamp(var(--t-meta-min),    calc(var(--t-meta)    * var(--t-u)), calc(var(--t-meta)    * 1px));
+
+}
+
+/* ----------------------------------------------------------------------------
+   The roles as classes. A surface sets --t-u to its own design pixel and then
+   anything wearing these classes is set correctly.
+   -------------------------------------------------------------------------- */
+
+.t-display, .t-h1, .t-h2, .t-h3 {
+  font-family: var(--t-display-face);
+  text-wrap: balance;
+}
+
+.t-display {
+  font-size: var(--t-size-display);
+  line-height: var(--t-display-lh);
+  letter-spacing: var(--t-display-ls);
+  font-weight: var(--t-display-w);
+}
+
+.t-h1 {
+  font-size: var(--t-size-h1);
+  line-height: var(--t-h1-lh);
+  letter-spacing: var(--t-h1-ls);
+  font-weight: var(--t-h1-w);
+}
+
+.t-h2 {
+  font-size: var(--t-size-h2);
+  line-height: var(--t-h2-lh);
+  letter-spacing: var(--t-h2-ls);
+  font-weight: var(--t-h2-w);
+}
+
+.t-h3 {
+  font-size: var(--t-size-h3);
+  line-height: var(--t-h3-lh);
+  letter-spacing: var(--t-h3-ls);
+  font-weight: var(--t-h3-w);
+}
+
+/* Lead and body are the rounded face. Caption and meta are NOT: the spec
+   sheet puts both of those in Caveat, so a picture's caption and a small
+   label are written in the same hand as a note in the margin. */
+.t-lead, .t-body, .t-body-sm {
+  font-family: var(--t-body-face);
+}
+.t-caption, .t-meta {
+  font-family: var(--t-hand-face);
+}
+
+.t-lead {
+  font-size: var(--t-size-lead);
+  line-height: var(--t-lead-lh);
+  font-weight: var(--t-lead-w);
+}
+
+.t-body {
+  font-size: var(--t-size-body);
+  line-height: var(--t-body-lh);
+  font-weight: var(--t-body-w);
+}
+
+.t-body-sm {
+  font-size: var(--t-size-body-sm);
+  line-height: var(--t-body-lh);
+  font-weight: var(--t-body-w);
+}
+
+.t-caption {
+  font-size: var(--t-size-caption);
+  line-height: var(--t-caption-lh);
+  font-weight: var(--t-caption-w);
+}
+
+.t-meta {
+  font-size: var(--t-size-meta);
+  line-height: var(--t-meta-lh);
+  letter-spacing: var(--t-meta-ls);
+  font-weight: var(--t-meta-w);
+  /* It used to be set in small capitals with wide tracking. The spec sheet
+     puts it in Caveat with tracking on auto, and a handwritten face does not
+     have small capitals to set it in - so it is written as written. */
+  text-transform: none;
+}
+
+/* an aside pencilled in the margin */
+.t-hand {
+  font-family: var(--t-hand-face);
+  font-size: var(--t-size-lead);
+  line-height: 1.25;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ===========================================================================
+   WHAT THE DRAWN FACE HAS, AND WHAT IT STILL DOES NOT
+
+   Every character in here is drawn by hand and traced from the drawing, so
+   the face never mixes with another one mid-word - EXCEPT for a character it
+   does not contain, because a browser falls back one CHARACTER at a time.
+   That is why this list is kept up to date.
+
+   HAS:  A-Z  a-z  0-9
+         ( ) # $ % @ * + - = / \ £ €
+         ! " ' , . : ; ?  and the curly quotes ‘ ’ “ ”
+
+   STILL MISSING, and the only ones left:
+
+       &      Rapid testing & validation of concepts
+              Information Aggregation & Surveillance
+              User feedback & surveys
+       …      the ellipsis, used in a couple of places
+       – —    en dash and em dash
+       [ ] { } _ |
+
+   Only the ampersand is currently wanted by a heading. Until it is drawn,
+   the choice is between drawing it and rewording the three headings around
+   it. Both are fine; a mixed-face heading is not.
+
+   THE TWO QUOTE MARKS THAT CHANGED. The face used to use one drawing for
+   both the opening and closing single quote, and one for both doubles - so
+   'start again' opened with a closing mark. Each now has its own glyph, and
+   the opening single and closing double are new drawings.
+   =========================================================================== */
+
+

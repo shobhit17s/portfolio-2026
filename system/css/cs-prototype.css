@@ -1,0 +1,396 @@
+﻿/* cs-prototype.css — everything the PrototypeEmbed component looks like.
+
+   This is the ONLY stylesheet that knows about prototypes. Nothing in here
+   reaches outside a .cs-slot, and a prototype's own styling cannot reach in:
+   anything that runs does so inside an iframe, which is a separate document.
+
+   A slot keeps its shape whatever fills it, so a placeholder and the
+   prototype that eventually replaces it occupy exactly the same room and the
+   layout around them never moves. */
+
+/* The slot's own sizing is written with :where(), which gives it no weight at
+   all. A template that wants a slot to be a particular size — the app logo's
+   400 x 400 frame — simply says so, and wins without having to shout. */
+:where(.cs-slot) {
+  --cs-embed-ratio: 16 / 9;
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.cs-slot { position: relative; }
+
+/* Where a slot has been given a fixed area by its template — a picture that
+   fills six rows of the slide grid — it fills that area. Where it has not,
+   it keeps its own aspect ratio instead. */
+:where(.cs-slot) > * { width: 100%; height: 100%; }
+
+/* A slot whose case study asked for a specific shape ("this prototype is
+   16 / 9") keeps that shape instead of stretching to fill the picture area.
+   It sits centred in whatever room the template gave it, letterboxed the way
+   a film is — so the layout around it never moves, and the prototype is never
+   squashed. The slot becomes its own measuring box so the child can be sized
+   against it: as wide as there is room for, but no wider than its own height
+   allows at the requested ratio. */
+.cs-slot--ratio {
+  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.cs-slot--ratio > * {
+  width: min(100cqw, calc(100cqh * (var(--cs-embed-ratio))));
+  height: auto;
+  aspect-ratio: var(--cs-embed-ratio);
+}
+
+/* ---------- a still ---------- */
+.cs-embed--image {
+  /* POSITIONED, so the expand button in the corner is the corner of the
+     PICTURE. Without this the button fell back to the slot, which on a
+     stepped slide is the whole width of the stage - so the button floated
+     a long way out to the right of a drawing that only used the middle
+     third of it. */
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: calc(22 * var(--u, 1px));
+}
+
+.cs-embed--image img,
+.cs-embed-clip img,
+.cs-embed-clip video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A drawing rather than a screenshot: no card, no rounded corner, no drawn
+   outline, and the whole picture kept in view. The slot contributes nothing
+   of its own - what you see is only the drawing, sitting on the page. */
+.cs-embed--image.cs-embed--bare {
+  background: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.cs-embed--bare img {
+  object-fit: contain;
+}
+
+/* ---------- anything that runs, and anything that moves ----------
+   TWO ELEMENTS, and the split matters.
+
+   The OUTER box wears the hand-drawn outline and must NOT clip. The drawn
+   line sits a few pixels outside the box on purpose - that overshoot is what
+   makes it read as drawn rather than ruled - so a box that hid its overflow
+   would cut the line off. That is exactly what used to happen: every
+   prototype on the site was carrying an outline nobody could see.
+
+   The INNER box clips. It owns the rounded corner and it holds whatever must
+   not spill: a poster, a video, or a prototype rendered at its own width and
+   shrunk down. */
+.cs-embed--frame,
+.cs-embed--video {
+  position: relative;
+  display: block;
+  overflow: visible;
+  /* the drawn outline reads in the accent while the box is an invitation... */
+  color: var(--cs-accent-2);
+}
+
+/* ...and in the reading colour once it holds the real thing, so the frame
+   stops competing with the prototype inside it. */
+.cs-embed--frame.is-running { color: var(--cs-text-1); }
+
+.cs-embed-clip {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: calc(22 * var(--u, 1px));
+  background: var(--cs-bg-2);
+}
+
+/* ---------- WHAT A PROTOTYPE LOOKS LIKE BEFORE IT IS RUN ----------
+
+   It used to announce itself: a hatched fill, a drawn outline round it, and
+   a small button in the middle. Three things saying "something goes here",
+   on a slide whose title has already said so. The hatch in particular is the
+   language of an EMPTY SLOT - a drawing that has not arrived - and this is
+   not an empty slot. It is a finished thing waiting to be asked.
+
+   So at rest it is simply the page: the primary background, no hatch, no
+   outline, and one button large enough to be the obvious thing to press.
+
+   None of this is deleted - it is held back while `.is-running` is absent.
+   The moment the prototype loads, the outline is drawn and the frame reads
+   as a frame again, because then there IS something inside it to frame. */
+.cs-embed--frame:not(.is-running) .cs-embed-clip { background: var(--cs-bg-1); }
+.cs-embed--frame:not(.is-running) > .cs-stroke { display: none; }
+.cs-embed--frame:not(.is-running) .cs-embed-cover:not(.has-poster)::before {
+  display: none;
+}
+
+.cs-embed-clip iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--cs-bg-1);
+}
+
+/* A prototype shown at its own drawn width and shrunk to fit. The frame is
+   larger than the box on purpose; the box clips what hangs over. */
+.cs-embed-clip.is-scaled iframe {
+  width: auto;
+  height: auto;
+}
+
+/* The way into the prototype at its real size.
+
+   NOTE the selector. The stroke layer lifts every child of a stroked box
+   above the drawn outline with `[data-cs-stroke] > :not(.cs-stroke)`, which
+   sets position: relative and outranks a plain class. Naming the element
+   (`a.cs-embed-open`) wins that argument; without it this link drops into
+   normal flow and falls out of the bottom of the frame. */
+.cs-embed-clip > button.cs-embed-open {
+  position: absolute;
+  right: calc(14 * var(--u, 1px));
+  bottom: calc(14 * var(--u, 1px));
+  z-index: 3;
+  padding: calc(8 * var(--u, 1px)) calc(16 * var(--u, 1px));
+  border-radius: calc(40 * var(--u, 1px));
+  background: var(--cs-bg-3);
+  /* THIS IS THE ONE THAT DISAPPEARED IN LIGHT MODE. Fire on the pale green
+     surface measured 2.08 to 1. -ink is the same colour levelled until it
+     clears 4.5 against every background the system has. */
+  color: var(--cs-accent-1-ink);
+  font-family: var(--t-body-face);
+  font-size: var(--t-size-meta);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  /* Visible from the start, quietly: a reader should know the prototype can
+     be opened properly without having to discover it by accident. */
+  opacity: 0.72;
+  transition: opacity 200ms var(--cs-ease), transform 200ms var(--cs-ease);
+}
+
+.cs-embed--frame:hover .cs-embed-open,
+.cs-embed-clip > button.cs-embed-open:focus-visible {
+  opacity: 1;
+  transform: translateY(calc(-2 * var(--u, 1px)));
+}
+
+/* ---------- A COLOURED LIGHT WAITS FOR ITS OWN DRAWING ----------
+
+   The persona light uses the portrait as a stencil (see cs-slides.css). The
+   stencil is a SECOND request for the same file, made by the stylesheet, and
+   on a first load it can be asked for before the drawing itself has arrived -
+   a mask with no image yet is a mask that hides everything, and once the
+   layer has been composited that way nothing on the page necessarily makes
+   it paint again. The light was therefore missing until you changed persona,
+   which rebuilt the picture and forced a fresh paint.
+
+   So the picture says when it is ready, and nothing is painted over it until
+   then. By that point the file is in the browser's cache, so the stencil
+   resolves at once. It fades in rather than appearing, which costs nothing
+   and reads better than a snap.
+
+   This is here rather than in cs-slides.css because `is-ready` belongs to
+   every picture on the site, not only to a persona. */
+.cs-embed--image:not(.is-ready) .cs-embed-wash::before,
+.cs-embed--image:not(.is-ready) .cs-embed-wash::after { opacity: 0; }
+
+/* The resting state, before the reader asks for it. It fills the clipping
+   box, which is why the run button sits in the middle of the frame. */
+.cs-embed-cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(18 * var(--u, 1px));
+  padding: calc(26 * var(--u, 1px));
+  text-align: center;
+  background-size: cover;
+  background-position: center;
+}
+
+/* the hatch a slot wears when there is no poster to show */
+.cs-embed-cover:not(.has-poster)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-42deg,
+              currentColor 0 1.2px, transparent 1.2px calc(16 * var(--u, 1px)));
+  opacity: 0.17;
+}
+
+.cs-embed-cover.has-poster::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--cs-bg-1) 55%, transparent);
+}
+
+/* BIGGER, because it is now the only thing on the frame. With the hatch and
+   the outline gone there is nothing else to look at, so the button has to
+   carry the whole invitation on its own - and a control that is the sole
+   point of a large empty area should look like it. */
+.cs-embed-start {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(20 * var(--u, 1px));
+  padding: calc(22 * var(--u, 1px)) calc(44 * var(--u, 1px));
+  border-radius: calc(60 * var(--u, 1px));
+  background: var(--cs-bg-3);
+  color: var(--cs-accent-1-ink);
+  font-family: var(--t-body-face);
+  font-size: var(--t-size-body);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 220ms var(--cs-ease), background-color 220ms;
+}
+
+.cs-embed-start:hover { transform: scale(1.03); }
+
+/* the same triangle the carousels use, so "play" reads the same everywhere */
+.cs-embed-start-mark {
+  width: calc(28 * var(--u, 1px));
+  height: calc(33 * var(--u, 1px));
+  background: var(--cs-accent-1);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.cs-embed-cover-note {
+  position: relative;
+  font-family: var(--t-body-face);
+  font-size: var(--t-size-caption);
+  line-height: var(--t-caption-lh);
+  color: var(--cs-text-1);
+  max-width: 44ch;
+}
+
+@media (max-width: 820px) {
+  .cs-embed--image, .cs-embed-clip { border-radius: 14px; }
+  .cs-slot > * { height: auto; aspect-ratio: var(--cs-embed-ratio); }
+  .cs-slot--ratio { container-type: normal; display: block; }
+  .cs-slot--ratio > * { width: 100%; }
+  .cs-embed-start { padding: 15px 26px; font-size: 0.98rem; gap: 13px; }
+  .cs-embed-start-mark { width: 15px; height: 18px; }
+  .cs-embed-cover-note { font-size: 0.8rem; }
+  .cs-embed-clip > button.cs-embed-open { font-size: 0.72rem; padding: 6px 12px; }
+}
+
+/* ---------- the full-size overlay ----------
+   Where "Open full size" goes. Not a new tab: a page hosted next to the
+   portfolio can refuse to load as a tab of its own, and the reader would get
+   a browser error instead of the work. This fills the window instead. */
+.cs-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  /* a column, because a drawing opened full size carries its caption under
+     it. The close button is positioned absolutely, so it is unaffected. */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--cs-bg-1) 88%, transparent);
+  animation: cs-overlay-in 200ms var(--cs-ease);
+}
+
+@keyframes cs-overlay-in { from { opacity: 0 } to { opacity: 1 } }
+
+.cs-overlay-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: calc(18 * var(--u, 1px));
+  background: var(--cs-bg-1);
+  box-shadow: 0 30px 90px -30px rgba(0, 0, 0, 0.7);
+}
+
+.cs-overlay-stage iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--cs-bg-1);
+}
+
+.cs-overlay-stage.is-scaled iframe { width: auto; height: auto; }
+
+.cs-overlay-close {
+  position: absolute;
+  top: calc(22 * var(--u, 1px));
+  right: calc(26 * var(--u, 1px));
+  padding: calc(9 * var(--u, 1px)) calc(20 * var(--u, 1px));
+  border-radius: calc(40 * var(--u, 1px));
+  background: var(--cs-bg-3);
+  color: var(--cs-accent-1-ink);
+  font-family: var(--t-body-face);
+  font-size: var(--t-size-meta);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+body.cs-overlay-open { overflow: hidden; }
+
+@media (max-width: 820px) {
+  .cs-overlay-close { font-size: 0.74rem; padding: 7px 14px; top: 10px; right: 12px; }
+}
+
+/* The expand button that used to live here is gone - a diagram is read at
+   the size the slide gives it. The overlay styling below stays: the PROTOTYPE
+   still opens full size, and a running page does need a window of its own. */
+
+/* ---------- a drawing in the full-size overlay ----------
+   No arithmetic: the picture may be up to 94% of the window wide and 82%
+   tall and must keep its own proportions. Which of the two it meets first is
+   the browser's problem, and a drawing's shape is nobody else's business. */
+.cs-overlay-stage--image {
+  width: auto;
+  height: auto;
+  max-width: 94vw;
+  max-height: 82vh;
+  background: none;
+  box-shadow: none;
+  display: grid;
+  place-items: center;
+}
+
+.cs-overlay-stage--image img {
+  display: block;
+  max-width: 94vw;
+  max-height: 82vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.cs-overlay-caption {
+  margin: calc(18 * var(--t-u)) auto 0;
+  max-width: 72ch;
+  padding: 0 24px;
+  font-family: var(--t-hand-face);
+  font-size: var(--t-size-caption);
+  line-height: var(--t-caption-lh);
+  color: var(--cs-text-1);
+  text-align: center;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-overlay { animation: none; }
+}
+
+
