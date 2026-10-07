@@ -1,0 +1,38 @@
+﻿/* assets.css — nothing lives here any more, on purpose.
+
+   THIS FILE USED TO HOLD THE TITLE SLIDE'S BIG DRAWING as a CSS background:
+
+       .art-hero-desk { background-image: url('assets/hero-desk.png'); }
+
+   That made it the one picture in the study that did NOT follow the rule.
+   Every other drawing is a named slot you fill by saving a file under the
+   slot's own name; this one needed a line of CSS edited instead.
+
+   It is now slide-01_img-01, an ordinary slot like all the others. Save
+   assets/slide-01_img-01.png and it appears, with nothing to edit.
+
+   ---------------------------------------------------------------------------
+   WHAT THIS FILE IS STILL FOR
+   ---------------------------------------------------------------------------
+   Anything that has to be a CSS background rather than a picture in a slot -
+   a stencil, a texture, a mask. Those must be written as the real property
+   (background-image, mask-image), never routed through a custom property: a
+   url() inside a custom property resolves against whichever stylesheet READS
+   it, which would be the engine's, in another folder entirely.
+
+   Also worth remembering: a data URI in CSS must use single quotes inside a
+   double-quoted url(), or be percent-encoded. A double quote inside a double
+   quote ends the value early and the browser throws the whole declaration
+   away silently.
+
+   THE HERO'S ORNAMENTAL RULE, if you ever want it as a stencil rather than a
+   drawing in slide-01_img-02:
+
+       .fig-hero-rule {
+         -webkit-mask-image: url('assets/hero-rule.svg');
+         mask-image: url('assets/hero-rule.svg');
+         --cs-has-figure: 1;
+       }
+*/
+
+
