@@ -1,0 +1,17 @@
+﻿/* theme.css — this case study's two accents.
+   Three lines per accent; system/css/cs-tokens.css says why. */
+:root {
+  /* MIST */
+  --cs-accent-1:       var(--cs-mist-on-bg);
+  --cs-accent-1-ink:   var(--cs-mist-ink);
+  --cs-accent-1-vivid: var(--cs-mist);         /* fills and tints */
+  --cs-accent-1-on:    var(--cs-on-mist);      /* words ON a fill of it */
+
+  /* STONE */
+  --cs-accent-2:       var(--cs-stone-on-bg);
+  --cs-accent-2-ink:   var(--cs-stone-ink);
+  --cs-accent-2-vivid: var(--cs-stone);
+  --cs-accent-2-on:    var(--cs-on-stone);
+}
+
+

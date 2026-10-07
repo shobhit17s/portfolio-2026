@@ -1,0 +1,23 @@
+﻿/* theme.css — this page's two accents.
+
+   Deliberately NOT the same pair as the industry dashboard: this is the shared,
+   open page, so it reads as its own thing rather than as part of either case
+   study.
+
+   Three lines per accent — see case-studies/industry-dashboard/theme.css, or
+   the long note in system/css/cs-tokens.css, for why. */
+:root {
+  /* SUN */
+  --cs-accent-1:       var(--cs-sun-on-bg);
+  --cs-accent-1-ink:   var(--cs-sun-ink);
+  --cs-accent-1-vivid: var(--cs-sun);         /* fills and tints */
+  --cs-accent-1-on:    var(--cs-on-sun);      /* words ON a fill of it */
+
+  /* WATER */
+  --cs-accent-2:       var(--cs-water-on-bg);
+  --cs-accent-2-ink:   var(--cs-water-ink);
+  --cs-accent-2-vivid: var(--cs-water);
+  --cs-accent-2-on:    var(--cs-on-water);
+}
+
+
