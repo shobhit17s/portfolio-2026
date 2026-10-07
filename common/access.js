@@ -30,7 +30,7 @@ CS.ACCESS = {
      typically works", the pantheon on the yellow planet - is deliberately
      NOT behind it: it is shared background rather than client work, and it
      is what the pantheon and the SME drawer both lean on. */
-  hash: '77d00ec61bd82e30b08ce9d807b31ba0b959c0f78b57aa27e7192019cf70a003',
+  hash: '1926485856f1286c753f72209a51c64b8323b9d2278f23dd660f0d79c6d95dc2',
 
   /* The line shown under the heading on the password screen. */
   note: 'The work behind this page was done for a client, so it travels with ' +
