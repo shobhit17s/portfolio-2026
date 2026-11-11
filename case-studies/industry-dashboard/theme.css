@@ -1,0 +1,27 @@
+﻿/* theme.css — the escape hatch, and nothing else any more.
+
+   THIS STUDY'S TWO COLOURS ARE NOT IN HERE. They are two words on the <html>
+   line of index.html next door:
+
+       data-cs-accent-1="fire"   the primary
+       data-cs-accent-2="forest"   the secondary
+
+   Change a word there and every rule on the page follows. The seven you can
+   choose from, and why the choice lives on the page rather than in a
+   stylesheet, are written out under THE ONE-WORD ACCENT PICKER at the foot
+   of system/css/cs-tokens.css.
+
+   WHAT THIS FILE IS FOR NOW: a colour this study needs that is NOT one of
+   the seven. That should be rare - the seven are the palette - but if it
+   happens, write the selector twice so it outranks the one-word choice, and
+   move all four lines of the accent together:
+
+       :root:root {
+         --cs-accent-1:       #7A4B2A;   -- large text and drawn lines
+         --cs-accent-1-ink:   #5E3620;   -- text at reading size
+         --cs-accent-1-vivid: #8E5A33;   -- fills and tints
+         --cs-accent-1-on:    #FCF9D9;   -- words printed ON a fill of it
+       }
+
+   Nothing is overridden today. */
+
