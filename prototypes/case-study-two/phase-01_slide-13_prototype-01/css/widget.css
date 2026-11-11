@@ -1,0 +1,575 @@
+/* ===========================================================================
+   widget.css — the Performance to Plan widgets, in Salt's structure.
+
+   >>> THERE IS NO COLOUR, NO FONT NAME AND NO SPACING NUMBER IN THIS FILE. <<<
+
+   Every value here is a Salt token out of salt-theme-caraxes.css. That is
+   the whole discipline: swap the theme and these widgets become another
+   bank's, with nothing in here to find and change. If you ever see a hex
+   code or a pixel below, it is a bug.
+
+   The two exceptions are the widget's own OUTER SIZE, which the brief
+   fixes at 1060 x 720, and `border-radius: 999px`, which is the idiom for
+   "fully rounded" rather than a measurement.
+
+   ONE TRAP THIS FILE ALREADY FELL INTO. Salt's spacing scale is
+   25 / 50 / 100 / 200 / 300 / 400 - there is no 150. The first draft of
+   this file asked for `--salt-spacing-150` in six places, and an unknown
+   custom property does not warn: it resolves to nothing, so those six
+   paddings simply vanished. Everything looked almost right, which is the
+   worst way for it to be wrong. If you add a rule here, check the token
+   exists in the theme before trusting what you see.
+   ===========================================================================
+
+   THE SHAPE BOTH CONCEPTS SHARE
+
+       +--------------------------------------------------+
+       |  PERFORMANCE TO PLAN                    [ ] ...  |   head
+       +--------------------------------------------------+
+       |  Currency / Scale            [ Credit case  v ]  |   tools
+       |                                                  |
+       |  the grid                                        |   body
+       |                                                  |
+       |            [] positive   [] negative             |   legend
+       +--------------------------------------------------+
+       |        View latest projection     [ Upload... ]  |   foot
+       +--------------------------------------------------+
+
+   Only the grid differs between them, which is the comparison: everything
+   around it is held still so the arrangement is the only variable.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   THE WIDGET BOX
+   --------------------------------------------------------------------------- */
+.ptp-widget {
+  /* the brief's size. A widget on someone else's page cannot choose its
+     own dimensions, so this is a given rather than a design decision.
+
+     BORDER-BOX, AND THAT IS THE WHOLE POINT OF SAYING IT. Without it the
+     1px outline is added OUTSIDE the 1060, and the widget hands back
+     1062 x 722 - which is the kind of two-pixel lie that only shows up
+     when somebody lays four of these on a grid and the last one wraps.
+     Measured after the fix: exactly 1060 x 720. */
+  box-sizing: border-box;
+
+  /* THE SIZE IS A PAIR OF KNOBS, defaulting to the size it was designed
+     at. On its own the widget is 1060 x 720, exactly as approved. Dropped
+     into a page that has its own idea of how wide a column is - the client
+     dashboard does - that page sets these two and nothing else changes:
+
+         .some-column .ptp-widget { --ptp-w: 100%; --ptp-h: auto; }
+
+     WHY KNOBS RATHER THAN A SECOND COPY OF THE WIDGET. A fork would have
+     to be kept in step with this one by somebody remembering to, and the
+     two would drift the first time a column width changed. */
+  inline-size: var(--ptp-w, 1060px);
+  block-size: var(--ptp-h, 720px);
+
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  /* ONE COLUMN, AND IT IS NOT ALLOWED TO GROW.
+
+     A grid column is `auto` by default, which means "as wide as the
+     widest thing in it". Concept 1's table is deliberately wider than the
+     widget, so that column swelled to the table's width and took the
+     head, the tools and the foot with it - the dropdown, the legend and
+     the Upload button all sailed off the right-hand edge while the box
+     stayed 1060 and clipped them.
+
+     `minmax(0, 1fr)` is the fix and the 0 is the whole of it: it says the
+     column may shrink below its contents, which is what lets the child
+     scroll instead of pushing. */
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-container-primary-borderColor);
+  border-radius: var(--salt-palette-corner-strong);
+
+  font-family: var(--salt-text-fontFamily);
+  color: var(--salt-content-primary-foreground);
+}
+
+/* ---------------------------------------------------------------------------
+   HEAD — the widget's name and its two window controls
+   --------------------------------------------------------------------------- */
+.ptp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--salt-spacing-100);
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  /* THE SAME WHITE AS THE WIDGET UNDER IT. The head used to carry a pale
+     band, which made every widget read as a little window with a title
+     bar; a deck of ten of those is ten title bars competing with the one
+     thing on the page that matters. The rule underneath is enough to say
+     "this is the name of what follows". */
+  background: var(--salt-container-primary-background);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-tertiary-borderColor);
+}
+
+.ptp-head-title {
+  margin: 0;
+  font-size: var(--salt-text-label-fontSize);
+  font-weight: var(--salt-text-fontWeight-strong);
+  letter-spacing: var(--salt-text-label-letterSpacing, 0.04em);
+  text-transform: uppercase;
+  color: var(--salt-content-primary-foreground);
+}
+
+.ptp-head-tools { display: flex; align-items: center; gap: var(--salt-spacing-100); }
+
+/* THE WINDOW CONTROLS ARE BUTTONS, not decoration, so they are focusable
+   and have a name a screen reader can read. They look like the reference
+   because of the icon, not because of a div. */
+.ptp-icon-button {
+  border-radius: var(--salt-palette-corner-weak);
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--salt-size-base);
+  block-size: var(--salt-size-base);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--salt-content-secondary-foreground);
+}
+.ptp-icon-button:hover { color: var(--salt-content-primary-foreground); }
+.ptp-icon-button:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+.ptp-icon-button svg { inline-size: 1em; block-size: 1em; }
+
+/* EVERY INLINE ICON IN THE WIDGET GETS A SIZE, ONCE, HERE.
+
+   An inline <svg> with a viewBox and no width or height collapses to
+   nothing. It does not warn and it leaves no gap - the layout closes over
+   it as if the icon had never been written.
+
+   The caret on the dropdown did exactly that from the first build, and I
+   only found it by measuring the element: it was 0 x 0 in every
+   screenshot I had looked at, and I had looked at a lot of them. A
+   missing thing is much harder to see than a wrong thing.
+
+   So the rule is on the widget rather than on each control that happens
+   to hold an icon today, and the next icon is sized before it is drawn. */
+.ptp-widget svg { inline-size: 1em; block-size: 1em; flex: 0 0 auto; }
+
+/* ---------------------------------------------------------------------------
+   TOOLS — what the figures are in, and which case they belong to
+   --------------------------------------------------------------------------- */
+.ptp-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--salt-spacing-200);
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+}
+
+.ptp-meta {
+  font-size: var(--salt-text-fontSize);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--salt-content-secondary-foreground);
+}
+/* THE DIVIDER BETWEEN THE TWO LABELS IS A BORDER, NOT A PIPE CHARACTER.
+
+   It started as a literal "|" and the contrast walk failed it at 1.83 -
+   correctly, because as far as the browser is concerned it is text, and
+   text has to be readable. But nobody reads it: it is a rule between two
+   labels that happens to be made of a letter.
+
+   So it stops being a letter. A border has no reading requirement to
+   fail, it lines up with the type better than a pipe glyph does, and the
+   markup loses an element and a stray character. */
+.ptp-meta-part + .ptp-meta-part {
+  margin-inline-start: var(--salt-spacing-200);
+  padding-inline-start: var(--salt-spacing-200);
+  border-inline-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                       var(--salt-separable-primary-borderColor);
+}
+
+/* =========================================================================
+   SALT'S DROPDOWN
+   =========================================================================
+
+   A real one: a button that owns a listbox, not a button that looks like
+   it owns one. It opens, it takes the keyboard, it closes when you press
+   Escape or click away, and what it reports is what the widget shows.
+
+   THE PILL BECAME A 2px CORNER with the rest of the controls. Your sketch
+   drew this one with fully rounded ends while the Upload button was a
+   rounded rectangle, so the two disagreed - and you have now set one
+   radius for controls. A pill sitting beside 2px buttons reads as a
+   leftover rather than as a decision, so it joined them. Say the word and
+   the pill comes back; it is one line.
+
+   THE LIST OPENS INSIDE THE WIDGET, which is not a limitation here but a
+   requirement: the widget clips its own overflow (it has to - it is a
+   fixed box on somebody else's page), so a list escaping it would simply
+   be cut off. There is room under the control for all three cases.
+   ========================================================================= */
+.ptp-dropdown-wrap { position: relative; }
+
+.ptp-dropdown {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--salt-spacing-200);
+  min-inline-size: 15rem;
+  block-size: var(--salt-size-base);
+  padding-inline: var(--salt-spacing-200);
+  font: inherit;
+  font-size: var(--salt-text-fontSize);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-editable-background, transparent);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-editable-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+}
+.ptp-dropdown:hover { border-color: var(--salt-actionable-secondary-borderColor); }
+.ptp-dropdown:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+
+/* the caret turns over when the list is open, so the control says which
+   way it will go before you press it */
+.ptp-dropdown-caret { display: inline-grid; transition: transform 120ms ease; }
+.ptp-dropdown[aria-expanded="true"] .ptp-dropdown-caret { transform: rotate(180deg); }
+
+.ptp-listbox {
+  position: absolute;
+  inset-block-start: calc(100% + var(--salt-spacing-100));
+  inset-inline-end: 0;
+  z-index: 5;
+  min-inline-size: 15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--salt-overlayable-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-container-primary-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+  box-shadow: var(--salt-overlayable-shadow);
+}
+.ptp-listbox[hidden] { display: none; }
+
+.ptp-option {
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  font-size: var(--salt-text-fontSize);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  color: var(--salt-content-primary-foreground);
+}
+/* HOVER AND KEYBOARD POSITION ARE THE SAME STATE drawn the same way. A
+   list where the mouse highlights one row and the arrow keys highlight
+   another, differently, is a list you cannot follow. */
+.ptp-option:hover,
+.ptp-option.is-active { background: var(--salt-selectable-background-hover); }
+
+/* THE CHOSEN ONE IS MARKED BY A TICK, not only by a tint. A tint alone is
+   a colour difference, and the one thing a reader must be able to see
+   here is which case these figures belong to. */
+.ptp-option[aria-selected="true"] {
+  background: var(--salt-selectable-background-selected);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.ptp-option[aria-selected="true"]::before { content: '\2713\00a0\00a0'; }
+.ptp-option[aria-selected="false"]::before { content: '\00a0\00a0\00a0'; }
+
+/* ---------------------------------------------------------------------------
+   THE GRID
+   ---------------------------------------------------------------------------
+
+   WHY A REAL <table> AND NOT A GRID OF DIVS. Salt's Data Grid is AG Grid,
+   which is not available here, so this stands in for it — and the thing
+   worth keeping from the real one is that a column of figures is a TABLE:
+   a screen reader announces "Revenue, Q2, 455" only if the row and column
+   headers are headers. A div cannot say that.
+   --------------------------------------------------------------------------- */
+.ptp-body {
+  min-block-size: 0;
+  min-inline-size: 0;      /* the same rule again, one level down */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* NO PADDING ON THE SCROLLER, AND THAT IS NOT A STYLE CHOICE.
+
+   A sticky column sticks to the scrollport's PADDING edge, so with
+   `padding-inline` on this box the scrolling content slides through the
+   strip of padding to the LEFT of the frozen column. On screen that read
+   as fragments of the Q1 header - "INA", "of:" - appearing outside the
+   frozen names, which looks like the table is leaking.
+
+   So the breathing room at the two ends moves onto the cells themselves,
+   where it scrolls with them and leaves nothing for content to hide in. */
+.ptp-grid-wrap {
+  min-block-size: 0;          /* lets the scroller actually scroll */
+  min-inline-size: 0;         /* ... and sideways, see the widget above */
+  overflow: auto;
+}
+
+.ptp-grid tr > :first-child { padding-inline-start: var(--salt-spacing-200); }
+.ptp-grid tr > :last-child  { padding-inline-end:   var(--salt-spacing-200); }
+
+/* HOW TALL A ROW IS, AND WHY IT IS NOT "FILL THE BOX".
+
+   Five rows in a 720-tall widget is awkward either way, and I got it
+   wrong in both directions before settling here.
+
+   LEFT ALONE, the table is about 220 tall and leaves five hundred pixels
+   of nothing under it, with the legend marooned at the bottom of the
+   void. STRETCHED TO FILL, each row becomes 190 pixels tall - a figure
+   floating in the middle of an enormous band, which looks like a bug
+   rather than like air.
+
+   SO THE ROW HAS A COMFORTABLE HEIGHT AND THE SLACK STAYS AT THE BOTTOM,
+   with the legend following the table rather than pinned under the
+   widget. The empty part then reads as the room a sixth and seventh
+   attribute would go in, which is what it actually is - five rows is this
+   data, not this widget's limit. */
+.ptp-grid {
+  inline-size: 100%;
+  /* SEPARATE, NOT COLLAPSE, AND THE FROZEN COLUMN IS THE REASON.
+
+     With `border-collapse: collapse` a cell does not own its edges - the
+     table does - and a `box-shadow` on a cell is clipped away with them.
+     The shadow that marks the frozen column simply did not paint, which
+     is why the half-scrolled column beside it looked glued on.
+
+     `separate` with zero spacing looks identical (every border here is
+     declared on ONE side of a cell, so nothing doubles up) and lets a
+     cell cast a shadow. */
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--salt-text-fontSize);
+  font-variant-numeric: tabular-nums;   /* so columns of figures line up */
+}
+
+.ptp-grid tbody tr { block-size: calc(var(--salt-size-base) * 1.6); }
+
+.ptp-grid th,
+.ptp-grid td {
+  text-align: right;
+  vertical-align: middle;
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-tertiary-borderColor);
+  white-space: nowrap;
+}
+
+/* the attribute names, and the group heads above the quarters */
+.ptp-grid th {
+  font-weight: var(--salt-text-fontWeight);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--salt-content-secondary-foreground);
+}
+/* ONLY THE COLUMN HEADS SIT ON THE BASELINE. A two-line head - PROJECTED
+   over FYE 2025 - has to align with a one-line head beside it, and they
+   only line up along the bottom. A row header is not one of those: it
+   belongs beside its figures, so it stays centred like them. */
+.ptp-grid thead th {
+  vertical-align: bottom;
+  border-block-end-color: var(--salt-separable-primary-borderColor);
+}
+
+/* A ROW HEADER IS LEFT-ALIGNED and everything else is right-aligned,
+   because a name is read from the left and a figure is compared from the
+   right. */
+.ptp-grid th[scope="row"] {
+  text-align: left;
+  color: var(--salt-content-primary-foreground);
+  font-weight: var(--salt-text-fontWeight);
+}
+
+.ptp-sub {
+  display: block;
+  font-size: var(--salt-text-notation-fontSize, 0.75em);
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--salt-content-tertiary-foreground);
+}
+
+/* ---- the figure, and the gap beside or under it ---- */
+.ptp-delta { color: var(--salt-content-secondary-foreground); }
+
+/* A WASHED CELL. The colour says significant; WHICH colour says whether
+   the gap is welcome. Both are content-sentiment tokens — see the long
+   note in the theme for why these are not the status ones. */
+.ptp-cell--positive { background: var(--salt-content-positive-background); }
+.ptp-cell--negative { background: var(--salt-content-negative-background); }
+
+/* A QUARTER NOT YET REPORTED. Drawn, and drawn as nothing, so an empty
+   cell can never be mistaken for a zero. */
+.ptp-na { color: var(--salt-content-tertiary-foreground); }
+
+/* ---------------------------------------------------------------------------
+   CONCEPT 1 — a block of three columns per quarter, scrolling sideways
+   ---------------------------------------------------------------------------
+   The attribute column is frozen because it is the only thing that tells
+   you which row you are reading; scroll it away and every figure loses its
+   name. Everything else travels.
+   --------------------------------------------------------------------------- */
+.ptp-grid--blocks th[scope="row"],
+.ptp-grid--blocks thead th:first-child {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  background: var(--salt-container-primary-background);
+  /* THE FROZEN EDGE IS A RULE, NOT A SHADOW: the same grey as every other
+     divider in the table, drawn at 2px instead of 1. Twice the weight is
+     enough to say "this column is a different kind of thing" without
+     introducing a second visual language for one edge.
+
+     IT IS STILL A box-shadow RATHER THAN A border, which sounds like a
+     contradiction and is not. A border on a sticky cell takes part in the
+     table's own layout and would widen the column; a shadow with no blur
+     and no spread paints exactly the same 2px bar and costs no width. */
+  box-shadow: var(--salt-size-fixed-200) 0 0
+              var(--salt-separable-secondary-borderColor);
+}
+
+/* THERE IS MORE TO THE RIGHT, AND THE WIDGET HAS TO SAY SO.
+
+   Four quarters of three columns do not fit in 1060, which is this
+   arrangement's real cost and the thing the comparison is for. A column
+   simply clipped at the edge reads as a rendering fault; a shadow that
+   appears only while there is something behind it reads as "keep going".
+
+   THE TRICK IS `background-attachment`. The two white panels are `local`,
+   so they travel with the content and slide out of the way; the two
+   shadows are `scroll`, so they stay pinned to the edges. At the start of
+   the scroll the left panel covers the left shadow exactly; move and it
+   uncovers. Nothing has to listen to a scroll event. */
+.ptp-grid--blocks {
+  background:
+    linear-gradient(to right, var(--salt-container-primary-background) 30%,
+                    transparent) left   / 2.5em 100% no-repeat local,
+    linear-gradient(to left,  var(--salt-container-primary-background) 30%,
+                    transparent) right  / 2.5em 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%,
+                    var(--salt-overlayable-scrim), transparent)
+                    left  / 0.6em 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%,
+                    var(--salt-overlayable-scrim), transparent)
+                    right / 0.6em 100% no-repeat scroll;
+}
+
+/* the rule that separates one quarter's block from the next */
+.ptp-grid--blocks .ptp-block-start {
+  border-inline-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                       var(--salt-separable-secondary-borderColor);
+}
+
+/* ---------------------------------------------------------------------------
+   CONCEPT 3 — one projected column, then the quarters under one head
+   ---------------------------------------------------------------------------
+   The cell holds the figure and, where the gap is significant, the gap
+   beside it. A quiet quarter shows the figure alone, so the eye finds the
+   marked ones by there being something extra there as well as by colour —
+   which is what keeps it readable for someone who cannot see the wash.
+   --------------------------------------------------------------------------- */
+.ptp-grid--quarters .ptp-value { display: inline-block; min-inline-size: 3.5em; }
+.ptp-grid--quarters .ptp-delta { margin-inline-start: var(--salt-spacing-200); }
+
+.ptp-grid--quarters .ptp-plan {
+  border-inline-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                     var(--salt-separable-secondary-borderColor);
+}
+
+/* ---------------------------------------------------------------------------
+   LEGEND
+   --------------------------------------------------------------------------- */
+.ptp-legend {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--salt-spacing-300);
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  font-size: var(--salt-text-notation-fontSize, 0.8125rem);
+  color: var(--salt-content-secondary-foreground);
+}
+.ptp-legend-item { display: inline-flex; align-items: center; gap: var(--salt-spacing-100); }
+.ptp-swatch {
+  inline-size: var(--salt-size-fixed-200);
+  block-size: var(--salt-size-fixed-200);
+  inline-size: 1em; block-size: 1em;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+}
+.ptp-swatch--positive { background: var(--salt-content-positive-background); }
+.ptp-swatch--negative { background: var(--salt-content-negative-background); }
+
+/* ---------------------------------------------------------------------------
+   FOOT — the two actions
+   ---------------------------------------------------------------------------
+   THE TEAL IS ONLY HERE. Your instruction was CTAs only, so the accent
+   appears on these two controls and nowhere else on the widget: not on the
+   head band, not on a row, not on a figure. Everything else is neutral or
+   a sentiment colour.
+   --------------------------------------------------------------------------- */
+.ptp-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--salt-spacing-200);
+  /* THE SAME PADDING THE PLAIN WIDGETS USE IN THEIR FOOTERS (see
+     `.cd-widget-foot`), which is what makes this band the same height as
+     theirs. It was the tighter 100/200 before, and in a deck where every
+     other footer is taller the odd one out reads as a mistake rather
+     than as emphasis. */
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  background: var(--salt-container-primary-background);
+  border-block-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                      var(--salt-separable-tertiary-borderColor);
+}
+
+.ptp-button {
+  border-radius: var(--salt-palette-corner-weak);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--salt-spacing-100);
+  block-size: var(--salt-size-base);
+  padding-inline: var(--salt-spacing-200);
+  font: inherit;
+  font-size: var(--salt-text-fontSize);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) transparent;
+}
+.ptp-button:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+.ptp-button svg { inline-size: 1em; block-size: 1em; }
+
+/* the quieter of the two: a link with an icon, as the reference draws it */
+.ptp-button--ghost {
+  background: none;
+  color: var(--salt-actionable-secondary-foreground,
+               var(--salt-content-accented-foreground));
+}
+.ptp-button--ghost:hover { text-decoration: underline; }
+
+/* the filled one */
+.ptp-button--cta {
+  background: var(--salt-actionable-cta-background);
+  color: var(--salt-actionable-cta-foreground);
+}
+.ptp-button--cta:hover { background: var(--salt-actionable-cta-background-hover); }
+.ptp-button--cta:active { background: var(--salt-actionable-cta-background-active); }

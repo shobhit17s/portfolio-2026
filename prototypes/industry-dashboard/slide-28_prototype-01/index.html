@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Key Industry Metrics — CreditRisk</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap">
+
+<!-- THE LOOK IS ONE FILE. Every colour and every size on this screen comes
+     out of salt-theme-caraxes.css; the four stylesheets after it name tokens
+     and nothing else. It is the same theme file the case comparison and the
+     client dashboard use, copied rather than linked so this folder can be
+     renamed and moved on its own. -->
+<link rel="stylesheet" href="css/salt-theme-caraxes.css">
+<link rel="stylesheet" href="css/shell.css">
+<link rel="stylesheet" href="css/views.css">
+<link rel="stylesheet" href="css/drawer.css">
+<link rel="stylesheet" href="css/coach.css">
+</head>
+
+<body class="salt-theme" data-mode="light" data-density="medium">
+
+<!-- THE STAGE. The design is drawn at its true 1440 x 1024 and scaled to
+     whatever room it is given, keeping its shape exactly. See js/fit.js. -->
+<div class="fit-stage" id="kim-stage" data-fit-w="1440" data-fit-h="1024">
+<div class="kim-frame fit-frame" id="kim-frame">
+
+  <!-- ================= THE APP BAR =================
+       Carried over from the case comparison prototype unchanged, except
+       that PORTFOLIOS is the current page rather than ANALYZE.
+       THREE COLUMNS, NOT A ROW: `1fr auto 1fr` puts the nav in the true
+       centre of the bar whatever the brand and the account tools weigh. -->
+  <header class="kim-appbar" id="kim-appbar" data-salt-surface="accented">
+    <span class="kim-brand" id="kim-brand">CreditRisk</span>
+
+    <nav class="kim-nav" id="kim-nav" aria-label="Main">
+      <button type="button" class="kim-navitem" id="kim-nav-surveillance">Surveillance</button>
+      <button type="button" class="kim-navitem" id="kim-nav-clients">Clients</button>
+      <button type="button" class="kim-navitem" id="kim-nav-portfolios" aria-current="page">Portfolios
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+      <button type="button" class="kim-navitem" id="kim-nav-create">Create &amp; manage
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+      <button type="button" class="kim-navitem" id="kim-nav-analyze">Analyze
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+    </nav>
+
+    <div class="kim-appbar-right" id="kim-appbar-right">
+      <div class="kim-search" id="kim-globalsearch">
+        <input type="search" id="kim-globalsearch-input" placeholder="Global search" aria-label="Global search">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+      </div>
+      <button type="button" class="kim-iconbtn" id="kim-mode" aria-label="Switch between light and dark">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z"/></svg>
+      </button>
+      <button type="button" class="kim-iconbtn" id="kim-account" aria-label="Your account">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="5.5" r="2.6"/><path d="M2.8 14c.6-2.8 2.7-4.2 5.2-4.2s4.6 1.4 5.2 4.2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= THE PAGE BAND =================
+       The product's own title on the left, its own second-level nav on the
+       right, exactly as your sheets draw it. -->
+  <div class="kim-pageband" id="kim-pageband">
+    <h1 class="kim-pagetitle" id="kim-pagetitle">Key Industry Metrics (KIMs)</h1>
+    <nav class="kim-pagenav" id="kim-pagenav" aria-label="Section">
+      <button type="button" class="kim-pagenav-item" id="kim-pagenav-home" aria-current="page">Home</button>
+      <button type="button" class="kim-pagenav-item" id="kim-pagenav-support">Support
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ================= THE BODY ================= -->
+  <div class="kim-body" id="kim-body">
+
+    <!-- ---------- THE VIEW SELECTOR ---------- -->
+    <aside class="kim-panel" id="kim-panel" aria-label="View selector">
+
+      <!-- THE HEAD IS TWO THINGS, NOT THREE: the name on the left, the
+           controls on the right, and `auto` between them. Written as three
+           flex children the two buttons could drift apart as the type
+           changed; in one box they travel together. -->
+      <div class="kim-panel-head" id="kim-panel-head">
+        <h2 class="kim-panel-title" id="kim-panel-title">View Selector</h2>
+
+        <div class="kim-right-controls" id="kim-right-controls">
+        <div class="kim-menuwrap">
+          <button type="button" class="kim-btn kim-btn--secondary kim-groupby" id="kim-groupby"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="kim-groupby-menu">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 4h9M2 8h6M2 12h3M12.5 6v7M10.5 11l2 2 2-2"/></svg>
+            <span id="kim-groupby-label">Group by</span>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+          </button>
+          <div class="kim-menu" id="kim-groupby-menu" role="menu" hidden>
+            <button type="button" class="kim-menu-item" role="menuitem" data-kim-value="favorites">Favorites</button>
+            <button type="button" class="kim-menu-item" role="menuitem" data-kim-value="industry">Industries (L1)</button>
+            <button type="button" class="kim-menu-item" role="menuitem" data-kim-value="country">Country of Assets</button>
+          </div>
+          <!-- NUDGE 1 of 4 lives here, inside the control it points at -->
+          <div class="kim-coach kim-coach--below" id="kim-coach-1" role="status" hidden>
+            <p class="kim-coach-step">1 of 4</p>
+            <p class="kim-coach-says">Change how the sub-industries are grouped — try <b>Country of Assets</b>.</p>
+            <button type="button" class="kim-coach-skip" data-kim-skip>Skip</button>
+          </div>
+        </div>
+
+        <button type="button" class="kim-iconbtn kim-panel-collapse" id="kim-panel-collapse"
+                aria-label="Collapse the view selector" aria-expanded="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M9.5 3.5L5 8l4.5 4.5M13 3.5L8.5 8l4.5 4.5"/></svg>
+        </button>
+        </div>
+      </div>
+
+      <div class="kim-panel-body" id="kim-panel-body">
+        <button type="button" class="kim-overview-item" id="kim-overview-item">Overview</button>
+
+        <div class="kim-field kim-subsearch" id="kim-subsearch">
+          <input type="search" id="kim-subsearch-input" placeholder="Search sub-industry"
+                 aria-label="Search sub-industry">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+        </div>
+
+        <p class="kim-panel-hint" id="kim-panel-hint">Select a sub-industry</p>
+        <div class="kim-grouplist" id="kim-grouplist"></div>
+      </div>
+    </aside>
+
+    <!-- THE RAIL THAT IS LEFT BEHIND WHEN THE PANEL IS COLLAPSED. It is
+         always in the page rather than being added and removed, because a
+         thing that does not exist cannot fade in. -->
+    <div class="kim-rail" id="kim-rail">
+      <button type="button" class="kim-iconbtn" id="kim-panel-expand"
+              aria-label="Open the view selector">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M6.5 3.5L11 8l-4.5 4.5M3 3.5L7.5 8 3 12.5"/></svg>
+      </button>
+    </div>
+
+    <!-- ---------- THE MAIN CARD ---------- -->
+    <main class="kim-main" id="kim-main">
+      <div class="kim-card" id="kim-card">
+
+        <!-- the KIM search, which owns the top band of the card -->
+        <div class="kim-searchrow" id="kim-searchrow">
+          <div class="kim-field kim-kimsearch" id="kim-kimsearch">
+            <input type="search" id="kim-kimsearch-input" autocomplete="off"
+                   placeholder="Search KIMs (eg: Steel PPI, Inventory etc.)"
+                   aria-label="Search KIMs" aria-expanded="false"
+                   aria-controls="kim-kimsearch-suggest" role="combobox">
+            <button type="button" class="kim-field-clear" id="kim-kimsearch-x"
+                    aria-label="Clear the search" hidden>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+            </button>
+            <svg class="kim-field-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+            <ul class="kim-suggest" id="kim-kimsearch-suggest" role="listbox" hidden></ul>
+          </div>
+
+          <button type="button" class="kim-btn kim-btn--link" id="kim-kimsearch-clear" hidden>Clear search</button>
+
+          <!-- NUDGE 4 of 4 -->
+          <div class="kim-coach kim-coach--below kim-coach--start" id="kim-coach-4" role="status" hidden>
+            <p class="kim-coach-step">4 of 4</p>
+            <p class="kim-coach-says">Search for a KIM to see every sub-industry it drives.</p>
+            <button type="button" class="kim-coach-skip" data-kim-skip>Skip</button>
+          </div>
+        </div>
+
+        <!-- the title band -->
+        <header class="kim-viewhead" id="kim-viewhead">
+          <h2 class="kim-view-title" id="kim-view-title">Overview of Sub-Industries</h2>
+          <span class="kim-view-count" id="kim-view-count"></span>
+
+          <div class="kim-view-tools" id="kim-view-tools">
+            <label class="kim-switch" id="kim-matonly-wrap">
+              <input type="checkbox" id="kim-matonly" checked>
+              <span class="kim-switch-box" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3.5 8.5l3 3 6-6.5"/></svg>
+              </span>
+              <span class="kim-switch-says">Show only material moves</span>
+            </label>
+
+            <div class="kim-segmented" id="kim-layout" role="group" aria-label="Card or list">
+              <button type="button" class="kim-segbtn" id="kim-layout-grid" aria-pressed="true" aria-label="Cards">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2" y="2" width="5" height="5"/><rect x="9" y="2" width="5" height="5"/><rect x="2" y="9" width="5" height="5"/><rect x="9" y="9" width="5" height="5"/></svg>
+              </button>
+              <button type="button" class="kim-segbtn" id="kim-layout-list" aria-pressed="false" aria-label="List">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+              </button>
+            </div>
+
+            <div class="kim-menuwrap" id="kim-download-wrap" hidden>
+              <button type="button" class="kim-btn kim-btn--secondary" id="kim-download"
+                      aria-haspopup="true" aria-expanded="false" aria-controls="kim-download-menu">
+                Download
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+              </button>
+              <div class="kim-menu kim-menu--end" id="kim-download-menu" role="menu" hidden>
+                <button type="button" class="kim-menu-item" role="menuitem">Download as CSV</button>
+                <button type="button" class="kim-menu-item" role="menuitem">Download as Excel</button>
+                <button type="button" class="kim-menu-item" role="menuitem">Download chart pack (PDF)</button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- the view itself -->
+        <div class="kim-view" id="kim-view">
+
+          <!-- 1 · THE OVERVIEW -->
+          <section class="kim-view-pane" id="kim-view-overview" aria-labelledby="kim-view-title">
+            <div class="kim-cardgroups" id="kim-cardgroups"></div>
+          </section>
+
+          <!-- 2 · ONE SUB-INDUSTRY -->
+          <section class="kim-view-pane" id="kim-view-sub" aria-labelledby="kim-view-title" hidden>
+            <div class="kim-gridwrap" id="kim-gridwrap">
+              <div class="kim-gridscroll" id="kim-grid-scroll">
+                <table class="kim-grid" id="kim-grid"></table>
+              </div>
+
+              <div class="kim-colswrap" id="kim-colswrap">
+                <button type="button" class="kim-colsbtn" id="kim-columns-btn"
+                        aria-haspopup="true" aria-expanded="false" aria-controls="kim-columns-menu">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11"/><path d="M6.2 2.5v11M9.8 2.5v11"/></svg>
+                  <span class="kim-colsbtn-says">Columns</span>
+                </button>
+                <div class="kim-menu kim-menu--cols" id="kim-columns-menu" role="menu" hidden></div>
+              </div>
+            </div>
+
+            <div class="kim-legendrow" id="kim-legendrow">
+              <!-- ONE ENTRY, NOT TWO. A legend that names the absence of a
+                   thing as well as the thing is naming every cell on the
+                   grid; "no material movement" is what a plain row already
+                   says by being plain. -->
+              <ul class="kim-legend" id="kim-legend">
+                <li><span class="kim-dot kim-dot--material" aria-hidden="true"></span>Material Movement</li>
+              </ul>
+              <div class="kim-impact" id="kim-impact-scale">
+                <span class="kim-impact-says">Impact on sub-industry:</span>
+                <span class="kim-impact-bar" aria-hidden="true"></span>
+                <span class="kim-impact-ends"><b>Positive</b><b>Negative</b></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3 · ONE KIM, AND WHAT IT DRIVES -->
+          <section class="kim-view-pane" id="kim-view-metric" aria-labelledby="kim-view-title" hidden>
+            <div class="kim-gridwrap kim-gridwrap--one">
+              <div class="kim-gridscroll" id="kim-metric-scroll">
+                <table class="kim-grid" id="kim-metric-row"></table>
+              </div>
+            </div>
+
+            <ul class="kim-legend kim-legend--end">
+              <li><span class="kim-dot kim-dot--material" aria-hidden="true"></span>Material Movement</li>
+            </ul>
+
+            <div class="kim-corr">
+              <section class="kim-corr-side" id="kim-corr-neg">
+                <h3 class="kim-corr-title">Negatively Correlated Sub-Industries</h3>
+                <table class="kim-corr-table"></table>
+              </section>
+              <section class="kim-corr-side" id="kim-corr-pos">
+                <h3 class="kim-corr-title">Positively Correlated Sub-Industries</h3>
+                <table class="kim-corr-table"></table>
+              </section>
+            </div>
+          </section>
+
+          <!-- 4 · WAITING -->
+          <div class="kim-loading" id="kim-loading" hidden>
+            <svg class="kim-spinner" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+              <circle cx="24" cy="24" r="18" opacity="0.18"/>
+              <path d="M24 6a18 18 0 0 1 18 18"/>
+            </svg>
+            <p class="kim-loading-says" id="kim-loading-says">Loading data…</p>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+<!-- ================= THE TREND DRAWER =================
+     IT IS INSIDE THE SCALED FRAME, and that is deliberate. A dialog that
+     belongs to the whole window — the case comparison's setup modal — sits
+     outside the canvas so it is never shrunk with it. This one belongs to
+     the SCREEN it opens from, being the metric's own panel, so it is drawn
+     inside the 1440 x 1024 canvas and scales with everything else. -->
+<div class="kim-scrim" id="kim-scrim" hidden></div>
+<aside class="kim-drawer" id="kim-drawer" role="dialog" aria-modal="true"
+       aria-labelledby="kim-drawer-title" hidden>
+  <div class="kim-drawer-top">
+    <p class="kim-drawer-crumb" id="kim-drawer-crumb"></p>
+    <button type="button" class="kim-iconbtn" id="kim-drawer-close" aria-label="Close">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg>
+    </button>
+  </div>
+  <h2 class="kim-sr" id="kim-drawer-title">Metric trend</h2>
+  <div class="kim-drawer-body" id="kim-drawer-body"></div>
+
+  <!-- THE DRAWER'S OWN WAIT. The panel opens at once and says it is
+       fetching, rather than opening empty or — worse — opening late. -->
+  <div class="kim-loading kim-drawer-loading" id="kim-drawer-loading" hidden>
+    <svg class="kim-spinner" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+      <circle cx="24" cy="24" r="18" opacity="0.18"/>
+      <path d="M24 6a18 18 0 0 1 18 18"/>
+    </svg>
+    <p class="kim-loading-says">Loading trend…</p>
+  </div>
+</aside>
+</div>
+</div>
+
+<script src="js/fit.js"></script>
+<script src="data/kims.js"></script>
+<script src="js/core.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/panel.js"></script>
+<script src="js/views.js"></script>
+<script src="js/drawer.js"></script>
+<script src="js/coach.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

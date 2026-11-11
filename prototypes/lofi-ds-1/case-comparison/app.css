@@ -1,0 +1,60 @@
+﻿/* app.css — only what is true of THIS prototype.
+
+   Almost empty on purpose: anything that wants to live here is usually
+   the design system missing a block. */
+#cc-preview { display: grid; gap: var(--lofi-s4); }
+#cc-preview .lofi-table { font-size: var(--lofi-t-xs); }
+#cc-preview h4 {
+  font-family: var(--lofi-face-label); text-transform: uppercase;
+  letter-spacing: var(--lofi-track); font-size: var(--lofi-t-md); margin: 0;
+}
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+.cc-delta {
+  display: block;
+  margin-top: 1px;
+  font-size: var(--lofi-t-xs);
+  color: var(--lofi-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+/* in a washed cell the wash already carries the meaning, so the delta
+   stops being the quiet one and joins the figure */
+.lofi-cell--pos .cc-delta,
+.lofi-cell--neg .cc-delta { color: var(--lofi-ink); }
+
+/* ---- THE SETUP MODAL'S FIELDS NEED AIR ----
+
+   Three labelled dropdowns stacked with no gap put each label hard
+   against the field above it, so "COMPARE TO" reads as a caption on the
+   Base case control rather than as the name of its own. A label belongs
+   to what is UNDER it, and the only thing that says so is the space. */
+#cc-setup .lofi-modal-body {
+  display: flex;
+  flex-direction: column;
+
+/* ---- A CELL THAT CARRIES TWO THINGS ----
+
+   The sheet of 3 November puts the figure and the gap in one cell, the
+   figure on top. They are not equals: the figure is what the company
+   does, the delta is a reading of it against another column. So the
+   delta is set smaller and quieter, which lets the eye run down a column
+   of figures without the percentages shouting over them - and still
+   find the percentage the moment it wants it. */
+.cc-fig {
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+.cc-delta {
+  display: block;
+  margin-top: 1px;
+  font-size: var(--lofi-t-xs);
+  color: var(--lofi-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+/* in a washed cell the wash already carries the meaning, so the delta
+   stops being the quiet one and joins the figure */
+.lofi-cell--pos .cc-delta,
+.lofi-cell--neg .cc-delta { color: var(--lofi-ink); }
+
+

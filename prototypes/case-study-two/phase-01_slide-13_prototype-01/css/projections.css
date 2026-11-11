@@ -1,0 +1,1177 @@
+/* ===========================================================================
+   app.css — the Salt version of the case comparison flow.
+
+   >>> NO COLOUR AND NO FONT NAME IN THIS FILE. <<<
+   Every one is a Salt token out of salt-theme-caraxes.css. The only raw
+   numbers are the frame's 1440 x 1024, which the brief fixes, and a short
+   list of layout constants named at the top - things the reference sets
+   by eye rather than by scale.
+
+   THE FIVE SCREENS, and which of them is which pane:
+
+       1  Latest projection   #cc-pane-latest      the ledger + Actions
+       2  Projection inventory #cc-pane-inventory  saved projections
+       3  Setup parameters    #cc-setup            the modal, over a scrim
+       4  Loader              #cc-loading          inside the results pane
+       5  Results             #cc-result           the grouped grid
+
+   Four and five share a pane because they are one tab: the loader is what
+   that tab shows while it has nothing to show yet.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   THE STAGE — a fixed canvas that scales, never a page that reflows
+   ---------------------------------------------------------------------------
+   See js/fit.js. The frame is always drawn at 1440 x 1024 and the whole
+   thing is scaled as one object, the way a slide is scaled, so every
+   proportion is exactly as drawn whatever window it is opened in.
+   --------------------------------------------------------------------------- */
+html, body { block-size: 100%; margin: 0; overflow: hidden; }
+
+.fit-stage {
+  position: fixed; inset: 0;
+  overflow: hidden;
+  background: var(--salt-container-secondary-background);
+}
+.fit-frame {
+  position: absolute; inset-block-start: 0; inset-inline-start: 0;
+  transform-origin: top left;
+  transform: translate(var(--fit-x, 0px), var(--fit-y, 0px)) scale(var(--fit-k, 1));
+}
+
+/* ---------------------------------------------------------------------------
+   THE FRAME
+   --------------------------------------------------------------------------- */
+.cc-frame {
+  /* the layout constants, all of them, in one place */
+  --cc-gutter: 24px;    /* the card's inset from the frame on every side */
+  --cc-pad:    24px;    /* the card's own inner padding */
+  --cc-gap:    24px;    /* between the bands of a pane */
+
+  box-sizing: border-box;
+  inline-size: 1440px;
+  block-size: 1024px;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  overflow: hidden;
+  background: var(--salt-container-secondary-background);
+  color: var(--salt-content-primary-foreground);
+  font-family: var(--salt-text-fontFamily);
+  font-size: var(--salt-text-fontSize);
+}
+.cc-frame *, .cc-frame *::before, .cc-frame *::after { box-sizing: border-box; }
+
+/* AN INLINE <svg> WITH A viewBox AND NO WIDTH OR HEIGHT HAS NO SIZE OF ITS
+   OWN - it STRETCHES to fill whatever box it is in, so a 16px chevron
+   quietly becomes a 300px chevron. Tying every icon to the text size
+   around it is the one rule that cannot be forgotten per-icon. */
+.cc-frame svg, .cc-modal svg { inline-size: 1em; block-size: 1em; flex: 0 0 auto; }
+
+.cc-sr {
+  position: absolute; inline-size: 1px; block-size: 1px;
+  padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   THE APP BAR
+   ---------------------------------------------------------------------------
+   `data-salt-surface="accented"` swaps the token VALUES underneath this
+   element without any rule in here changing: the bar asks for
+   `container-primary-background` exactly as the page does and gets the
+   colour that belongs on teal. That is Salt's nested-provider pattern.
+   --------------------------------------------------------------------------- */
+.cc-appbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--salt-spacing-300);
+  padding-inline: var(--salt-spacing-300);
+  block-size: calc(var(--salt-size-base) + var(--salt-spacing-300));
+  background: var(--salt-container-primary-background);
+  color: var(--salt-content-primary-foreground);
+}
+.cc-brand {
+  font-weight: var(--salt-text-fontWeight-strong);
+  letter-spacing: 0.02em;
+}
+.cc-nav { display: flex; align-items: center; gap: var(--salt-spacing-100); justify-self: center; }
+.cc-navitem {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-100);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  cursor: pointer; color: inherit; background: none;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) transparent;
+  border-radius: var(--salt-palette-corner-weak);
+}
+.cc-navitem:hover { background: var(--salt-selectable-background-hover); }
+
+/* ON THE TEAL BAR the selected pill is CUT OUT of the bar rather than
+   washed onto it: a white fill with the bar's own teal in it. The
+   accented surface names both halves per mode, so this rule says no
+   colour and cannot drift out of step with the bar behind it. */
+.cc-navitem[aria-current="page"] {
+  background: var(--salt-target-background-selected);
+  color: var(--salt-selectable-foreground-selected);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.cc-navitem[aria-current="page"]:hover { background: var(--salt-target-background-selected); }
+
+.cc-appbar-right { display: flex; align-items: center; gap: var(--salt-spacing-200); justify-self: end; }
+.cc-search {
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  inline-size: 17rem; block-size: var(--salt-size-base);
+  padding-inline: var(--salt-spacing-200);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) currentColor;
+  border-radius: 999px;
+}
+.cc-search input {
+  flex: 1 1 auto; min-inline-size: 0;
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  color: inherit; background: none; border: none; outline: none;
+}
+.cc-search input::placeholder { color: inherit; opacity: 1; }
+
+.cc-iconbtn {
+  display: inline-grid; place-items: center;
+  inline-size: var(--salt-size-base); block-size: var(--salt-size-base);
+  padding: 0; cursor: pointer; color: inherit; background: none;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) transparent;
+  border-radius: 999px;
+}
+.cc-iconbtn:hover { background: var(--salt-selectable-background-hover); }
+
+/* ---------------------------------------------------------------------------
+   THE PAGE BAND
+   --------------------------------------------------------------------------- */
+.cc-pageband {
+  display: flex; align-items: center;
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  background: var(--salt-container-primary-background);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-secondary-borderColor);
+}
+.cc-pagetitle {
+  margin: 0;
+  font-size: var(--salt-text-h2-fontSize, 1.25rem);
+  font-weight: var(--salt-text-fontWeight-strong);
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------------------
+   THE CARD — one bordered box holding every pane, as the reference draws it
+   --------------------------------------------------------------------------- */
+.cc-card {
+  margin: var(--cc-gutter);
+  padding: var(--cc-pad);
+  min-block-size: 0;
+  /* THE CLIENT LOADER'S PANEL IS MEASURED FROM HERE, which is why the card
+     is a positioned box. Row 1 is the client band, row 2 the tabs, row 3
+     whichever pane is showing. */
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: var(--cc-gap);
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-container-primary-borderColor);
+  border-radius: var(--salt-palette-corner-strong);
+}
+
+/* ---- the tab strip ---- */
+/* EVERY CHILD OF THE CARD NAMES ITS OWN ROW. The veil is placed across two
+   of them on purpose, and an explicitly placed item makes the grid stop
+   guessing where the rest go - without this, the auto-placed tabs and panes
+   step around the veil instead of sitting under it. */
+.cc-tabs {
+  grid-row: 2; grid-column: 1;
+  display: flex; gap: var(--salt-spacing-300);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-tertiary-borderColor);
+}
+.cc-tab {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-200);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  padding: var(--salt-spacing-200) 0;
+  cursor: pointer;
+  color: var(--salt-content-secondary-foreground);
+  background: none; border: none;
+  border-block-end: var(--salt-size-fixed-200) var(--salt-borderStyle-solid) transparent;
+  margin-block-end: calc(-1 * var(--salt-size-fixed-100));
+}
+.cc-tab:hover { color: var(--salt-content-primary-foreground); }
+.cc-tab[aria-selected="true"] {
+  color: var(--salt-content-primary-foreground);
+  font-weight: var(--salt-text-fontWeight-strong);
+  border-block-end-color: var(--salt-actionable-cta-background);
+}
+.cc-tab:focus-visible, .cc-navitem:focus-visible, .cc-iconbtn:focus-visible,
+.cc-btn:focus-visible, .cc-menu-item:focus-visible, .cc-switch:focus-visible,
+.cc-select:focus-visible, .cc-multi-trigger:focus-visible, .cc-multi-item:focus-visible,
+.cc-tabclose:focus-visible, .cc-group-toggle:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid) var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+
+/* A TAB CANNOT CONTAIN A BUTTON if the tab is itself a button - nested
+   buttons are not allowed and behave unpredictably. So the closable tab
+   is a <div role="tab">, which is the same thing to a screen reader and
+   can hold a real close button. */
+.cc-tab--closable { padding-inline-end: 0; }
+.cc-tabclose {
+  display: inline-grid; place-items: center;
+  inline-size: 1.25em; block-size: 1.25em; padding: 0;
+  cursor: pointer; color: var(--salt-content-secondary-foreground);
+  background: none; border: none; border-radius: var(--salt-palette-corner-weak);
+}
+.cc-tabclose:hover { color: var(--salt-content-primary-foreground); }
+
+/* ---- a pane ---- */
+.cc-pane {
+  grid-row: 3; grid-column: 1;
+  min-block-size: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: var(--cc-gap);
+}
+.cc-pane[hidden] { display: none; }
+#cc-pane-inventory { grid-template-rows: 1fr; }
+
+/* THE ONLY THING THAT SCROLLS is the body of a pane. `min-block-size: 0`
+   is the load-bearing part: a grid row refuses to shrink below its
+   content unless told it may, and without it the card would grow to fit
+   the whole ledger and the frame would overflow. */
+.cc-scroll { min-block-size: 0; overflow: auto; }
+
+/* ---------------------------------------------------------------------------
+   THE TOOLBAR
+   --------------------------------------------------------------------------- */
+.cc-toolbar { display: flex; align-items: center; justify-content: space-between;
+              gap: var(--salt-spacing-300); }
+.cc-meta { margin: 0; font-size: var(--salt-text-fontSize);
+           text-transform: uppercase; letter-spacing: 0.03em;
+           color: var(--salt-content-secondary-foreground); }
+.cc-meta b { color: var(--salt-content-primary-foreground);
+             font-weight: var(--salt-text-fontWeight-strong); }
+/* THE SEPARATOR IS A RULE, NOT A LETTER. A typed "|" is text as far as
+   the browser and a contrast checker are concerned, and a divider light
+   enough to stay in the background will always fail as text. Drawn as a
+   1px border it is what it actually is - a divider - and the question
+   does not arise. */
+.cc-meta-sep {
+  display: inline-block; vertical-align: -2px;
+  inline-size: 0; block-size: 1em;
+  margin-inline: var(--salt-spacing-300);
+  border-inline-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                       var(--salt-separable-primary-borderColor);
+}
+.cc-toolbar-right { display: flex; align-items: center; gap: var(--salt-spacing-200); }
+
+/* ---------------------------------------------------------------------------
+   BUTTONS
+   --------------------------------------------------------------------------- */
+.cc-btn {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-200);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  block-size: var(--salt-size-base);
+  padding-inline: var(--salt-spacing-300);
+  cursor: pointer; white-space: nowrap;
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-actionable-secondary-background, transparent);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-actionable-secondary-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+}
+.cc-btn--cta {
+  color: var(--salt-actionable-cta-foreground);
+  background: var(--salt-actionable-cta-background);
+  border-color: transparent;
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.cc-btn--cta:hover { background: var(--salt-actionable-cta-background-hover); }
+.cc-btn--quiet {
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-container-tertiary-background);
+  border-color: transparent;
+}
+.cc-btn--quiet:hover { background: var(--salt-selectable-background-hover); }
+.cc-btn--link {
+  padding-inline: 0; background: none; border-color: transparent;
+  color: var(--salt-content-primary-foreground);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------------------
+   A PLAIN SELECT
+   --------------------------------------------------------------------------- */
+.cc-select {
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  inline-size: 100%; block-size: var(--salt-size-base);
+  padding-inline: var(--salt-spacing-200);
+  cursor: pointer;
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-editable-background, transparent);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-editable-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+}
+.cc-select-wrap { inline-size: 14rem; }
+
+/* ---------------------------------------------------------------------------
+   THE ACTIONS MENU
+   ---------------------------------------------------------------------------
+   THE MENU IS A SIBLING OF THE BUTTON inside a positioned wrapper, not a
+   child of it: a <button> may not contain interactive elements, and a
+   menu full of buttons inside a button is exactly that.
+   --------------------------------------------------------------------------- */
+.cc-menuwrap { position: relative; display: inline-flex; }
+.cc-menu {
+  position: absolute; inset-inline-end: 0; inset-block-start: calc(100% + var(--salt-spacing-100));
+  z-index: 40; min-inline-size: 15rem;
+  padding: var(--salt-spacing-200) 0;
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+  border-radius: var(--salt-palette-corner-strong);
+  box-shadow: var(--salt-overlayable-shadow);
+}
+.cc-menu[hidden] { display: none; }
+.cc-menu-group {
+  margin: 0; padding: var(--salt-spacing-100) var(--salt-spacing-300);
+  font-size: var(--salt-text-notation-fontSize, 0.8125rem);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--salt-content-secondary-foreground);
+}
+.cc-menu-rule { margin: var(--salt-spacing-100) 0; border: 0;
+                border-block-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                                    var(--salt-separable-tertiary-borderColor); }
+.cc-menu-item {
+  display: block; inline-size: 100%; text-align: start;
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  cursor: pointer; color: inherit; background: none; border: none;
+}
+.cc-menu-item:hover { background: var(--salt-selectable-background-hover); }
+
+/* the row a kebab belongs to stays marked while its menu is open, because
+   the menu covers the row it came from */
+.cc-table tr.is-menued > td { background: var(--salt-selectable-background-selected); }
+
+/* ---------------------------------------------------------------------------
+   TABLES
+   --------------------------------------------------------------------------- */
+.cc-table {
+  inline-size: 100%;
+  border-collapse: separate;      /* a sticky cell's shadow is clipped away
+                                     by `collapse`, which owns the edges */
+  border-spacing: 0;
+  font-size: var(--salt-text-fontSize);
+  font-variant-numeric: tabular-nums;
+}
+.cc-table th, .cc-table td {
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  text-align: end; white-space: nowrap;
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-tertiary-borderColor);
+}
+.cc-table thead th {
+  position: sticky; inset-block-start: 0; z-index: 2;
+  background: var(--salt-container-primary-background);
+  font-weight: var(--salt-text-fontWeight-regular);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  color: var(--salt-content-secondary-foreground);
+  border-block-end: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+                    var(--salt-separable-primary-borderColor);
+}
+.cc-table th:first-child, .cc-table td:first-child { text-align: start; }
+
+/* THE COLUMN OF NAMES IS FROZEN, because it is the only thing that tells
+   you which row you are reading; scroll it away and every figure loses
+   its name. A box-shadow rather than a border: a border on a sticky cell
+   joins the table's own layout and widens the column, while a shadow with
+   no blur paints the same 2px bar and costs no width. */
+/* A ROW HEAD IS A LABEL, NOT A HEADING. `th` comes bold by default, and
+   a whole column of bold names competes with the figures they belong to -
+   the reference sets them at the same weight as everything else. Upper
+   case instead, which separates the names from the numbers without
+   shouting. */
+.cc-table .cc-rowhead {
+  position: sticky; inset-inline-start: 0; z-index: 1;
+  text-align: start;
+  font-weight: var(--salt-text-fontWeight-regular);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  background: var(--salt-container-primary-background);
+  box-shadow: var(--salt-size-fixed-200) 0 0 var(--salt-separable-secondary-borderColor);
+}
+.cc-table thead th.cc-rowhead { z-index: 3; }
+
+/* ---- the ledger (screen 1) ---- */
+.cc-section { margin-block-end: var(--salt-spacing-400); }
+.cc-section:last-child { margin-block-end: 0; }
+.cc-section-name {
+  margin: 0 0 var(--salt-spacing-200);
+  font-size: var(--salt-text-fontSize);
+  font-weight: var(--salt-text-fontWeight-strong);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.cc-table td.cc-sub, .cc-table th.cc-sub { color: var(--salt-content-secondary-foreground); }
+.cc-table .cc-rowhead.cc-sub { padding-inline-start: var(--salt-spacing-400); }
+.cc-table tr.cc-rule > * { border-block-start: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+                                               var(--salt-separable-primary-borderColor); }
+
+/* ---- the inventory (screen 2) ---- */
+/* EVERY COLUMN IN THE INVENTORY IS READ, NOT COMPARED. Figures line up on
+   the right so the eye can run down them; words and dates do not, and the
+   reference sets this whole table to the left. */
+.cc-table--inventory th, .cc-table--inventory td { text-align: start; }
+.cc-table--inventory td.cc-divide, .cc-table--inventory th.cc-divide {
+  border-inline-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                       var(--salt-separable-secondary-borderColor);
+}
+.cc-link {
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  padding: 0; cursor: pointer; background: none; border: none;
+  color: var(--salt-navigable-primary-foreground, var(--salt-actionable-cta-background));
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.cc-link.is-off { color: var(--salt-content-tertiary-foreground); text-decoration: none; cursor: default; }
+.cc-kebab {
+  display: inline-grid; place-items: center;
+  inline-size: var(--salt-size-base); block-size: var(--salt-size-base);
+  padding: 0; cursor: pointer; color: var(--salt-content-secondary-foreground);
+  background: none; border: none; border-radius: var(--salt-palette-corner-weak);
+}
+.cc-kebab:hover { color: var(--salt-content-primary-foreground); }
+
+/* ---- the results grid (screen 5) ----
+
+   ONE WIDTH FOR THE NAME COLUMN, WHATEVER IS IN IT. A table column is as
+   wide as its widest cell, so folding every group away took the case
+   names out of the column and left only the group headings - and the
+   column shrank under the reader's hand. Fixing it means the grid does
+   not move when you fold something, which is the whole point of being
+   able to fold it. */
+.cc-table--grid th.cc-rowhead {
+  inline-size: 260px;
+  min-inline-size: 260px;
+  max-inline-size: 260px;
+  white-space: normal;        /* a long case name wraps rather than widens */
+}
+/* NO FILL ON THE GROUP ROW. The reference leaves it on the page colour:
+   a band would read as a second table starting, when what it is is a
+   heading inside one. The rule under it is enough to say so. */
+.cc-group-row > th {
+  text-align: start;
+  background: var(--salt-container-primary-background);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-secondary-borderColor);
+}
+/* THE WHOLE ROW IS THE BUTTON, not a word inside it. A heading you can
+   fold should not ask the reader to find the two centimetres of it that
+   respond; the button fills its cell, and the cell spans the row. */
+.cc-group-row > th { padding: 0; }
+.cc-group-toggle {
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  inline-size: 100%;
+  /* THE SAME PADDING A CELL HAS, so a group heading is the same height as
+     the rows under it. It was declared here and then undone by a second
+     `padding: 0` further down the same rule - the later one wins, the row
+     collapsed to 16px, and nothing warned. ONE PROPERTY, ONE PLACE. */
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  font-weight: var(--salt-text-fontWeight-strong);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  cursor: pointer; color: inherit; background: none; border: none;
+}
+.cc-group-toggle svg { transition: transform 160ms ease; }
+.cc-group-toggle[aria-expanded="false"] svg { transform: rotate(-90deg); }
+@media (prefers-reduced-motion: reduce) { .cc-group-toggle svg { transition: none; } }
+
+/* ---- THE DELTA'S COLOUR IS THE WHOLE OF THE SIGNAL ----
+
+   THE HEATMAP IS GONE. A washed cell colours the figure as well as the
+   gap, and the figure is not the thing that is good or bad - 844.8 is
+   just a number. Colouring the delta alone puts the meaning exactly on
+   the word that carries it, and leaves the grid readable as a grid.
+
+   GREEN MEANS GOOD, NOT UP. On revenue, EBITDA and cash flow those are
+   the same thing. On LEVERAGE THEY ARE OPPOSITE: more debt against the
+   same earnings is worse, so a rise there is red. The direction lives
+   with the attribute in app.js, not here.
+
+   THE TWO COLOURS ARE THE ONES YOU PICKED, and they only just clear the
+   contrast bar on white - 4.54 and 4.56 against the 4.5 small text needs.
+   On the dark surface they do not clear it at all, so each has a
+   lightened twin of the same hue: measured, not guessed. */
+:root, .salt-theme {
+  --cc-good: #00875D;
+  --cc-bad:  #E52135;
+}
+.salt-theme[data-mode="dark"] {
+  --cc-good: #009466;   /* 4.60 on the dark surface; #00875D managed 3.93 */
+  --cc-bad:  #E94152;   /* 4.53 on the dark surface; #E52135 managed 3.90 */
+}
+
+/* THE MUTED PILL - the pale one you sent. It is the SAME pill as the one on
+   the header band, wearing quieter clothes, because the two are not saying
+   the same thing: the band's pills describe the client you have loaded, and
+   the list's describe eight you have not. A filled pill on every row turns
+   the list into a wall of colour and the loaded row stops standing out.
+
+   The fill and the hairline are yours, measured off the swatch. The text is
+   the accent's own foreground token, which lands at 5.19 on that fill in
+   light and 4.65 in dark - measured, not guessed. */
+:root, .salt-theme {
+  --cc-pill-muted-bg:     #DBF5F7;
+  --cc-pill-muted-border: #99ABAC;
+}
+.salt-theme[data-mode="dark"] {
+  --cc-pill-muted-bg:     #16323B;
+  --cc-pill-muted-border: #3E6471;
+}
+
+.cc-val { display: block; }
+.cc-delta { display: block; margin-block-start: 1px;
+            font-size: var(--salt-text-notation-fontSize, 0.8125rem);
+            color: var(--salt-content-secondary-foreground); }
+/* NO DELTA IS "SIGNIFICANT" ANY MORE - every one is coloured, so the
+   reader is not being told which gaps are worth their attention. A flat
+   zero keeps the quiet grey, because it has no direction to have. */
+.cc-delta--good { color: var(--cc-good); }
+.cc-delta--bad  { color: var(--cc-bad); }
+
+/* ---- THE LEGEND ---- */
+.cc-legend {
+  display: flex; justify-content: flex-end; gap: var(--salt-spacing-400);
+  padding-block-start: var(--salt-spacing-200);
+  font-size: var(--salt-text-notation-fontSize, 0.8125rem);
+  color: var(--salt-content-secondary-foreground);
+  border-block-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                      var(--salt-separable-tertiary-borderColor);
+}
+.cc-legend[hidden] { display: none; }
+.cc-legend-item { display: inline-flex; align-items: center; gap: var(--salt-spacing-200); }
+/* THE SQUARE IS AS TALL AS THE WORD BESIDE IT. `1em` is the font size of the
+   legend itself, so the two can never drift apart: change the legend's type
+   and the swatch follows. A fixed size in pixels would have to be chased. */
+.cc-swatch {
+  inline-size: 1em; block-size: 1em; flex: 0 0 auto;
+  border-radius: var(--salt-palette-corner-weak);
+}
+.cc-swatch--good { background: var(--cc-good); }
+.cc-swatch--bad  { background: var(--cc-bad); }
+
+/* ---------------------------------------------------------------------------
+   THE LOADER
+   --------------------------------------------------------------------------- */
+.cc-loader { display: grid; place-content: center; justify-items: center;
+             gap: var(--salt-spacing-300); min-block-size: 0; }
+.cc-loader[hidden] { display: none; }
+.cc-loader-says { margin: 0; font-size: var(--salt-text-fontSize);
+                  text-transform: uppercase; letter-spacing: 0.04em;
+                  color: var(--salt-content-secondary-foreground); }
+/* THE SPINNER IS SIZED HERE, NOT BY THE GLOBAL 1em SVG RULE. Every other
+   icon on the page is tied to the text beside it; this one is the thing
+   the screen is about, so it is given its own size. */
+.cc-loader .cc-spinner, .cc-veil .cc-spinner {
+  inline-size: 48px; block-size: 48px;
+  color: var(--salt-content-primary-foreground);
+  animation: cc-turn 1s linear infinite;
+}
+@keyframes cc-turn { to { transform: rotate(360deg); } }
+/* A READER WHO HAS ASKED FOR LESS MOTION STILL HAS TO KNOW IT IS WORKING,
+   so the arc stops turning and breathes instead - a state change without
+   anything travelling across the screen. */
+@media (prefers-reduced-motion: reduce) {
+  .cc-loader .cc-spinner, .cc-veil .cc-spinner { animation: cc-breathe 1.6s ease-in-out infinite; }
+  @keyframes cc-breathe { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+}
+
+/* ---------------------------------------------------------------------------
+   THE MODAL
+   ---------------------------------------------------------------------------
+   IT IS OUTSIDE THE SCALED FRAME on purpose. A dialog that belongs to the
+   whole window should not be scaled with the canvas behind it; it is a
+   layer over the page, not a part of the drawing.
+   --------------------------------------------------------------------------- */
+.cc-scrim {
+  position: fixed; inset: 0; z-index: 60;
+  background: var(--salt-overlayable-scrim);
+}
+.cc-scrim[hidden] { display: none; }
+
+.cc-modal {
+  position: fixed; z-index: 70;
+  inset-block-start: 50%; inset-inline-start: 50%;
+  transform: translate(-50%, -50%);
+  inline-size: min(1120px, calc(100vw - var(--salt-spacing-400) * 2));
+  max-block-size: calc(100vh - var(--salt-spacing-400) * 2);
+  display: grid; grid-template-rows: auto 1fr auto;
+  font-family: var(--salt-text-fontFamily);
+  font-size: var(--salt-text-fontSize);
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-container-primary-background);
+  border-radius: var(--salt-palette-corner-strong);
+  box-shadow: var(--salt-overlayable-shadow);
+}
+.cc-modal[hidden] { display: none; }
+.cc-modal *, .cc-modal *::before, .cc-modal *::after { box-sizing: border-box; }
+
+.cc-modal-head {
+  padding: var(--salt-spacing-300) var(--salt-spacing-400);
+  background: var(--salt-container-tertiary-background);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-secondary-borderColor);
+  border-start-start-radius: var(--salt-palette-corner-strong);
+  border-start-end-radius: var(--salt-palette-corner-strong);
+}
+.cc-modal-title { margin: 0; font-size: var(--salt-text-h2-fontSize, 1.25rem);
+                  font-weight: var(--salt-text-fontWeight-strong);
+                  text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* TWO COLUMNS WITH A RULE BETWEEN THEM. The rule is a border on the second
+   column rather than an element of its own, so it is exactly as tall as
+   the body and cannot fall out of step with it. */
+.cc-modal-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  padding: var(--salt-spacing-400);
+  gap: var(--salt-spacing-400);
+  overflow: visible;           /* an open dropdown must be able to spill */
+}
+#cc-col-how {
+  padding-inline-start: var(--salt-spacing-400);
+  border-inline-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                       var(--salt-separable-secondary-borderColor);
+}
+.cc-col { display: grid; align-content: start; gap: var(--salt-spacing-300); }
+.cc-field { display: grid; gap: var(--salt-spacing-100); }
+.cc-label, .cc-col-head {
+  margin: 0; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--salt-content-secondary-foreground);
+}
+.cc-col-head {
+  padding-block-end: var(--salt-spacing-200);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-secondary-borderColor);
+}
+
+/* ---- THE "ARE YOU SURE" DIALOG ----
+   The same modal, narrower and with one column instead of two. A question
+   this short in a 1120px box reads as a mistake; the box is sized to the
+   sentence. */
+.cc-modal--ask { inline-size: min(520px, calc(100vw - var(--salt-spacing-400) * 2)); }
+.cc-modal-body--one { grid-template-columns: minmax(0, 1fr); }
+.cc-ask-says {
+  margin: 0;
+  font-size: var(--salt-text-h4-fontSize, 0.9375rem);
+  line-height: 1.5;
+  color: var(--salt-content-primary-foreground);
+}
+
+.cc-modal-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--salt-spacing-300);
+  padding: var(--salt-spacing-300) var(--salt-spacing-400);
+  border-block-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                      var(--salt-separable-secondary-borderColor);
+}
+
+/* ---------------------------------------------------------------------------
+   THE CHECKBOX
+   ---------------------------------------------------------------------------
+   THE BOX AND ITS WORDS ARE ONE BUTTON, so the label is a target too - a
+   three-word label beside a 16px box, where only the box responds, is a
+   small target pretending to be a large one.
+   --------------------------------------------------------------------------- */
+.cc-check-row { display: flex; align-items: center; }
+.cc-check {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-200);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  padding: 0; cursor: pointer; color: inherit; background: none; border: none;
+}
+.cc-check-box {
+  display: inline-grid; place-items: center;
+  inline-size: 1.25em; block-size: 1.25em; flex: 0 0 auto;
+  border: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+          var(--salt-separable-primary-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+  color: var(--salt-actionable-cta-foreground);
+}
+.cc-check[aria-checked="true"] .cc-check-box {
+  background: var(--salt-actionable-cta-background);
+  border-color: var(--salt-actionable-cta-background);
+}
+.cc-check-box svg { opacity: 0; }
+.cc-check[aria-checked="true"] .cc-check-box svg { opacity: 1; }
+.cc-check-label { text-transform: uppercase; letter-spacing: 0.03em; }
+
+/* ---------------------------------------------------------------------------
+   THE PILL FIELD — "which ONES", answered without being opened
+   ---------------------------------------------------------------------------
+   A dropdown answers "which one". This answers "which ones", and shows
+   the whole answer in the field: a removable pill per choice, with a
+   checkbox list behind it.
+   --------------------------------------------------------------------------- */
+.cc-multi { position: relative; }
+.cc-multi-trigger {
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  inline-size: 100%; min-block-size: var(--salt-size-base);
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  font: inherit; cursor: pointer; text-align: start;
+  color: inherit;
+  background: var(--salt-editable-background, transparent);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-editable-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+}
+.cc-multi-tags { display: flex; flex-wrap: wrap; gap: var(--salt-spacing-100);
+                 flex: 1 1 auto; min-inline-size: 0; }
+.cc-multi-empty { color: var(--salt-content-tertiary-foreground);
+                  text-transform: uppercase; letter-spacing: 0.03em; }
+
+/* THE PILL IS THE SELECTION MADE VISIBLE, and its cross is a real button
+   so the choice can be taken back without opening the list at all. */
+.cc-tag, .cc-pill {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-100);
+  padding: 2px var(--salt-spacing-200);
+  font-size: var(--salt-text-notation-fontSize, 0.8125rem);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  border-radius: 999px;
+  /* THE TWO VARIABLES ARE THE WHOLE OF THE DIFFERENCE between a pill on a
+     pale surface and the same pill on a filled one. Nothing that uses a
+     pill has to know which surface it is sitting on - it only has to be
+     inside something that has set them. */
+  color: var(--cc-pill-fg, var(--salt-actionable-cta-foreground));
+  background: var(--cc-pill-bg, var(--salt-actionable-cta-background));
+}
+.cc-tag-x {
+  display: inline-grid; place-items: center;
+  inline-size: 1em; block-size: 1em; padding: 0;
+  cursor: pointer; color: inherit; background: none; border: none; opacity: .8;
+}
+.cc-tag-x:hover { opacity: 1; }
+
+.cc-multi-panel {
+  position: absolute; inset-inline: 0; inset-block-start: calc(100% + var(--salt-spacing-100));
+  z-index: 40; max-block-size: 18rem; overflow: auto;
+  padding: var(--salt-spacing-100) 0;
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+  border-radius: var(--salt-palette-corner-strong);
+  box-shadow: var(--salt-overlayable-shadow);
+}
+.cc-multi-panel[hidden] { display: none; }
+.cc-multi-item {
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  inline-size: 100%; text-align: start;
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  cursor: pointer; color: inherit; background: none; border: none;
+}
+.cc-multi-item:hover { background: var(--salt-selectable-background-hover); }
+.cc-multi-item[aria-selected="true"] { background: var(--salt-selectable-background-selected); }
+.cc-multi-box {
+  display: inline-grid; place-items: center;
+  inline-size: 1.1em; block-size: 1.1em; flex: 0 0 auto;
+  border: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+          var(--salt-separable-primary-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+}
+.cc-multi-item[aria-selected="true"] .cc-multi-box {
+  color: var(--salt-actionable-cta-foreground);
+  background: var(--salt-actionable-cta-background);
+  border-color: var(--salt-actionable-cta-background);
+}
+.cc-multi-box svg { opacity: 0; }
+.cc-multi-item[aria-selected="true"] .cc-multi-box svg { opacity: 1; }
+
+/* GREYED AND STILL THERE, not removed. A case cannot be compared with
+   itself - that is a column of zeroes pretending to be an answer - so
+   whichever case is the base is greyed out of "compare to". A list that
+   silently loses an item as you change something above it is a list the
+   reader cannot trust. */
+.cc-multi-item[aria-disabled="true"] {
+  color: var(--salt-content-tertiary-foreground);
+  cursor: default; pointer-events: none;
+}
+.cc-multi-item[aria-disabled="true"] .cc-multi-box { display: none; }
+
+/* ---------------------------------------------------------------------------
+   THE NUDGE
+   ---------------------------------------------------------------------------
+   The bubble is a child of the thing it points at, so it is placed by
+   sitting inside it rather than by measurement - which matters because
+   the whole canvas is scaled, and a measured position would be measured
+   in the wrong units.
+   --------------------------------------------------------------------------- */
+/* IT IS THE KIT'S TOOLTIP, not a shape of its own: a pale card with a
+   hairline round it, a soft shadow, and a point aimed at the thing it is
+   talking about. A nudge that looks like nothing else on the screen reads
+   as an advert; one that looks like every other tooltip reads as help. */
+.cc-coach {
+  --cc-arrow: 10px;
+  position: absolute; z-index: 80;
+  inline-size: max-content; max-inline-size: 18rem;
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  border-radius: var(--salt-palette-corner-strong);
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+  box-shadow: var(--salt-overlayable-shadow);
+  /* IT MUST NOT SWALLOW THE PRESS IT IS ASKING FOR. The bubble sits over
+     the control it is pointing at, and a reader aiming for the button
+     under it would hit the bubble instead. Nothing in it is clickable
+     now, so the whole thing lets the press through. */
+  pointer-events: none;
+}
+.cc-coach[hidden] { display: none; }
+.cc-coach-says { margin: 0; font-size: var(--salt-text-fontSize); }
+
+/* THE POINT IS ONE SQUARE TURNED 45 DEGREES, with two of its four borders
+   taken off - the two that would otherwise draw a line across the inside
+   of the bubble. Two stacked triangles would need the border colour and
+   the fill kept in step by hand; this way the point is made of the same
+   two declarations as the bubble and cannot drift from it. */
+.cc-coach::after {
+  content: ''; position: absolute;
+  inline-size: var(--cc-arrow); block-size: var(--cc-arrow);
+  background: inherit;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+  transform: rotate(45deg);
+}
+
+/* ---- under the thing it points at, pointing up ---- */
+.cc-coach--above {
+  inset-block-start: calc(100% + var(--salt-spacing-300));
+  inset-inline-end: 0;
+}
+.cc-coach--above::after {
+  inset-block-start: calc(var(--cc-arrow) / -2);
+  inset-inline-end: var(--salt-spacing-400);
+  border-block-end: 0; border-inline-end: 0;
+}
+
+/* ---- beside the thing it points at, pointing right ----
+
+   THIS BUBBLE IS A CHILD OF THE MENU, NOT OF THE ITEM, because an item is
+   a <button> and a <button> may not contain anything clickable or, in
+   practice, anything with its own box. So the menu is the frame it is
+   placed in, and `--cc-at` says how far down that frame to sit - set by
+   app.js from the item's own offset, which is measured in the same
+   unscaled pixels the layout uses and so survives the canvas being
+   scaled. Left to CSS alone it sat at the top of the panel and pointed
+   at the word "Export". */
+.cc-coach--left {
+  inset-block-start: var(--cc-at, var(--salt-spacing-200));
+  inset-inline-end: calc(100% + var(--salt-spacing-300));
+}
+.cc-coach--left::after {
+  inset-block-start: calc(50% - var(--cc-arrow) / 2);
+  inset-inline-end: calc(var(--cc-arrow) / -2);
+  border-block-end: 0; border-inline-start: 0;
+}
+
+/* THE RING IS THE OTHER HALF OF THE NUDGE. The bubble says what to do and
+   the ring says where - a bubble alone leaves the reader hunting. */
+.is-coached {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-actionable-cta-background);
+  outline-offset: var(--salt-size-fixed-200);
+  border-radius: var(--salt-palette-corner-weak);
+}
+
+/* ---------------------------------------------------------------------------
+   THE CLIENT LOADER
+   ---------------------------------------------------------------------------
+   Three pieces: a band that names whoever is loaded, a panel that drops out
+   of it holding everyone who could be, and a veil that covers the module
+   while the swap happens.
+
+   THE BAND BLEEDS TO THE CARD'S EDGES. The card pads its contents by
+   `--cc-pad` on every side; the band cancels that padding on three sides
+   with a negative margin, so it meets the card's border the way the
+   reference draws it, and the tabs below keep their inset. */
+.cc-client {
+  grid-row: 1; grid-column: 1;
+  position: relative;
+  /* ABOVE EVERYTHING THE CARD DRAWS, the nudge's tooltip included. A panel
+     that covers the page has to cover all of it; one control poking through
+     it reads as a bug, not as a layer. */
+  z-index: 100;
+  margin: calc(-1 * var(--cc-pad)) calc(-1 * var(--cc-pad)) 0;
+}
+
+/* ---- the band ---- */
+.cc-client-head {
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  inline-size: 100%; text-align: start;
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  font: inherit; cursor: pointer;
+  color: var(--salt-content-primary-foreground);
+  /* THE SAME WHITE AS THE CARD UNDER IT. The band used to carry a pale
+     fill, which made it read as a strip of chrome bolted on top of the
+     card rather than as the card's own first line. The accent rule
+     underneath is what separates it, and one separator is enough. */
+  background: var(--salt-container-primary-background);
+  border: none;
+  border-block-end: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+                    var(--salt-separable-accented-borderColor);
+  /* ONE PIXEL INSIDE THE CARD'S OWN CURVE, so the band's corner sits in the
+     card's corner instead of poking out of it. */
+  border-start-start-radius: calc(var(--salt-palette-corner-strong) - var(--salt-size-fixed-100));
+  border-start-end-radius:   calc(var(--salt-palette-corner-strong) - var(--salt-size-fixed-100));
+  transition: background 160ms ease;
+}
+
+/* OPEN, THE BAND IS A FILLED SURFACE. `data-salt-surface="accented"` is
+   added by the script, and every colour in here follows without a single
+   rule changing: the band asks for the same tokens it always did and is
+   handed the accent's values instead.
+
+   The pills and the chevron box invert at the same time - white fill, accent
+   text - which is the same trick the selected nav pill uses on the app bar,
+   and for the same reason: an accent-on-accent pill is an invisible pill. */
+.cc-client-head[data-salt-surface="accented"] {
+  --cc-pill-bg: var(--salt-target-background-selected);
+  --cc-pill-fg: var(--salt-selectable-foreground-selected);
+  background: var(--salt-container-primary-background);
+  border-block-end-color: var(--salt-separable-primary-borderColor);
+}
+
+.cc-avatar {
+  inline-size: 2.75rem; block-size: 2.75rem; flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--cc-pill-bg, var(--salt-actionable-cta-background));
+  transition: background 160ms ease;
+}
+
+.cc-client-id { flex: 0 1 auto; display: grid; gap: 2px; min-inline-size: 0; }
+.cc-client-head > .cc-pills { flex: 0 0 auto; }
+.cc-client-name {
+  overflow: hidden; text-overflow: ellipsis;
+  font-size: var(--salt-text-h2-fontSize, 1.375rem);
+  font-weight: var(--salt-text-fontWeight-strong);
+  letter-spacing: 0.03em; text-transform: uppercase;
+  white-space: nowrap;
+}
+/* THE FAMILY LINE IS A CAPTION, NOT A SECOND NAME. It disappears entirely
+   when a family itself is loaded, because then the big line already is the
+   family and repeating it reads as a bug. */
+.cc-client-family {
+  font-size: var(--salt-text-label-fontSize, 0.6875rem);
+  letter-spacing: var(--salt-text-label-letterSpacing, 0.04em);
+  text-transform: uppercase;
+  color: var(--salt-content-secondary-foreground);
+}
+.cc-client-family:empty { display: none; }
+
+.cc-pills { display: flex; align-items: center; flex-wrap: wrap;
+            gap: var(--salt-spacing-100); min-inline-size: 0; }
+
+/* DRAWN AND INERT. It is a glyph inside the band's button, so clicking it
+   opens the panel like clicking anywhere else does - which is better than a
+   dead patch in the middle of a live band. */
+.cc-orgchart {
+  display: inline-grid; place-items: center;
+  font-size: 1.125rem; flex: 0 0 auto;
+  color: var(--salt-content-secondary-foreground);
+}
+
+.cc-client-chev {
+  display: inline-grid; place-items: center;
+  margin-inline-start: auto; flex: 0 0 auto;
+  inline-size: 2rem; block-size: 2rem; font-size: 1.125rem;
+  border-radius: var(--salt-palette-corner-strong);
+  color: var(--cc-pill-fg, var(--salt-actionable-cta-foreground));
+  background: var(--cc-pill-bg, var(--salt-actionable-cta-background));
+  transition: background 160ms ease;
+}
+/* THE CHEVRON TURNS OVER rather than being swapped for a different glyph.
+   The turn is the thing that says "this is the same control, in its other
+   state". */
+.cc-client-chev svg { transition: transform 180ms ease; }
+.cc-client-head[aria-expanded="true"] .cc-client-chev svg { transform: rotate(180deg); }
+
+/* ---- the panel ---- */
+.cc-client-panel {
+  position: absolute;
+  inset-inline: var(--cc-pad);
+  /* THE PANEL SHARES THE BAND'S BOTTOM EDGE rather than floating below it.
+     Pulled up by exactly its own border width, its top line lands on the
+     band's line and the two read as ONE object opening - which is the whole
+     of proximity: a gap, however small, is the eye being told these are two
+     separate things. */
+  inset-block-start: calc(100% - var(--salt-size-fixed-200));
+  z-index: 50;
+  max-block-size: 600px;
+  display: grid; grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--salt-spacing-200);
+  padding: var(--salt-spacing-300);
+  background: var(--salt-container-secondary-background);
+  border: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+          var(--salt-separable-accented-borderColor);
+  /* SQUARE WHERE IT MEETS THE BAND, round where it does not. A curve on the
+     top corners would draw a line between the two shapes again. */
+  border-radius: 0 0 var(--salt-palette-corner-strong) var(--salt-palette-corner-strong);
+  box-shadow: var(--salt-overlayable-shadow);
+  animation: cc-drop 160ms ease both;
+}
+.cc-client-panel[hidden] { display: none; }
+@keyframes cc-drop { from { opacity: 0; transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) {
+  .cc-client-panel { animation: none; }
+  .cc-client-chev svg, .cc-client-head, .cc-avatar { transition: none; }
+}
+
+.cc-client-search { position: relative; display: flex; align-items: center; }
+.cc-client-search input {
+  inline-size: 100%;
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  padding: var(--salt-spacing-200) var(--salt-spacing-400)
+           var(--salt-spacing-200) var(--salt-spacing-300);
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-accented-borderColor);
+  border-radius: 999px;
+}
+/* THE BROWSER'S OWN CLEAR CROSS SITS EXACTLY WHERE THE MAGNIFIER IS, and
+   two glyphs on top of each other is neither of them. The field is cleared
+   by selecting a client or closing the panel, so nothing is lost. */
+.cc-client-search input::-webkit-search-cancel-button { display: none; }
+.cc-client-search input::-webkit-search-decoration { display: none; }
+
+.cc-client-search input::placeholder {
+  color: var(--salt-content-tertiary-foreground); opacity: 1;
+}
+.cc-client-search input:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid) var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+.cc-client-search > svg {
+  position: absolute; inset-inline-end: var(--salt-spacing-300);
+  font-size: 1.125rem; pointer-events: none;
+  color: var(--salt-content-secondary-foreground);
+}
+
+.cc-client-list { overflow-y: auto; overflow-x: hidden;
+                  display: grid; align-content: start; }
+/* ONE RULE BETWEEN FAMILIES, none above the first. A family is a block of
+   rows and the rule is what says where one block ends. */
+.cc-client-group + .cc-client-group {
+  margin-block-start: var(--salt-spacing-200);
+  padding-block-start: var(--salt-spacing-200);
+  border-block-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                      var(--salt-separable-tertiary-borderColor);
+}
+
+.cc-client-row {
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  inline-size: 100%; text-align: start;
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  font: inherit; cursor: pointer;
+  color: var(--salt-content-primary-foreground);
+  background: none; border: none;
+  border-radius: var(--salt-palette-corner-strong);
+  transition: background 140ms ease;
+}
+.cc-client-row:hover { background: var(--salt-selectable-background-hover); }
+/* THE INDENT IS THE ONLY THING THAT SAYS "BELONGS TO". A subsidiary's row
+   carries no word for its parent, so the step in has to be unmistakable.
+
+   AND THE ROW HAS TO GIVE BACK WHAT THE INDENT TAKES. This is where the last
+   pill was being cut off: a row is 100% wide, and a margin is added ON TOP of
+   that width, so every subsidiary ran 24px past the panel's edge. The width
+   now subtracts exactly what the margin adds. */
+.cc-client-row[data-cc-level="child"] {
+  margin-inline-start: var(--salt-spacing-300);
+  inline-size: calc(100% - var(--salt-spacing-300));
+}
+.cc-client-row .cc-avatar { inline-size: 2rem; block-size: 2rem;
+                            background: var(--salt-container-tertiary-background); }
+.cc-client-row[data-cc-level="family"] .cc-avatar { inline-size: 2.25rem; block-size: 2.25rem; }
+/* THE NAME IS THE ONLY THING THAT GIVES WAY. A row is a name on the left and
+   its pills on the right; when the two together are wider than the row,
+   something has to go, and it must not be the pills - they sit at the edge,
+   so they are what falls off it. Pinning them (`flex: 0 0 auto`) and letting
+   the name shrink to an ellipsis (`min-inline-size: 0`, which a flex child
+   does NOT do by itself) means a long name trims itself and every pill
+   stays on the page, whatever font the browser ends up using. */
+.cc-client-row-name {
+  flex: 0 1 auto; min-inline-size: 0;
+  overflow: hidden; text-overflow: ellipsis;
+  font-size: var(--salt-text-h4-fontSize, 0.9375rem);
+  letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap;
+}
+.cc-client-row .cc-pills { flex: 0 0 auto; margin-inline-start: auto; flex-wrap: nowrap; }
+
+/* THE LIST'S PILLS ARE THE MUTED ONE. The border is paid for out of the
+   padding, so a muted pill is exactly as tall as a filled one and the rows
+   do not change height. */
+.cc-client-list {
+  --cc-pill-bg: var(--cc-pill-muted-bg);
+  --cc-pill-fg: var(--salt-content-accented-foreground);
+}
+.cc-client-list .cc-pill {
+  padding-block: 1px;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) var(--cc-pill-muted-border);
+}
+
+/* THE ONE THAT IS LOADED. Three cues, not one: a fill, a ring and a darker
+   avatar - so it still reads for anyone who cannot separate the fill from
+   the panel behind it. */
+.cc-client-row[aria-current="true"] {
+  background: var(--salt-selectable-background-selected);
+  box-shadow: inset 0 0 0 var(--salt-size-fixed-200) var(--salt-separable-accented-borderColor);
+}
+.cc-client-row[aria-current="true"] .cc-avatar {
+  background: var(--salt-actionable-cta-background);
+}
+.cc-client-row[aria-current="true"] .cc-client-row-name {
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+
+.cc-client-none {
+  margin: 0; align-self: start;
+  padding: var(--salt-spacing-300) var(--salt-spacing-200);
+  font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--salt-content-secondary-foreground);
+}
+.cc-client-none[hidden] { display: none; }
+
+/* ---- the veil ----
+   NOT AN ABSOLUTE BOX. It is placed in the card's grid across rows 2 and 3
+   - the tabs and the pane - so it covers exactly what the client owns and
+   leaves the band itself readable, without anything measuring anything. */
+.cc-veil {
+  grid-row: 2 / 4; grid-column: 1;
+  /* ABOVE THE NUDGE (80) AND BELOW THE CLIENT PANEL (100). A veil that
+     something shows through is not a veil. */
+  z-index: 90;
+  display: grid; place-content: center; justify-items: center;
+  gap: var(--salt-spacing-300);
+  background: var(--salt-container-primary-background);
+}
+.cc-veil[hidden] { display: none; }
+
+/* WHILE THE CLIENT LOADER HAS THE FLOOR - panel open, or reloading - THE
+   NUDGE STANDS DOWN. Two things asking for attention at once is neither of
+   them being read. It also has to go for a plainer reason: the nudge's ring
+   is an OUTLINE, drawn outside its button and outside the card's content
+   box, so neither the panel nor the veil can cover it. */
+.cc-card.is-clientactive .cc-coach { display: none; }
+.cc-card.is-clientactive .is-coached { outline: none; }

@@ -1,0 +1,202 @@
+/* lofi-multi.css — SURFACE. Choosing SEVERAL things, shown as pills.
+
+   WHAT IT IS, AND WHY IT IS NOT A COMBO. `.lofi-combo` answers "which
+   one?" and shows the answer as a line of text. This one answers "which
+   ones?" and shows the answer as a row of removable pills sitting in the
+   field itself - so the whole answer is readable without opening
+   anything, and any single part of it can be taken back with one press
+   on its own cross.
+
+       <div class="lofi-multi" data-lofi-multi id="cc-against">
+         <button type="button" class="lofi-multi-trigger">
+           <span class="lofi-multi-tags"></span>
+           <span class="lofi-caret">&#9662;</span>
+         </button>
+         <div class="lofi-multi-panel" role="listbox" aria-multiselectable="true" hidden>
+           <button type="button" class="lofi-multi-item" role="option"
+                   aria-selected="true" data-lofi-value="management"
+                   data-lofi-tag="Management">Management case</button>
+         </div>
+       </div>
+
+   `data-lofi-tag` is the SHORT name for the pill. The list says
+   "MANAGEMENT CASE" because a list has room to be explicit; the pill says
+   "MANAGEMENT" because four pills of "… CASE" is four words of nothing.
+   Leave it out and the pill uses the item's own text.
+
+   THE PILLS ARE MIST, which is the kit's colour for "chosen by a person"
+   - the same colour the scrubber uses. Cream text on it, which is what
+   `--lofi-on-dark` is for.
+   =========================================================================== */
+
+.lofi-multi { position: relative; display: block; }
+
+/* ---------------------------------------------------------------------------
+   THE FIELD
+   ---------------------------------------------------------------------------
+   A <button> that grows. It holds pills rather than a line of text, so it
+   has to wrap, and it has to keep a sensible height when it is empty -
+   otherwise clearing the last pill makes the whole modal jump.
+   --------------------------------------------------------------------------- */
+.lofi-multi-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--lofi-s3);
+  width: 100%;
+  min-height: 48px;
+  text-align: left;
+  background: var(--lofi-canvas);
+  border: var(--lofi-stroke);
+  border-radius: var(--lofi-r-pill);
+  padding: var(--lofi-s2) var(--lofi-s4);
+  cursor: pointer;
+  color: var(--lofi-ink);
+  font: inherit;
+}
+.lofi-multi-trigger .lofi-caret { margin-left: auto; font-size: 0.8em; opacity: 0.8; }
+.lofi-multi-trigger.is-open { border-radius: var(--lofi-r-lg); }
+
+.lofi-multi-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lofi-s2);
+  min-width: 0;
+}
+
+/* WHAT AN EMPTY FIELD SAYS. A field with nothing in it and no words in it
+   reads as broken rather than as empty. The placeholder comes off
+   `data-lofi-empty` on the element, so each field can say its own thing. */
+.lofi-multi-empty {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-size: var(--lofi-t-md);
+  color: var(--lofi-ink-soft);
+}
+
+/* ---------------------------------------------------------------------------
+   A PILL
+   --------------------------------------------------------------------------- */
+.lofi-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lofi-s2);
+  background: var(--lofi-mist);
+  color: var(--lofi-on-dark);
+  border: 2px solid var(--lofi-mist);
+  border-radius: var(--lofi-r-pill);
+  padding: var(--lofi-s1) var(--lofi-s2) var(--lofi-s1) var(--lofi-s3);
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-sm);
+  white-space: nowrap;
+}
+
+/* THE CROSS IS A REAL BUTTON INSIDE A BUTTON? No - and that is why the
+   field is wired the way it is. A <button> may not contain another
+   <button>, so the cross is a <span role="button"> with its own tabindex,
+   and lofi-multi.js stops its press from reaching the field behind it.
+   The alternative - making the field a <div> - loses the keyboard for
+   free, which is the worse trade. */
+.lofi-tag-x {
+  display: inline-grid;
+  place-items: center;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.85;
+}
+.lofi-tag-x:hover { background: rgba(252, 249, 217, 0.22); opacity: 1; }
+.lofi-tag-x:focus-visible {
+  outline: 2px solid var(--lofi-on-dark);
+  outline-offset: 1px;
+}
+
+/* ---------------------------------------------------------------------------
+   THE OPEN LIST
+   --------------------------------------------------------------------------- */
+.lofi-multi-panel {
+  position: absolute;
+  top: calc(100% + var(--lofi-s2));
+  left: 0; right: 0;
+  z-index: 40;
+  background: var(--lofi-canvas);
+  border: var(--lofi-stroke);
+  border-radius: var(--lofi-r-lg);
+  padding: var(--lofi-s2);
+  box-shadow: 0 10px 24px rgba(63, 87, 87, 0.14);
+  max-height: 300px;
+  overflow-y: auto;
+}
+.lofi-multi-panel[hidden] { display: none; }
+
+.lofi-multi-item {
+  display: flex;
+  align-items: center;
+  gap: var(--lofi-s3);
+  width: 100%;
+  text-align: left;
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-md);
+  color: var(--lofi-ink);
+  background: none;
+  border: 0;
+  border-radius: var(--lofi-r-sm);
+  padding: var(--lofi-s3);
+  cursor: pointer;
+}
+.lofi-multi-item:hover { background: var(--lofi-surface); }
+.lofi-multi-item[aria-selected="true"] { background: var(--lofi-yellow); }
+
+/* THE BOX IS DRAWN, NOT A CHARACTER. A unicode ballot box is a different
+   shape and weight in every font, and this kit's own face would render it
+   as a fallback glyph from somewhere else entirely. Two divs always look
+   the same. */
+.lofi-multi-box {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 20px; height: 20px;
+  border: var(--lofi-stroke-ink);
+  border-radius: var(--lofi-r-sm);
+  background: var(--lofi-canvas);
+}
+.lofi-multi-box::after {
+  content: '';
+  width: 11px; height: 6px;
+  border-left: 2.5px solid var(--lofi-ink);
+  border-bottom: 2.5px solid var(--lofi-ink);
+  transform: translateY(-2px) rotate(-45deg);
+  opacity: 0;
+}
+.lofi-multi-item[aria-selected="true"] .lofi-multi-box::after { opacity: 1; }
+
+/* ---------------------------------------------------------------------------
+   AN OPTION THAT CANNOT BE PICKED
+   ---------------------------------------------------------------------------
+   In the reference, the case chosen as the BASE is greyed out in the
+   "compare to" list - because comparing a thing with itself is not a
+   question anybody is asking, and a row of zeroes is the answer.
+
+   IT IS LEFT IN THE LIST RATHER THAN REMOVED. A list that silently loses
+   a row when you change something else is a list a reader stops trusting;
+   one that keeps the row and greys it answers "where did Credit case go?"
+   before it is asked. `aria-disabled` rather than `disabled` so it is
+   still read aloud - the fact that it is unavailable IS the information.
+   --------------------------------------------------------------------------- */
+.lofi-multi-item[aria-disabled="true"] {
+  color: var(--lofi-ink-soft);
+  cursor: not-allowed;
+  background: none;
+}
+.lofi-multi-item[aria-disabled="true"] .lofi-multi-box { display: none; }
+.lofi-multi-item[aria-disabled="true"]:hover { background: none; }

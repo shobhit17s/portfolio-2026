@@ -1,0 +1,148 @@
+/* ===========================================================================
+   coach.css — the nudge.
+
+   IT IS THE KIT'S TOOLTIP, not a shape of its own: a pale card with a
+   hairline round it, a soft shadow, and a point aimed at the thing it is
+   talking about. A nudge that looks like nothing else on the screen reads as
+   an advert; one that looks like every other tooltip reads as help. Same
+   bubble and same ring as the case comparison prototype, so the two
+   prototypes teach in one voice.
+
+   FOUR STEPS, NOT TWO, and that is why there is a counter and a way out.
+   A two-step nudge is a hint. Four steps across three screens is a tour,
+   and a reader who already knows the product must be able to leave one.
+   =========================================================================== */
+
+.kim-coach {
+  --kim-arrow: 10px;
+  position: absolute; z-index: 85;
+  inline-size: max-content; max-inline-size: 17rem;
+  display: grid; gap: var(--salt-spacing-50);
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+  border-radius: var(--salt-palette-corner-strong);
+  box-shadow: var(--salt-overlayable-shadow);
+  /* IT MUST NOT SWALLOW THE PRESS IT IS ASKING FOR. The bubble can sit over
+     the control it points at, and a reader aiming for what is underneath
+     would hit the bubble instead. So the card lets every press through and
+     only the Skip inside it takes one back. */
+  pointer-events: none;
+}
+.kim-coach[hidden] { display: none; }
+
+.kim-coach-step {
+  margin: 0;
+  font-size: var(--salt-text-label-fontSize);
+  letter-spacing: var(--salt-text-label-letterSpacing);
+  text-transform: uppercase;
+  color: var(--salt-content-secondary-foreground);
+}
+.kim-coach-says { margin: 0; font-size: var(--salt-text-fontSize); }
+.kim-coach-skip {
+  justify-self: start;
+  margin-block-start: var(--salt-spacing-50);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  padding: 0; cursor: pointer; background: none; border: none;
+  color: var(--salt-actionable-secondary-foreground);
+  text-decoration: underline; text-underline-offset: 2px;
+  pointer-events: auto;
+}
+
+/* THE POINT IS ONE SQUARE TURNED 45 DEGREES, with the two borders that
+   would otherwise draw a line across the inside of the bubble taken off.
+   Two stacked triangles would need the border colour and the fill kept in
+   step by hand; this way the point is made of the same two declarations as
+   the bubble and cannot drift from it. */
+.kim-coach::after {
+  content: ''; position: absolute;
+  inline-size: var(--kim-arrow); block-size: var(--kim-arrow);
+  background: inherit;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+  transform: rotate(45deg);
+}
+
+/* ---- under the thing it points at, pointing up ---- */
+.kim-coach--below {
+  inset-block-start: calc(100% + var(--salt-spacing-300));
+  inset-inline-end: 0;
+}
+.kim-coach--below.kim-coach--start { inset-inline-end: auto; inset-inline-start: 0; }
+.kim-coach--below::after {
+  inset-block-start: calc(var(--kim-arrow) / -2);
+  inset-inline-end: var(--salt-spacing-400);
+  border-block-end: 0; border-inline-end: 0;
+}
+.kim-coach--below.kim-coach--start::after {
+  inset-inline-end: auto; inset-inline-start: var(--salt-spacing-400);
+}
+
+/* ---- over the thing it points at, pointing down ---- */
+.kim-coach--above {
+  inset-block-end: calc(100% + var(--salt-spacing-300));
+  inset-inline-start: 0;
+}
+.kim-coach--above::after {
+  inset-block-end: calc(var(--kim-arrow) / -2);
+  inset-inline-start: var(--salt-spacing-400);
+  border-block-start: 0; border-inline-start: 0;
+}
+
+/* ---- beside the thing it points at, pointing right ----
+   `--kim-at` is how far down the frame to sit, set by coach.js from the
+   target's own offset. Those are the layout's unscaled pixels, the same
+   ones the design is drawn in, so the aim survives the canvas being
+   scaled to any window. */
+.kim-coach--left {
+  inset-block-start: var(--kim-at, var(--salt-spacing-200));
+  inset-inline-end: calc(100% + var(--salt-spacing-300));
+}
+.kim-coach--left::after {
+  inset-block-start: calc(50% - var(--kim-arrow) / 2);
+  inset-inline-end: calc(var(--kim-arrow) / -2);
+  border-block-end: 0; border-inline-start: 0;
+}
+
+/* THE RING IS THE OTHER HALF OF THE NUDGE. The bubble says what to do and
+   the ring says where — a bubble on its own leaves the reader hunting. */
+.is-coached {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-actionable-cta-background);
+  outline-offset: var(--salt-size-fixed-200);
+  border-radius: var(--salt-palette-corner-weak);
+}
+
+/* ---- a bubble that is not a child of what it points at ----
+
+   STEPS 2 AND 3 POINT AT THINGS THAT DO NOT EXIST YET when the page loads,
+   and are rebuilt every time the deck or the grid is redrawn — so their
+   bubbles cannot live inside them. They are children of the view instead,
+   and coach.js measures where to put them.
+
+   A CARD IS A <button>, WHICH SETTLES IT ANYWAY. A button may not contain
+   another button, and every bubble carries a Skip; so a bubble inside a
+   card would be invalid HTML whose Skip may or may not be reachable
+   depending on the browser.
+
+   The numbers coach.js writes are the LAYOUT's own pixels — it divides the
+   canvas scale back out — so the aim holds at any window size. */
+.kim-coach--float {
+  inset-block-start: var(--kim-y, 0px);
+  inset-inline-start: var(--kim-x, 0px);
+  inset-inline-end: auto;
+  inset-block-end: auto;
+}
+.kim-coach--float.kim-coach--below::after {
+  inset-inline-start: var(--salt-spacing-400);
+  inset-inline-end: auto;
+}
+/* beside the thing, pointing right at it */
+.kim-coach--leftof::after {
+  inset-block-start: calc(50% - var(--kim-arrow) / 2);
+  inset-inline-end: calc(var(--kim-arrow) / -2);
+  inset-inline-start: auto;
+  border-block-end: 0; border-inline-start: 0;
+}

@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Performance to plan</title>
+
+<!-- THE DESIGN SYSTEM. Six stylesheets and three scripts, all shared - this
+     prototype owns none of them. Change a button in lofi-ds-1/ and every
+     prototype in this folder follows without being touched. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Shantell+Sans:wght@400;600;700&family=Varela+Round&display=swap">
+<link rel="stylesheet" href="../../../lofi-ds-1/css/lofi-face.css">
+<link rel="stylesheet" href="../../../lofi-ds-1/css/lofi-tokens.css">
+<link rel="stylesheet" href="../../../lofi-ds-1/css/lofi-base.css">
+<link rel="stylesheet" href="../../../lofi-ds-1/css/lofi-stage.css">
+<link rel="stylesheet" href="../../../lofi-ds-1/css/lofi-shell.css">
+<link rel="stylesheet" href="../../../lofi-ds-1/css/lofi-tabs.css">
+<link rel="stylesheet" href="../../../lofi-ds-1/css/lofi-table.css">
+<link rel="stylesheet" href="../../../lofi-ds-1/css/lofi-controls.css">
+
+<!-- AND THIS ONE FILE IS THIS PROTOTYPE'S OWN. If it ever grows past a
+     handful of rules, that is usually the system missing a component. -->
+<link rel="stylesheet" href="app.css">
+</head>
+<body class="lofi-stage-host">
+
+<!-- THE FIXED CANVAS. Everything below is written at 1440 x 1024 and
+     scaled as one object - see lofi-ds-1/css/lofi-stage.css for why. -->
+<div class="lofi-stage-fit">
+<div class="lofi-stage" data-lofi-stage>
+
+<div class="lofi-app" id="ptp-app">
+
+  <nav class="lofi-nav" id="ptp-nav" aria-label="Main">
+    <button type="button" class="lofi-nav-tab">Surveillance</button>
+    <button type="button" class="lofi-nav-tab">Clients</button>
+    <button type="button" class="lofi-nav-tab">Portfolios <span class="lofi-caret" aria-hidden="true">▾</span></button>
+    <button type="button" class="lofi-nav-tab">Create &amp; manage <span class="lofi-caret" aria-hidden="true">▾</span></button>
+    <button type="button" class="lofi-nav-tab" aria-current="page">Analyze <span class="lofi-caret" aria-hidden="true">▾</span></button>
+  </nav>
+
+  <div class="lofi-module" id="ptp-module">
+    <h1 class="lofi-module-name">Projections module</h1>
+  </div>
+
+  <main class="lofi-page" id="ptp-page">
+    <div class="lofi-panel lofi-stack" id="ptp-panel">
+
+      <div class="lofi-tabs" role="tablist" aria-label="Projection section">
+        <button type="button" class="lofi-tab" role="tab" aria-controls="ptp-latest" aria-selected="false">Latest projection</button>
+        <button type="button" class="lofi-tab" role="tab" aria-controls="ptp-inventory" aria-selected="false">Projection inventory</button>
+        <button type="button" class="lofi-tab" role="tab" aria-controls="ptp-plan" aria-selected="true">Performance to plan
+          <span class="lofi-tab-close" role="button" tabindex="0" aria-label="Close performance to plan">✕</span></button>
+      </div>
+
+      <div id="ptp-latest" class="lofi-pane" role="tabpanel" hidden>
+        <p class="lofi-note">The latest projection would go here.</p>
+      </div>
+      <div id="ptp-inventory" class="lofi-pane" role="tabpanel" hidden>
+        <p class="lofi-note">The projection inventory would go here.</p>
+      </div>
+
+      <div id="ptp-plan" class="lofi-pane lofi-stack" role="tabpanel">
+
+        <div class="lofi-block lofi-bar" id="ptp-controls">
+          <p class="lofi-note">Note: threshold is set at (+/-)<span id="ptp-threshold-said">15</span>%</p>
+          <span class="lofi-select-wrap">
+            <label class="lofi-select-label" for="ptp-threshold">Threshold</label>
+            <select class="lofi-select" id="ptp-threshold">
+              <option value="5">5%</option>
+              <option value="10">10%</option>
+              <option value="15" selected>15%</option>
+              <option value="25">25%</option>
+            </select>
+          </span>
+        </div>
+
+        <div class="lofi-table-wrap" id="ptp-table-wrap">
+          <table class="lofi-table" id="ptp-table" data-lofi-threshold="15">
+            <caption class="lofi-sr">Projected against actual financials, by quarter</caption>
+            <thead>
+              <tr>
+                <th class="lofi-rowhead lofi-label" rowspan="2">Attributes</th>
+                <th class="lofi-label lofi-divide" rowspan="2">Projected<span class="lofi-sub">FYE 2025</span></th>
+                <th class="lofi-group lofi-label lofi-divide" colspan="6">Financials</th>
+              </tr>
+              <tr>
+                <th class="lofi-divide">Q1</th><th>Δ</th>
+                <th class="lofi-divide">Q2</th><th>Δ</th>
+                <th class="lofi-divide">Q3</th><th>Δ</th>
+              </tr>
+            </thead>
+            <tbody id="ptp-rows"><!-- built by app.js from the data below --></tbody>
+          </table>
+        </div>
+
+        <div class="lofi-bar">
+          <button type="button" class="lofi-btn" id="ptp-add">+ Add attribute</button>
+          <div class="lofi-legend">
+            <span class="lofi-legend-item"><i class="lofi-swatch lofi-swatch--pos"></i> Significant positive connotation</span>
+            <span class="lofi-legend-item"><i class="lofi-swatch lofi-swatch--neg"></i> Significant negative connotation</span>
+          </div>
+        </div>
+
+        <p class="lofi-prose" id="ptp-readout">Pick a cell to see what it says.</p>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+</div><!-- /lofi-stage -->
+</div><!-- /lofi-stage-fit -->
+
+<script src="../../../lofi-ds-1/js/lofi-stage.js"></script>
+<script src="../../../lofi-ds-1/js/lofi-tabs.js"></script>
+<script src="../../../lofi-ds-1/js/lofi-table.js"></script>
+<script src="../../../lofi-ds-1/js/lofi-main.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
+

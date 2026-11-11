@@ -1,0 +1,615 @@
+/* ===========================================================================
+   shell.css — the frame, the app bar, the page band, the view selector and
+   every small control the screens share.
+
+   >>> NO COLOUR AND NO FONT NAME IN THIS FILE. <<<
+   Every one is a Salt token out of salt-theme-caraxes.css. The only raw
+   numbers are the frame's 1440 x 1024, which your sheets fix, and a short
+   list of layout constants named at the top of .kim-frame — the things a
+   drawing sets by eye rather than by scale.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   THE STAGE — a fixed canvas that scales, never a page that reflows
+   ---------------------------------------------------------------------------
+   See js/fit.js. The design is always drawn at 1440 x 1024 and the whole
+   thing is scaled as one object, the way a slide is, so every proportion is
+   exactly as drawn whatever window it is opened in.
+   --------------------------------------------------------------------------- */
+html, body { block-size: 100%; margin: 0; overflow: hidden; }
+
+.fit-stage {
+  position: fixed; inset: 0;
+  overflow: hidden;
+  background: var(--salt-container-secondary-background);
+}
+.fit-frame {
+  position: absolute; inset-block-start: 0; inset-inline-start: 0;
+  transform-origin: top left;
+  transform: translate(var(--fit-x, 0px), var(--fit-y, 0px)) scale(var(--fit-k, 1));
+}
+
+/* ---------------------------------------------------------------------------
+   THE FRAME
+   --------------------------------------------------------------------------- */
+.kim-frame {
+  /* the layout constants, all of them, in one place */
+  --kim-gutter: 16px;   /* the card's inset from the frame */
+  --kim-pad:    16px;   /* the card's own inner padding */
+  --kim-rail-w: 320px;  /* the view selector, open */
+  --kim-rail-c: 44px;   /* the view selector, collapsed */
+  --kim-panel-pad: 12px;/* the air inside the view selector, all four sides */
+  /* THE BAR'S HEIGHT IS A NAME, not a number repeated twice. The trend
+     drawer hangs off the bottom of the app bar, so the two have to agree —
+     and the only way they cannot drift apart is for there to be one of it. */
+  --kim-bar-h: calc(var(--salt-size-base) + var(--salt-spacing-300));
+
+  box-sizing: border-box;
+  inline-size: 1440px;
+  block-size: 1024px;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  /* `clip` RATHER THAN `hidden`, AND THE DIFFERENCE IS NOT COSMETIC.
+     `hidden` makes a box a SCROLL CONTAINER that merely has no scrollbars —
+     so the browser is free to scroll it itself, and it does: focusing
+     something that lies outside it slides the whole box across to bring it
+     into view. The trend drawer starts one panel-width off the right edge
+     and takes focus the moment it opens, so the entire screen slid left to
+     meet it. `clip` is the same crop with no scrolling behind it. */
+  overflow: hidden;
+  overflow: clip;
+  position: relative;
+  background: var(--salt-container-secondary-background);
+  color: var(--salt-content-primary-foreground);
+  font-family: var(--salt-text-fontFamily);
+  font-size: var(--salt-text-fontSize);
+}
+.kim-frame *, .kim-frame *::before, .kim-frame *::after { box-sizing: border-box; }
+
+/* AN INLINE <svg> WITH A viewBox AND NO WIDTH OR HEIGHT HAS NO SIZE OF ITS
+   OWN — it STRETCHES to fill whatever box it is in, so a 16px chevron
+   quietly becomes a 300px one. Tying every icon to the text beside it is the
+   one rule that cannot be forgotten per-icon. Anything that wants its own
+   size says so afterwards. */
+.kim-frame svg, .kim-drawer svg { inline-size: 1em; block-size: 1em; flex: 0 0 auto; }
+
+.kim-sr {
+  position: absolute; inline-size: 1px; block-size: 1px;
+  padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   THE APP BAR
+   ---------------------------------------------------------------------------
+   `data-salt-surface="accented"` swaps the token VALUES underneath this
+   element without a single rule in here changing: the bar asks for
+   `container-primary-background` exactly as the page does, and gets the
+   colour that belongs on teal. That is Salt's nested-provider pattern,
+   written out for a build with no React in it.
+   --------------------------------------------------------------------------- */
+.kim-appbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--salt-spacing-300);
+  padding-inline: var(--salt-spacing-300);
+  block-size: var(--kim-bar-h);
+  background: var(--salt-container-primary-background);
+  color: var(--salt-content-primary-foreground);
+}
+.kim-brand { font-weight: var(--salt-text-fontWeight-strong); letter-spacing: 0.02em; }
+
+.kim-nav { display: flex; align-items: center; gap: var(--salt-spacing-100); justify-self: center; }
+.kim-navitem {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-100);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  cursor: pointer; color: inherit; background: none;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) transparent;
+  border-radius: var(--salt-palette-corner-weak);
+}
+.kim-navitem:hover { background: var(--salt-selectable-background-hover); }
+
+/* ON THE TEAL BAR the current page is CUT OUT of the bar rather than washed
+   onto it: a white fill with the bar's own teal in it. Both halves are named
+   by the accented surface per mode, so this rule says no colour and cannot
+   drift out of step with the bar behind it. */
+.kim-navitem[aria-current="page"] {
+  background: var(--salt-target-background-selected);
+  color: var(--salt-selectable-foreground-selected);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.kim-navitem[aria-current="page"]:hover { background: var(--salt-target-background-selected); }
+
+.kim-appbar-right { display: flex; align-items: center; gap: var(--salt-spacing-200); justify-self: end; }
+.kim-search {
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  inline-size: 17rem; block-size: var(--salt-size-base);
+  padding-inline: var(--salt-spacing-200);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) currentColor;
+  border-radius: 999px;
+}
+.kim-search input {
+  flex: 1 1 auto; min-inline-size: 0;
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  color: inherit; background: none; border: none; outline: none;
+}
+.kim-search input::placeholder { color: inherit; opacity: 1; }
+
+.kim-iconbtn {
+  display: inline-grid; place-items: center;
+  inline-size: var(--salt-size-base); block-size: var(--salt-size-base);
+  padding: 0; cursor: pointer; color: inherit; background: none;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) transparent;
+  border-radius: 999px;
+}
+.kim-iconbtn:hover { background: var(--salt-selectable-background-hover); }
+
+/* ---------------------------------------------------------------------------
+   THE PAGE BAND
+   --------------------------------------------------------------------------- */
+.kim-pageband {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--salt-spacing-300);
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  background: var(--salt-container-primary-background);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-secondary-borderColor);
+}
+.kim-pagetitle {
+  margin: 0;
+  font-size: var(--salt-text-h3-fontSize);
+  line-height: var(--salt-text-h3-lineHeight);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.kim-pagenav { display: flex; align-items: center; gap: var(--salt-spacing-300); }
+.kim-pagenav-item {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-100);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  padding: var(--salt-spacing-100) 0;
+  cursor: pointer; background: none;
+  color: var(--salt-navigable-foreground);
+  border: none;
+  /* THE INDICATOR IS A BORDER THAT IS ALWAYS THERE, transparent until the
+     item is current. Adding one on selection would move the word by two
+     pixels every time, which is the oldest tab-strip bug there is. */
+  border-block-end: var(--salt-size-fixed-200) var(--salt-borderStyle-solid) transparent;
+}
+.kim-pagenav-item:hover { color: var(--salt-navigable-foreground-active); }
+.kim-pagenav-item[aria-current="page"] {
+  color: var(--salt-navigable-foreground-active);
+  font-weight: var(--salt-text-fontWeight-strong);
+  border-block-end-color: var(--salt-navigable-indicator-active);
+}
+
+/* ---------------------------------------------------------------------------
+   THE BODY — selector on the left, card on the right
+   ---------------------------------------------------------------------------
+   ONE GRID COLUMN FOR THE SELECTOR, whose width is a custom property. The
+   collapse is therefore one number changing, and the card beside it takes
+   the room back without being told to: `minmax(0, 1fr)` and nothing else.
+   --------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+   OPENING AND CLOSING THE SELECTOR, WITHOUT A JUMP
+   ---------------------------------------------------------------------------
+   THE WHOLE MOVE IS ONE NUMBER CHANGING: `--kim-col`, the width of the
+   first grid column. The card beside it takes the room back without being
+   told to, because its own column is `minmax(0, 1fr)`.
+
+   A CUSTOM PROPERTY CANNOT BE ANIMATED UNTIL IT HAS BEEN DECLARED. To the
+   browser `--kim-col` is just text — "320px" and "44px" are two unrelated
+   strings and there is nothing in between them to draw. `@property` says
+   it is a LENGTH, and from that moment the browser can work out every
+   width on the way. Without these five lines the panel still opens and
+   closes; it just snaps.
+
+   THE CONTENTS KEEP THEIR OWN WIDTH while the column shrinks, so the
+   panel slides out of sight rather than being squeezed — a list
+   re-wrapping to 44px on its way out is the opposite of calm — and the
+   panel is clipped by `overflow: hidden`.
+   --------------------------------------------------------------------------- */
+@property --kim-col {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 320px;
+}
+
+.kim-frame {
+  --kim-col: var(--kim-rail-w);
+  transition: --kim-col 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.kim-frame[data-panel="closed"] { --kim-col: var(--kim-rail-c); }
+
+.kim-body {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--kim-col) minmax(0, 1fr);
+  min-block-size: 0;
+}
+
+.kim-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-block-size: 0;
+  padding: var(--kim-panel-pad);
+  overflow: hidden;
+  background: var(--salt-container-primary-background);
+  border-inline-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                     var(--salt-separable-secondary-borderColor);
+  transition: opacity 160ms ease;
+}
+/* the contents keep the OPEN width while the column shrinks, less the
+   padding either side, so the panel slides out of sight instead of
+   re-wrapping its way down to 44px */
+.kim-panel > * { inline-size: calc(var(--kim-rail-w) - var(--kim-panel-pad) * 2); }
+.kim-frame[data-panel="closed"] .kim-panel { opacity: 0; pointer-events: none; }
+
+/* THE RAIL SITS OVER THE PANEL'S COLUMN rather than taking one of its own,
+   so the two can cross over: the panel fades out as the column closes and
+   the rail's button fades in behind it, a touch later. Two columns would
+   have meant the main card jumping sideways by 44px at the moment of the
+   swap. */
+.kim-rail {
+  position: absolute; inset-block: 0; inset-inline-start: 0;
+  inline-size: var(--kim-rail-c);
+  display: grid; justify-items: center; align-content: start;
+  padding-block-start: var(--salt-spacing-200);
+  background: var(--salt-container-primary-background);
+  border-inline-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                     var(--salt-separable-secondary-borderColor);
+  opacity: 0; pointer-events: none;
+  transition: opacity 160ms ease;
+}
+.kim-frame[data-panel="closed"] .kim-rail {
+  opacity: 1; pointer-events: auto; transition-delay: 140ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kim-frame, .kim-panel, .kim-rail { transition: none; }
+}
+
+.kim-panel-head {
+  display: flex; align-items: center;
+  padding: 0 0 var(--salt-spacing-200);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-secondary-borderColor);
+}
+/* THE NAME ON THE LEFT, THE CONTROLS ON THE RIGHT, AND `auto` BETWEEN.
+   A margin of `auto` is the whole gap: it takes every pixel that is left
+   over, so the two ends are pinned to the two edges whatever the middle
+   weighs. Nothing here is a number that has to be kept in step with the
+   width of a word. */
+.kim-panel-title {
+  margin: 0 auto 0 0;
+  white-space: nowrap;
+  font-size: var(--salt-text-h4-fontSize);
+  line-height: var(--salt-text-h4-lineHeight);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.kim-right-controls {
+  display: flex; align-items: center; gap: var(--salt-spacing-50);
+  flex: 0 0 auto;
+}
+.kim-panel-body {
+  display: grid; grid-template-rows: auto auto auto minmax(0, 1fr);
+  gap: var(--salt-spacing-200);
+  padding: var(--salt-spacing-200) 0 0;
+  min-block-size: 0;
+}
+
+.kim-overview-item {
+  font: inherit; font-size: var(--salt-text-fontSize);
+  font-weight: var(--salt-text-fontWeight-strong);
+  text-align: start; cursor: pointer;
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-container-secondary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-tertiary-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+}
+.kim-overview-item:hover { background: var(--salt-target-background-hover); }
+.kim-overview-item[aria-current="page"] {
+  background: var(--salt-target-background-selected);
+  border-color: var(--salt-separable-accented-borderColor);
+}
+
+.kim-panel-hint {
+  margin: 0;
+  font-size: var(--salt-text-fontSize);
+  color: var(--salt-content-secondary-foreground);
+}
+
+/* the tree of groups and sub-industries */
+.kim-grouplist { overflow: auto; min-block-size: 0; }
+.kim-grouprow, .kim-subrow {
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  inline-size: 100%;
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-align: start; cursor: pointer;
+  padding: var(--salt-spacing-200) var(--salt-spacing-200);
+  color: var(--salt-content-primary-foreground);
+  background: none; border: none;
+  border-radius: var(--salt-palette-corner-weak);
+}
+.kim-grouprow { font-weight: var(--salt-text-fontWeight-strong); }
+/* THE INDENT IS PADDING, NOT A MARGIN, so the row the pointer lands on is
+   still the full width of the panel. A margin would leave a dead strip down
+   the left that looks like part of the row and is not. */
+.kim-subrow { padding-inline-start: var(--salt-spacing-400); }
+.kim-grouprow:hover, .kim-subrow:hover { background: var(--salt-target-background-hover); }
+.kim-grouprow[aria-expanded="true"] { background: var(--salt-container-secondary-background); }
+.kim-subrow[aria-current="true"] {
+  background: var(--salt-target-background-selected);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.kim-rowname { flex: 1 1 auto; min-inline-size: 0; }
+.kim-grouprow svg, .kim-subrow svg { color: var(--salt-content-secondary-foreground); }
+.kim-grouprow[aria-expanded="true"] > .kim-chev { transform: rotate(180deg); }
+.kim-chev { transition: transform 160ms ease; }
+
+/* the little "Material Move" tag that rides on a row */
+.kim-tag {
+  font-size: var(--salt-text-label-fontSize);
+  letter-spacing: var(--salt-text-label-letterSpacing);
+  padding: 2px var(--salt-spacing-100);
+  white-space: nowrap;
+  color: var(--salt-content-negative-foreground);
+  background: var(--salt-content-negative-background);
+  border-radius: var(--salt-palette-corner-weak);
+}
+
+/* ---------------------------------------------------------------------------
+   THE CARD
+   --------------------------------------------------------------------------- */
+.kim-main { padding: var(--kim-gutter); min-block-size: 0; display: grid; }
+.kim-card {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  min-block-size: 0;
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-container-primary-borderColor);
+  border-radius: var(--salt-palette-corner-strong);
+}
+
+.kim-searchrow {
+  position: relative;
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  padding: var(--salt-spacing-200) var(--kim-pad);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-tertiary-borderColor);
+}
+
+.kim-viewhead {
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  padding: var(--salt-spacing-200) var(--kim-pad);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-tertiary-borderColor);
+}
+.kim-view-title {
+  margin: 0;
+  font-size: var(--salt-text-h3-fontSize);
+  line-height: var(--salt-text-h3-lineHeight);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.kim-view-count {
+  font-size: var(--salt-text-fontSize);
+  padding: 2px var(--salt-spacing-200);
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-container-tertiary-background);
+  border-radius: var(--salt-palette-corner-weak);
+}
+.kim-view-count[hidden] { display: none; }
+.kim-view-tools {
+  margin-inline-start: auto;
+  display: flex; align-items: center; gap: var(--salt-spacing-300);
+}
+
+.kim-view { position: relative; min-block-size: 0; display: grid; }
+.kim-view-pane {
+  min-block-size: 0; overflow: auto;
+  padding: var(--kim-pad);
+  display: grid; align-content: start; gap: var(--salt-spacing-300);
+}
+.kim-view-pane[hidden] { display: none; }
+
+/* ---------------------------------------------------------------------------
+   THE SMALL CONTROLS
+   --------------------------------------------------------------------------- */
+.kim-btn {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-50);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.02em;
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  block-size: var(--salt-size-base);
+  /* A LABEL OF TWO WORDS WILL BREAK BETWEEN THEM the moment the box it is
+     in gets tight, and "GROUP / BY" stacked inside a 28px-tall button
+     reads as a fault. The button keeps its words on one line and takes
+     whatever width that needs; what gives way is the space beside it. The
+     font on your machine is Open Sans, which is wider than the stand-in
+     this sandbox falls back to — so a button that fits here can still
+     wrap there unless it is told not to. */
+  white-space: nowrap; flex: 0 0 auto;
+  cursor: pointer;
+  border-radius: var(--salt-palette-corner-weak);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) transparent;
+}
+.kim-btn--secondary {
+  color: var(--salt-actionable-secondary-foreground);
+  background: var(--salt-actionable-secondary-background);
+  border-color: var(--salt-actionable-secondary-borderColor);
+}
+.kim-btn--secondary:hover { background: var(--salt-actionable-secondary-background-hover); }
+.kim-btn--cta {
+  color: var(--salt-actionable-cta-foreground);
+  background: var(--salt-actionable-cta-background);
+}
+.kim-btn--cta:hover { background: var(--salt-actionable-cta-background-hover); }
+.kim-btn--link {
+  color: var(--salt-actionable-secondary-foreground);
+  background: none;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.kim-btn--link[hidden] { display: none; }
+
+:where(.kim-frame, .kim-drawer) :focus-visible {
+  outline: var(--salt-focused-outlineWidth) var(--salt-focused-outlineStyle)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-focused-outlineOffset);
+}
+
+/* ---- a text field: a line under it, as the sheets draw ---- */
+.kim-field {
+  position: relative;
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  flex: 1 1 auto; min-inline-size: 0;
+  padding: var(--salt-spacing-100) 0;
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-editable-borderColor);
+}
+.kim-field input {
+  flex: 1 1 auto; min-inline-size: 0;
+  font: inherit; font-size: var(--salt-text-fontSize);
+  block-size: var(--salt-size-base);
+  color: var(--salt-editable-foreground);
+  background: none; border: none; outline: none;
+}
+.kim-field input::placeholder { color: var(--salt-content-secondary-foreground); opacity: 1; }
+/* THE BROWSER PUTS ITS OWN CLEAR CROSS IN A type="search" BOX, and this
+   page draws one of its own that also goes back to the overview. Two
+   crosses side by side, one of which only empties the box, is a choice
+   nobody should have to make. */
+.kim-field input[type="search"]::-webkit-search-cancel-button { display: none; }
+.kim-field-icon { color: var(--salt-content-secondary-foreground); }
+.kim-field-clear {
+  display: inline-grid; place-items: center;
+  inline-size: var(--salt-size-base); block-size: var(--salt-size-base);
+  padding: 0; cursor: pointer; background: none; border: none;
+  color: var(--salt-content-secondary-foreground);
+}
+.kim-field-clear[hidden] { display: none; }
+.kim-kimsearch { max-inline-size: 30rem; }
+
+/* the type-ahead list under the KIM search */
+.kim-suggest {
+  position: absolute; inset-block-start: calc(100% + var(--salt-spacing-50));
+  inset-inline: 0; z-index: 60;
+  margin: 0; padding: var(--salt-spacing-50) 0; list-style: none;
+  max-block-size: 18rem; overflow: auto;
+  background: var(--salt-overlayable-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+  box-shadow: var(--salt-overlayable-shadow);
+}
+.kim-suggest[hidden] { display: none; }
+.kim-suggest li { display: block; }
+.kim-suggest button {
+  inline-size: 100%; display: flex; align-items: baseline; gap: var(--salt-spacing-200);
+  font: inherit; font-size: var(--salt-text-fontSize); text-align: start;
+  padding: var(--salt-spacing-100) var(--salt-spacing-300);
+  cursor: pointer; background: none; border: none;
+  color: var(--salt-content-primary-foreground);
+}
+.kim-suggest button:hover, .kim-suggest button.is-active {
+  background: var(--salt-target-background-hover);
+}
+.kim-suggest .kim-suggest-cat {
+  margin-inline-start: auto;
+  color: var(--salt-content-secondary-foreground);
+  font-size: var(--salt-text-label-fontSize);
+  letter-spacing: var(--salt-text-label-letterSpacing);
+  text-transform: uppercase;
+}
+
+/* ---- a menu ---- */
+.kim-menuwrap { position: relative; display: inline-flex; }
+.kim-menu {
+  position: absolute; inset-block-start: calc(100% + var(--salt-spacing-50));
+  inset-inline-start: 0; z-index: 70;
+  min-inline-size: 12rem;
+  padding: var(--salt-spacing-50) 0;
+  background: var(--salt-overlayable-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+  box-shadow: var(--salt-overlayable-shadow);
+}
+.kim-menu--end { inset-inline-start: auto; inset-inline-end: 0; }
+.kim-menu[hidden] { display: none; }
+.kim-menu-item {
+  inline-size: 100%; display: flex; align-items: center; gap: var(--salt-spacing-200);
+  font: inherit; font-size: var(--salt-text-fontSize); text-align: start;
+  padding: var(--salt-spacing-100) var(--salt-spacing-300);
+  cursor: pointer; background: none; border: none;
+  color: var(--salt-content-primary-foreground);
+}
+.kim-menu-item:hover { background: var(--salt-target-background-hover); }
+.kim-menu-item[aria-checked="true"] { font-weight: var(--salt-text-fontWeight-strong); }
+
+/* `hidden` IS ONLY A DEFAULT, AND `display` BEATS IT. Every component
+   below sets its own `display`, which overrides the browser's
+   `[hidden] { display: none }` — so a head tool told to hide stays on
+   screen. One rule for all of them rather than three remembered
+   separately: the Download menu was visible on the overview for exactly
+   this reason. */
+.kim-menuwrap[hidden], .kim-segmented[hidden], .kim-switch[hidden],
+.kim-btn[hidden], .kim-field[hidden] { display: none; }
+
+/* ---- the switch ---- */
+.kim-switch {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-200);
+  cursor: pointer; font-size: var(--salt-text-fontSize);
+}
+.kim-switch input { position: absolute; opacity: 0; inline-size: 0; block-size: 0; }
+.kim-switch-box {
+  display: inline-grid; place-items: center;
+  inline-size: 1.33em; block-size: 1.33em;
+  color: transparent;
+  background: var(--salt-editable-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-editable-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+}
+.kim-switch input:checked + .kim-switch-box {
+  color: var(--salt-actionable-cta-foreground);
+  background: var(--salt-actionable-cta-background);
+  border-color: var(--salt-actionable-cta-background);
+}
+.kim-switch input:focus-visible + .kim-switch-box {
+  outline: var(--salt-focused-outlineWidth) var(--salt-focused-outlineStyle)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-focused-outlineOffset);
+}
+
+/* ---- a segmented pair of icon buttons ---- */
+.kim-segmented {
+  display: inline-flex;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-primary-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+  overflow: hidden;
+}
+.kim-segbtn {
+  display: inline-grid; place-items: center;
+  inline-size: var(--salt-size-base); block-size: var(--salt-size-base);
+  padding: 0; cursor: pointer; border: none;
+  color: var(--salt-selectable-foreground);
+  background: var(--salt-selectable-background);
+}
+.kim-segbtn + .kim-segbtn {
+  border-inline-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                       var(--salt-separable-primary-borderColor);
+}
+.kim-segbtn:hover { background: var(--salt-selectable-background-hover); }
+.kim-segbtn[aria-pressed="true"] {
+  color: var(--salt-actionable-cta-foreground);
+  background: var(--salt-actionable-cta-background);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kim-chev { transition: none; }
+}

@@ -1,0 +1,10 @@
+﻿/* app.css — only what is true of THIS prototype.
+
+   Deliberately almost empty. Every time something wants to go in here,
+   the first question is whether lofi-ds-1 should have it instead, because
+   the next prototype will want it too. */
+
+/* the readout line under the table, which is this prototype's own idea */
+#ptp-readout { color: var(--lofi-ink-soft); margin: 0; }
+#ptp-readout strong { color: var(--lofi-ink); }
+

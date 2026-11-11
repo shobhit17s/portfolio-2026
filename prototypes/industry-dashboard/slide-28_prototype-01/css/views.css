@@ -1,0 +1,551 @@
+/* ===========================================================================
+   views.css — the three screens: the card deck, the heat grid, and one KIM
+   with everything it drives.
+
+   No colour and no font name in here either: the heat ramp at the top is
+   built out of the two wash tokens the theme already carries.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   THE HEAT RAMP
+   ---------------------------------------------------------------------------
+   WHERE THE TWO COLOURS COME FROM. `--salt-content-positive-background` and
+   `-negative-background` are your forest and your fire, each mixed 22% into
+   the surface. That 22% was not chosen by eye: tools/salt-wash-derive.py in
+   the performance-to-plan build walked the mix from nothing upward and
+   printed what each strength did to every piece of text that can sit on it.
+   22% is the quietest mix that still steps clearly off a plain row, and it
+   leaves the figure on the cell at 12.7:1 and the delta beside it at 5.2:1.
+
+   WHICH IS WHY THE STRONGEST STEP HERE IS EXACTLY THAT MIX AND NO MORE.
+   The two lighter steps are made by mixing it BACK toward the surface, so
+   every cell in the ramp is somewhere between "no tint" and the measured
+   one. Contrast therefore cannot be worse anywhere in the ramp than the
+   figure already checked — a ramp built by mixing the other way, toward the
+   raw colour, would have put the darkest cells beyond what was measured.
+
+   AND THE DIRECTION FOLLOWS YOUR SHEET. The scale on the sheet runs
+   Positive at the pale end to Negative at the strong end, so a positive
+   impact takes forest and a negative one takes fire.
+   --------------------------------------------------------------------------- */
+.kim-frame, .kim-drawer {
+  --kim-heat-pos-1: color-mix(in srgb, var(--salt-content-positive-background) 38%,
+                              var(--salt-container-primary-background));
+  --kim-heat-pos-2: color-mix(in srgb, var(--salt-content-positive-background) 68%,
+                              var(--salt-container-primary-background));
+  --kim-heat-pos-3: var(--salt-content-positive-background);
+  --kim-heat-neg-1: color-mix(in srgb, var(--salt-content-negative-background) 38%,
+                              var(--salt-container-primary-background));
+  --kim-heat-neg-2: color-mix(in srgb, var(--salt-content-negative-background) 68%,
+                              var(--salt-container-primary-background));
+  --kim-heat-neg-3: var(--salt-content-negative-background);
+}
+
+/* ===========================================================================
+   1 · THE OVERVIEW
+   =========================================================================== */
+.kim-cardgroups { display: grid; gap: var(--salt-spacing-300); }
+
+.kim-cardgroup { display: grid; gap: var(--salt-spacing-200); }
+.kim-cardgroup + .kim-cardgroup {
+  padding-block-start: var(--salt-spacing-300);
+  border-block-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                      var(--salt-separable-tertiary-borderColor);
+}
+.kim-grouphead {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-200);
+  justify-self: start;
+  font: inherit;
+  font-size: var(--salt-text-h4-fontSize);
+  font-weight: var(--salt-text-fontWeight-strong);
+  padding: 0; cursor: pointer; background: none; border: none;
+  color: var(--salt-content-primary-foreground);
+}
+.kim-grouphead[aria-expanded="false"] + .kim-cards { display: none; }
+.kim-grouphead[aria-expanded="true"] > .kim-chev { transform: rotate(180deg); }
+.kim-groupcount {
+  font-size: var(--salt-text-fontSize);
+  font-weight: var(--salt-text-fontWeight);
+  color: var(--salt-content-secondary-foreground);
+}
+
+/* FIVE ACROSS AT 1440, as your sheet draws it — but written as a minimum
+   width rather than as the number five, so the deck keeps its shape if the
+   frame is ever given a different width, and drops to four rather than
+   squashing when the selector is open on a narrower one. */
+.kim-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(184px, 1fr));
+  gap: var(--salt-spacing-200);
+}
+
+.kim-card-item {
+  position: relative;
+  display: grid; align-content: start; gap: var(--salt-spacing-100);
+  text-align: start; cursor: pointer;
+  padding: var(--salt-spacing-200);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-container-primary-borderColor);
+  /* THE TOP EDGE IS THE ONE LOUD LINE, as drawn: a 3px accent across the
+     head of every card, which is what makes the deck read as a deck rather
+     than as a wall of boxes. */
+  border-block-start: 3px var(--salt-borderStyle-solid)
+                      var(--salt-separable-accented-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+}
+.kim-card-item:hover {
+  background: var(--salt-target-background-hover);
+  border-color: var(--salt-separable-accented-borderColor);
+  border-block-start-color: var(--salt-separable-accented-borderColor);
+}
+.kim-card-top { display: flex; align-items: start; gap: var(--salt-spacing-100); }
+.kim-card-name {
+  flex: 1 1 auto; min-inline-size: 0;
+  font-size: var(--salt-text-h4-fontSize);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.kim-card-asof, .kim-card-label {
+  color: var(--salt-content-secondary-foreground);
+  font-size: var(--salt-text-fontSize);
+}
+.kim-card-label { margin-block-start: var(--salt-spacing-100); }
+.kim-card-big {
+  font-size: var(--salt-text-h3-fontSize);
+  line-height: var(--salt-text-h3-lineHeight);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.kim-card-strong { font-weight: var(--salt-text-fontWeight-strong); }
+
+/* the star: a button inside a button is illegal, so it is a span the card
+   handles — the card's own click reads which half was pressed */
+.kim-star { color: var(--salt-separable-primary-borderColor); }
+.kim-star.is-on { color: var(--salt-content-accented-foreground); }
+
+/* the count of material movements, washed the way a grid cell is */
+.kim-movepill {
+  justify-self: start;
+  padding: 2px var(--salt-spacing-200);
+  font-weight: var(--salt-text-fontWeight-strong);
+  background: var(--kim-heat-neg-2);
+  border-radius: var(--salt-palette-corner-weak);
+}
+.kim-movepill.is-quiet { background: var(--salt-container-tertiary-background); }
+
+/* THE HOVER BREAKDOWN. It is a child of the pill it belongs to, so it is
+   placed by sitting inside it rather than by measurement — which matters,
+   because the whole canvas is scaled and a measured position would be
+   measured in the wrong units. */
+.kim-card-pop {
+  position: absolute; inset-block-start: 50%; inset-inline-start: calc(100% + 10px);
+  z-index: 40;
+  inline-size: max-content;
+  transform: translateY(-50%);
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  display: none; gap: var(--salt-spacing-100);
+  background: var(--salt-overlayable-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+  box-shadow: var(--salt-overlayable-shadow);
+  pointer-events: none;
+}
+.kim-movewrap { position: relative; display: inline-flex; }
+/* the other side, for a card at the end of a row — see views.js */
+.kim-card-pop.is-flipped {
+  inset-inline-start: auto;
+  inset-inline-end: calc(100% + 10px);
+}
+.kim-movewrap:hover .kim-card-pop, .kim-movewrap:focus-within .kim-card-pop { display: grid; }
+.kim-card-pop dt { color: var(--salt-content-secondary-foreground); }
+.kim-card-pop dd { margin: 0 0 var(--salt-spacing-100); font-weight: var(--salt-text-fontWeight-strong); }
+.kim-card-pop dd:last-child { margin-block-end: 0; }
+
+/* ---- the same deck as rows ----
+   ONE COLUMN PER CHILD OF THE CARD, in the order the card builds them:
+   name, as-of, "# KIMs", the count, "# Material Movements", the pill,
+   "Most Moved KIM", the metric. Fewer columns than children does not
+   truncate — the extras wrap onto a second row, which is what the first
+   version of this did and why every row was two lines tall. */
+.kim-cards--list { display: grid; grid-template-columns: 1fr; gap: 0; }
+.kim-cards--list .kim-card-item {
+  grid-template-columns: minmax(0, 1.6fr) 8.5rem 4.5rem 3rem 11rem 3.5rem 8rem minmax(0, 1.6fr);
+  align-items: center; gap: var(--salt-spacing-300);
+  border: none;
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-tertiary-borderColor);
+  border-radius: 0;
+}
+.kim-cards--list .kim-card-big { font-size: var(--salt-text-fontSize); line-height: inherit; }
+.kim-cards--list .kim-card-label { margin-block-start: 0; }
+
+.kim-empty {
+  padding: var(--salt-spacing-400);
+  text-align: center;
+  color: var(--salt-content-secondary-foreground);
+}
+
+/* ===========================================================================
+   2 · THE HEAT GRID
+   =========================================================================== */
+.kim-gridwrap {
+  position: relative;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+  overflow: hidden;
+}
+/* THE GRID TAKES THE ROOM THE CARD HAS AND NOT A PIXEL MORE. `align-self:
+   start` keeps it the height of its own rows when there are few of them —
+   a half-empty grid stretched to the bottom of the card looks broken — and
+   `max-block-size: 100%` stops it running past the card when there are
+   many, at which point it scrolls inside itself and the legend underneath
+   stays put. A fixed height here would be right at one row count only. */
+#kim-view-sub { align-content: stretch; grid-template-rows: minmax(0, 1fr) auto; }
+#kim-view-sub .kim-gridwrap { align-self: start; max-block-size: 100%; min-block-size: 0; }
+.kim-gridscroll { overflow: auto; min-block-size: 0; }
+
+.kim-grid {
+  inline-size: max-content; min-inline-size: 100%;
+  border-collapse: separate; border-spacing: 0;
+  font-size: var(--salt-text-fontSize);
+}
+.kim-grid th, .kim-grid td {
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  text-align: start; vertical-align: middle; white-space: nowrap;
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-tertiary-borderColor);
+}
+
+/* THE HEAD STAYS WHILE THE ROWS GO BY, and it is two rows deep, so the
+   second row has to be told how far down it sits. `--kim-head-1` is the
+   first row's height, measured once by views.js — a number here instead
+   would be a guess that breaks the moment the density changes. */
+.kim-grid thead th {
+  position: sticky; inset-block-start: 0; z-index: 3;
+  background: var(--salt-container-tertiary-background);
+  font-weight: var(--salt-text-fontWeight-strong);
+  border-block-end: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+                    var(--salt-separable-accented-borderColor);
+}
+.kim-grid thead tr:first-child th { z-index: 4; }
+.kim-grid thead tr:nth-child(2) th { inset-block-start: var(--kim-head-1, 34px); }
+.kim-grid-sub {
+  display: block;
+  font-weight: var(--salt-text-fontWeight);
+  color: var(--salt-content-secondary-foreground);
+  font-size: var(--salt-text-label-fontSize);
+}
+
+/* THE FIRST THREE COLUMNS DO NOT TRAVEL. Scrolling sideways through eight
+   quarters is useless if the name of the thing being scrolled goes with
+   them. Each one is told where it starts, because a sticky column has to
+   know its own offset. */
+.kim-grid .kim-col-pin {
+  position: sticky; z-index: 2;
+  background: var(--salt-container-primary-background);
+}
+/* THE FROZEN HEAD CELLS ARE THE TOP OF THE PILE, and they have to say so
+   in one place. Scrolling sideways slides "Quarterly Data" underneath
+   "Category & KIMs" — unless the group header, which is also sticky and
+   also in the head, happens to win the stacking order, in which case it
+   slides OVER the frozen names instead. Two sticky cells in the same
+   stacking context are ordered by z-index alone; left to the defaults the
+   later cell in the markup wins, which is the wrong one. */
+.kim-grid thead tr:first-child .kim-col-pin,
+.kim-grid thead .kim-col-pin { z-index: 6; background: var(--salt-container-tertiary-background); }
+.kim-grid .kim-col-1 { inset-inline-start: 0; inline-size: 15rem; }
+.kim-grid .kim-col-2 { inset-inline-start: 15rem; inline-size: 9rem; }
+.kim-grid .kim-col-3 { inset-inline-start: 24rem; inline-size: 9rem; }
+/* the edge of the frozen block: a line rather than a shadow, because a
+   border on a sticky cell joins the table's layout and widens the column */
+.kim-grid .kim-col-3 {
+  box-shadow: inset -2px 0 0 var(--salt-separable-secondary-borderColor);
+}
+/* and the Trend column, which does not travel either */
+.kim-grid .kim-col-trend {
+  position: sticky; inset-inline-end: 0; z-index: 2;
+  background: var(--salt-container-primary-background);
+  box-shadow: inset 2px 0 0 var(--salt-separable-secondary-borderColor);
+  text-align: center;
+}
+.kim-grid thead tr:first-child .kim-col-trend,
+.kim-grid thead .kim-col-trend { z-index: 6; background: var(--salt-container-tertiary-background); }
+
+/* AND THAT DOUBLED SELECTOR IS NOT BELT AND BRACES. `:first-child` counts
+   as a CLASS when the browser weighs two rules against each other, so
+   `.kim-grid thead tr:first-child th` is heavier than
+   `.kim-grid thead .kim-col-pin` — two classes and three elements against
+   two classes and one. The frozen header cells were therefore taking the
+   row's z-index of 4 rather than their own 6, and scrolling sideways slid
+   "Quarterly Data" over the top of "Latest Value". Naming the row in the
+   rule puts it back in front. */
+
+.kim-grid tbody tr:hover .kim-col-pin,
+.kim-grid tbody tr:hover .kim-col-trend { background: var(--salt-target-background-hover); }
+.kim-grid tbody tr:hover > td { background-color: var(--salt-target-background-hover); }
+
+/* the three category rows */
+.kim-grouprow-grid > th {
+  position: sticky; inset-inline-start: 0;
+  background: var(--salt-container-secondary-background);
+  font-size: var(--salt-text-h4-fontSize);
+}
+.kim-grouprow-grid > td { background: var(--salt-container-secondary-background); }
+/* THE CATEGORY NAME DOES NOT TRAVEL EITHER. The row it sits in is as wide
+   as the whole table, so scrolling eight quarters sideways carried
+   "Volume Drivers" off the left edge and left three unlabelled bands
+   behind. The ROW cannot stay still — it has to scroll with the columns —
+   so the BUTTON inside it is what sticks. */
+.kim-catbtn {
+  position: sticky; inset-inline-start: var(--salt-spacing-200); z-index: 1;
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-200);
+  font: inherit; font-size: var(--salt-text-h4-fontSize);
+  font-weight: var(--salt-text-fontWeight-strong);
+  padding: 0; cursor: pointer; background: none; border: none;
+  color: var(--salt-content-primary-foreground);
+}
+.kim-catbtn[aria-expanded="true"] > .kim-chev { transform: rotate(180deg); }
+
+/* ---- a column group's own header ---- */
+.kim-colgroup-btn {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-100);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  font-weight: var(--salt-text-fontWeight-strong);
+  padding: 0; cursor: pointer; background: none; border: none;
+  color: var(--salt-content-primary-foreground);
+}
+/* AND THE GROUP'S NAME STAYS PUT TOO, for the same reason the category
+   name does: "Quarterly Data" scrolling away while four of its quarters
+   are still on screen leaves a band of columns belonging to nothing. It
+   sticks just clear of the frozen block, which is 33rem wide — the three
+   pinned columns added up. Only on the sub-industry grid: the one-metric
+   screen has no frozen columns to clear. */
+#kim-view-sub .kim-colgroup-btn {
+  position: sticky;
+  inset-inline-start: calc(33rem + var(--salt-spacing-200));
+}
+
+/* THE ARROW POINTS AT THE COLUMNS IT GOVERNS, which is the reading every
+   grid uses: open, it points back along the group it has spread out to
+   the left; closed, it points right at the room the group would take if
+   you let it out. It is the same chevron as everywhere else, turned — a
+   second glyph would be one more thing to keep in step. */
+.kim-chev--side { transform: rotate(-90deg); }
+.kim-colgroup-btn[aria-expanded="true"] .kim-chev--side { transform: rotate(90deg); }
+
+.kim-metric-name { font-weight: var(--salt-text-fontWeight-strong); }
+.kim-metric-unit, .kim-metric-when, .kim-metric-freq {
+  display: block;
+  color: var(--salt-content-secondary-foreground);
+  font-size: var(--salt-text-label-fontSize);
+}
+
+/* the % change: an arrow that says which way, and a pill when it matters
+
+   A MATERIAL MOVE WEARS THE LEGEND'S OWN COLOUR, filled, so the two are
+   the same statement: the dot in the legend and the pill in the row read
+   off `--salt-content-negative-foreground` and cannot drift apart. It is a
+   full pill rather than the faint wash a cell gets, because this is the
+   one figure on the row that is being called out rather than shaded.
+
+   THE LABEL ON IT TAKES THE CTA'S FOREGROUND, which is white on the light
+   page and near-black on the dark one — the same flip every filled thing
+   in Salt makes, and the only way a fill stays a fill rather than becoming
+   a hole. */
+.kim-pct { display: flex; align-items: center; gap: var(--salt-spacing-100); }
+.kim-pct-val {
+  padding: 1px var(--salt-spacing-100);
+  font-weight: var(--salt-text-fontWeight-strong);
+  border-radius: var(--salt-palette-corner-weak);
+  color: var(--salt-content-primary-foreground);
+}
+.kim-pct.is-material .kim-pct-val {
+  padding-inline: var(--salt-spacing-200);
+  border-radius: 999px;
+  color: var(--salt-actionable-cta-foreground);
+  background: var(--salt-content-negative-foreground);
+}
+.kim-pct.is-up   { color: var(--salt-content-positive-foreground); }
+.kim-pct.is-down { color: var(--salt-content-negative-foreground); }
+
+/* THE CELLS THEMSELVES. The number is always full strength; the tint is the
+   only thing that changes, which is what keeps a washed grid readable. */
+.kim-cell { text-align: end; font-variant-numeric: tabular-nums; }
+.kim-cell.is-pos-1 { background: var(--kim-heat-pos-1); }
+.kim-cell.is-pos-2 { background: var(--kim-heat-pos-2); }
+.kim-cell.is-pos-3 { background: var(--kim-heat-pos-3); }
+.kim-cell.is-neg-1 { background: var(--kim-heat-neg-1); }
+.kim-cell.is-neg-2 { background: var(--kim-heat-neg-2); }
+.kim-cell.is-neg-3 { background: var(--kim-heat-neg-3); }
+.kim-cell.is-off { display: none; }
+.kim-grid th.is-off { display: none; }
+
+.kim-trendbtn {
+  display: inline-grid; place-items: center;
+  inline-size: var(--salt-size-base); block-size: calc(var(--salt-size-base) * 0.8);
+  padding: 0; cursor: pointer; background: none;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) transparent;
+  border-radius: var(--salt-palette-corner-weak);
+  color: var(--salt-content-accented-foreground);
+}
+.kim-trendbtn:hover {
+  background: var(--salt-actionable-secondary-background-hover);
+  border-color: var(--salt-actionable-secondary-borderColor);
+}
+.kim-trendbtn svg { inline-size: 1.25em; block-size: 1.25em; }
+
+/* ---- the Columns rail down the right edge ---- */
+.kim-colswrap {
+  position: relative;
+  border-inline-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                       var(--salt-separable-secondary-borderColor);
+  background: var(--salt-container-tertiary-background);
+}
+.kim-colsbtn {
+  display: flex; flex-direction: column; align-items: center; gap: var(--salt-spacing-200);
+  block-size: 100%; inline-size: calc(var(--salt-size-base) + var(--salt-spacing-50));
+  padding: var(--salt-spacing-200) 0;
+  font: inherit; font-size: var(--salt-text-fontSize);
+  cursor: pointer; background: none; border: none;
+  color: var(--salt-content-primary-foreground);
+}
+.kim-colsbtn-says { writing-mode: vertical-rl; letter-spacing: 0.04em; }
+.kim-colsbtn:hover { background: var(--salt-target-background-hover); }
+.kim-menu--cols {
+  inset-inline-start: auto; inset-inline-end: 0;
+  inset-block-start: calc(var(--salt-size-base));
+  min-inline-size: 15rem;
+  max-block-size: 22rem; overflow: auto;
+}
+.kim-colgroup-title {
+  padding: var(--salt-spacing-100) var(--salt-spacing-300);
+  font-size: var(--salt-text-label-fontSize);
+  letter-spacing: var(--salt-text-label-letterSpacing);
+  text-transform: uppercase;
+  color: var(--salt-content-secondary-foreground);
+}
+
+/* ---- the legend and the impact scale ---- */
+.kim-legendrow {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--salt-spacing-400); flex-wrap: wrap;
+}
+.kim-legend {
+  display: flex; align-items: center; gap: var(--salt-spacing-400);
+  margin: 0; padding: 0; list-style: none;
+  font-size: var(--salt-text-fontSize);
+  color: var(--salt-content-secondary-foreground);
+}
+.kim-legend li { display: inline-flex; align-items: center; gap: var(--salt-spacing-100); }
+.kim-legend--end { justify-content: flex-end; }
+/* THE DOT IS AS TALL AS THE WORD BESIDE IT. `1em` is the legend's own font
+   size, so the two can never drift apart. */
+.kim-dot { inline-size: 0.75em; block-size: 0.75em; border-radius: 999px; }
+.kim-dot--material { background: var(--salt-content-negative-foreground); }
+
+.kim-impact {
+  display: grid; grid-template-columns: auto 16rem;
+  align-items: center; gap: var(--salt-spacing-200) var(--salt-spacing-200);
+  font-size: var(--salt-text-fontSize);
+}
+.kim-impact-says { grid-row: 1; color: var(--salt-content-secondary-foreground); }
+.kim-impact-bar {
+  grid-row: 1; block-size: 1.1em;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-tertiary-borderColor);
+  background: linear-gradient(to right,
+    var(--kim-heat-pos-3), var(--kim-heat-pos-1),
+    var(--salt-container-primary-background),
+    var(--kim-heat-neg-1), var(--kim-heat-neg-3));
+}
+.kim-impact-ends {
+  grid-row: 2; grid-column: 2;
+  display: flex; justify-content: space-between;
+  font-size: var(--salt-text-label-fontSize);
+  font-weight: var(--salt-text-fontWeight);
+  color: var(--salt-content-secondary-foreground);
+}
+
+/* ===========================================================================
+   3 · ONE KIM AND WHAT IT DRIVES
+   =========================================================================== */
+.kim-corr {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--salt-spacing-400);
+}
+.kim-corr-title {
+  margin: 0 0 var(--salt-spacing-200);
+  font-size: var(--salt-text-h4-fontSize);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.kim-corr-table {
+  inline-size: 100%;
+  border-collapse: separate; border-spacing: 0;
+  font-size: var(--salt-text-fontSize);
+}
+.kim-corr-table th {
+  text-align: start; font-weight: var(--salt-text-fontWeight-strong);
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  background: var(--salt-container-tertiary-background);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-accented-borderColor);
+}
+.kim-corr-table td {
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-tertiary-borderColor);
+}
+.kim-corr-link {
+  font: inherit; font-size: var(--salt-text-fontSize);
+  padding: 0; cursor: pointer; background: none; border: none;
+  color: var(--salt-content-accented-foreground);
+  text-decoration: underline; text-underline-offset: 2px;
+}
+
+/* ===========================================================================
+   4 · WAITING
+   =========================================================================== */
+.kim-loading {
+  position: absolute; inset: 0; z-index: 10;
+  display: grid; place-content: center; justify-items: center;
+  gap: var(--salt-spacing-300);
+  background: var(--salt-container-primary-background);
+}
+.kim-loading[hidden] { display: none; }
+.kim-loading-says {
+  margin: 0; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--salt-content-secondary-foreground);
+}
+/* THE SPINNER IS SIZED HERE, not by the global 1em rule: every other icon is
+   tied to the text beside it, and this one is the thing the screen is about.
+
+   AND THE SELECTOR HAS TO NAME ITS PARENT TO WIN. `.kim-spinner` on its own
+   is lighter than `.kim-frame svg`, which ties every icon on the page to
+   the size of the text beside it — so the loader was being drawn at twelve
+   pixels. It WAS appearing on every sub-industry you opened; it was just
+   the size of a full stop, which is indistinguishable from not appearing
+   at all. Same trap as the charts, two rounds ago, and the same fix. */
+.kim-view .kim-spinner,
+.kim-drawer .kim-spinner,
+.kim-spinner {
+  inline-size: 44px; block-size: 44px;
+  color: var(--salt-content-accented-foreground);
+  animation: kim-turn 1s linear infinite;
+}
+/* and a word under it, at a size that says the screen is working rather
+   than empty */
+.kim-loading-says { font-size: var(--salt-text-fontSize); }
+@keyframes kim-turn { to { transform: rotate(360deg); } }
+
+/* A READER WHO HAS ASKED FOR LESS MOTION still has to know it is working,
+   so the arc stops turning and breathes instead — a state change with
+   nothing travelling across the screen. */
+@media (prefers-reduced-motion: reduce) {
+  .kim-spinner { animation: kim-breathe 1.6s ease-in-out infinite; }
+  @keyframes kim-breathe { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+}

@@ -1,0 +1,899 @@
+/* ===========================================================================
+   dashboard.css — the client dashboard shell.
+
+   >>> NO COLOUR, NO FONT NAME, NO SPACING NUMBER IN THIS FILE. <<<
+   Every value is a Salt token out of salt-theme-caraxes.css, the same
+   discipline widget.css keeps. The exceptions are the frame's own size,
+   which the brief fixes at 1440 x 1024, and the rail's two widths, which
+   are a layout decision rather than a look.
+
+   ---------------------------------------------------------------------------
+   THE FOUR BANDS, AND WHICH OF THEM MOVE
+   ---------------------------------------------------------------------------
+
+       +------------------------------------------------------+
+       |  CreditRisk   nav pills            search  mode  you  |  app bar
+       +------------------------------------------------------+
+       |  CLIENT DASHBOARD                                     |  page band
+       +--------------+---------------------------------------+
+       | VIEW         |  SUBSIDIARY ONE            [ACTIONS]   |  panel
+       | SELECTOR  << |  CLIENT FAMILY TWO                     |   - STILL
+       |              |  [profile][health][exposure]           |
+       | [group by v] +---------------------------------------+
+       | [search    ] |                                        |
+       | LIST OF      |   widget   widget                      |  the only
+       | CLIENTS      |   performance to plan                  |  thing that
+       |  family 1    |   widget   widget                      |  SCROLLS
+       |  family 2 ^  |                                        |
+       |   sub 1      |                                        |
+       +--------------+---------------------------------------+
+
+   ONLY THE WIDGET AREA SCROLLS. The app bar, the page band, the rail and
+   the panel all stay where they are - so the name of the thing you are
+   looking at is never scrolled off the top while you read its figures,
+   which is the whole point of a dashboard that holds one subject.
+
+   This is built with `grid-template-rows: auto auto 1fr` and
+   `min-block-size: 0` on the row that scrolls. The 0 is the load-bearing
+   part: a grid row refuses to shrink below its content unless told it may,
+   and without it the widget area grows to fit all four widgets and the
+   whole page scrolls instead.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   THE STAGE — how a fixed design fills a window it was not drawn for
+   ---------------------------------------------------------------------------
+   The frame below is ALWAYS 1440 x 1024. The stage is the mount board
+   around it: it measures whatever room it has and scales the frame to fit,
+   keeping the shape exactly. js/fit.js does the measuring and writes three
+   numbers here; this file does the moving.
+
+   THIS IS THE STANDING PATTERN for every 1440 x 1024 prototype. Copy
+   fit.js and these two rules, wrap the frame, and it is done.
+   --------------------------------------------------------------------------- */
+html, body { block-size: 100%; }
+body {
+  margin: 0;
+  background: var(--salt-container-tertiary-background);
+  font-family: var(--salt-text-fontFamily);
+}
+
+.fit-stage {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: hidden;
+}
+/* `transform` is what keeps the shape: one number scales both directions,
+   so nothing can stretch. `transform-origin: top left` plus the two
+   offsets fit.js works out is what centres it in the leftover space. */
+.fit-frame {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  transform-origin: top left;
+  transform: translate(var(--fit-x, 0px), var(--fit-y, 0px)) scale(var(--fit-k, 1));
+}
+
+/* ---------------------------------------------------------------------------
+   THE FRAME
+   --------------------------------------------------------------------------- */
+.cd-frame {
+  box-sizing: border-box;
+  inline-size: 1440px;
+  block-size: 1024px;
+
+  /* THE TWO SPACING NUMBERS ON THE PAGE, and the only two. Everywhere
+     else this file asks the theme. These two are written out because you
+     named them: 16px between every widget and panel, 12px between the
+     rail's contents and its edges. They are layout decisions in the same
+     class as the frame's 1440 x 1024, not colours or type.
+
+     (At medium density `--salt-spacing-200` happens to be exactly 16px,
+     so --cd-gap could be that token instead - but then it would follow
+     the density setting rather than stay at 16, which is not what you
+     asked for.) */
+  --cd-gap: 16px;
+  --cd-rail-pad: 12px;
+
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+
+  background: var(--salt-container-secondary-background);
+  color: var(--salt-content-primary-foreground);
+  font-family: var(--salt-text-fontFamily);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-container-primary-borderColor);
+}
+.cd-frame *, .cd-frame *::before, .cd-frame *::after { box-sizing: border-box; }
+
+/* AN INLINE <svg> WITH A viewBox AND NO WIDTH OR HEIGHT HAS NO SIZE OF ITS
+   OWN. It does not collapse - it STRETCHES to fill whatever box it is in,
+   so a 16px chevron quietly became a 300px chevron and shoved the words
+   out of the nav. Tying every icon to the text size around it (1em) is the
+   one rule that cannot be forgotten per-icon. widget.css carries the same
+   rule for the widget; the values match, so whichever wins is correct. */
+.cd-frame svg { inline-size: 1em; block-size: 1em; flex: 0 0 auto; }
+
+/* ---------------------------------------------------------------------------
+   THE APP BAR — the one place the accented surface is used
+   ---------------------------------------------------------------------------
+   `data-salt-surface="accented"` swaps the token VALUES underneath this
+   element without any rule in here changing: the bar asks for
+   `content-primary-foreground` exactly as the page does and gets the
+   colour that reads on teal. That is Salt's nested-provider pattern, and
+   it is why there is no second set of classes for "things on the bar".
+   --------------------------------------------------------------------------- */
+/* THREE COLUMNS, NOT A ROW, so the nav sits in the TRUE centre of the bar.
+   In a flex row, "centre" means the centre of whatever space the brand and
+   the account tools have left over - which moves the moment either side
+   changes width. `1fr auto 1fr` pins the middle column to the middle of
+   the bar and lets the two outer ones be whatever they are. */
+/* `minmax(0, 1fr)` AND NOT `1fr`. A plain `1fr` is floored at the column's
+   min-content, so the heavier side - search box plus two icon buttons -
+   claimed more than its half and shoved the nav 21px off centre. Letting
+   both outer columns go narrower than their contents is what makes the
+   middle column sit at the true middle. */
+.cd-appbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--salt-spacing-300);
+  padding-inline: var(--salt-spacing-300);
+  block-size: calc(var(--salt-size-base) + var(--salt-spacing-300));
+  /* THE BAR'S OWN COLOUR COMES FROM THE ACCENTED SURFACE, not from the CTA
+     token. They happen to be the same teal in light mode, which hid the
+     mistake; in dark mode the CTA token lightens to #3491B1 and white text
+     on it measured 3.60:1 - a fail. The accented surface darkens to
+     #006482 instead, where the same white reads 6.37:1. */
+  background: var(--salt-container-primary-background);
+  color: var(--salt-content-primary-foreground);
+}
+.cd-brand {
+  font-weight: var(--salt-text-fontWeight-strong);
+  letter-spacing: 0.02em;
+  font-size: var(--salt-text-fontSize);
+}
+.cd-nav { display: flex; align-items: center; justify-content: center;
+          gap: var(--salt-spacing-100); }
+
+.cd-navitem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--salt-spacing-100);
+  font: inherit;
+  font-size: var(--salt-text-fontSize);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  cursor: pointer;
+  color: inherit;
+  background: none;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) transparent;
+  border-radius: var(--salt-palette-corner-weak);
+}
+.cd-navitem:hover { background: var(--salt-selectable-background-hover); }
+/* THE SELECTED PILL IS CUT OUT OF THE BAR rather than washed onto it: a
+   white fill with the bar's own teal in it. The accented surface already
+   names both halves of that pair per mode - `target-background-selected`
+   and `selectable-foreground-selected` - so this rule never says a
+   colour and cannot drift out of step with the bar behind it. Asking for
+   `selectable-background-selected` here was the bug: that token is white
+   on the bar, and so is the text, so the pill rendered as an empty box. */
+.cd-navitem[aria-current="page"] {
+  background: var(--salt-target-background-selected);
+  color: var(--salt-selectable-foreground-selected);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.cd-navitem[aria-current="page"]:hover {
+  background: var(--salt-target-background-selected);
+}
+.cd-navitem:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+
+.cd-appbar-right { display: flex; align-items: center; justify-content: flex-end;
+                   gap: var(--salt-spacing-200); }
+
+.cd-search {
+  display: flex;
+  align-items: center;
+  gap: var(--salt-spacing-200);
+  inline-size: 17rem;
+  block-size: var(--salt-size-base);
+  padding-inline: var(--salt-spacing-200);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) currentColor;
+  border-radius: 999px;
+}
+.cd-search input {
+  flex: 1 1 auto; min-inline-size: 0;
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  color: inherit; background: none; border: none; outline: none;
+}
+.cd-search input::placeholder { color: inherit; opacity: 1; }
+
+.cd-iconbtn {
+  display: inline-grid; place-items: center;
+  inline-size: var(--salt-size-base); block-size: var(--salt-size-base);
+  padding: 0; cursor: pointer;
+  color: inherit; background: none;
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) transparent;
+  border-radius: 999px;
+}
+.cd-iconbtn:hover { background: var(--salt-selectable-background-hover); }
+.cd-iconbtn:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+
+/* ---------------------------------------------------------------------------
+   THE PAGE BAND
+   --------------------------------------------------------------------------- */
+/* THE BAND'S BOTTOM RULE IS ALSO THE PANEL'S TOP EDGE. The panel hangs
+   off the band with no gap and no top border of its own, so this one line
+   does both jobs: it closes the band and it draws the line the panel
+   starts under. Two lines there would read as a double border. */
+.cd-pageband {
+  display: flex; align-items: center;
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+  background: var(--salt-container-primary-background);   /* white */
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-secondary-borderColor);
+}
+.cd-pagetitle {
+  margin: 0;
+  font-size: var(--salt-text-h2-fontSize, 1.25rem);
+  font-weight: var(--salt-text-fontWeight-strong);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------------------
+   THE BODY — rail beside everything else
+   ---------------------------------------------------------------------------
+   The rail's width is a custom property so that collapsing it is ONE
+   value changing, not a set of rules swapping. Everything to the right is
+   a `1fr` column, so it takes back the space without being told to - which
+   is what makes the panel widen at the same moment the widgets do.
+   --------------------------------------------------------------------------- */
+/* EVERY CHILD OF THE FRAME NAMES ITS OWN ROW. There are five of them now -
+   the bar, the band, the dashboard, the projections module and the veil -
+   and the last three all want the SAME row, because they are three things
+   that occupy one space. A grid places the items you placed by hand first
+   and then flows the rest around them, so the moment one of them is placed
+   explicitly they all have to be, or the ones left over step politely into
+   rows of their own underneath. */
+.cd-appbar  { grid-row: 1; grid-column: 1; }
+.cd-pageband{ grid-row: 2; grid-column: 1; }
+.cd-body, .cd-proj, .cd-veil { grid-row: 3; grid-column: 1; }
+
+.cd-body {
+  --cd-rail: 272px;
+  display: grid;
+  grid-template-columns: var(--cd-rail) minmax(0, 1fr);
+  min-block-size: 0;
+  transition: grid-template-columns 180ms ease;
+}
+.cd-body[hidden] { display: none; }
+
+/* ---------------------------------------------------------------------------
+   THE NUDGE
+   ---------------------------------------------------------------------------
+   IT IS THE PROJECTIONS MODULE'S OWN TOOLTIP, not a second one that nearly
+   matches. `.cc-coach` and `.is-coached` arrive with css/projections.css and
+   are already on this page, so all that is written here is WHERE the two
+   bubbles sit - the bubble, the point, the ring and the colours are shared.
+
+   Two placements the other screen did not need: under a tab strip pointing
+   up at one tab, and over a footer pointing down at one button. */
+.cd-tabs { position: relative; }
+.ptp-foot { position: relative; }
+
+/* BOTH BUBBLES ARE CENTRED ON THEIR TARGET, by the same one number.
+   `--cd-at` is the middle of the thing being pointed at, in the layout's
+   own unscaled pixels, measured by dashboard.js from `offsetLeft` rather
+   than from a rectangle on the screen - which is what makes it hold at any
+   scale of the canvas. */
+.cc-coach.cd-coach--tab,
+.cc-coach.cd-coach--overfoot {
+  inset-inline-start: var(--cd-at, 50%);
+  inset-inline-end: auto;
+  transform: translateX(-50%);
+}
+.cc-coach.cd-coach--tab::after,
+.cc-coach.cd-coach--overfoot::after {
+  inset-inline-start: calc(50% - var(--cc-arrow) / 2);
+  inset-inline-end: auto;
+}
+
+/* ---- under the tab strip, pointing up ---- */
+.cc-coach.cd-coach--tab {
+  inset-block-start: calc(100% + var(--salt-spacing-200));
+}
+.cc-coach.cd-coach--tab::after {
+  inset-block-start: calc(var(--cc-arrow) / -2);
+  border-block-end: 0;
+  border-inline-end: 0;
+}
+
+/* ---- over the footer, pointing down ---- */
+.cc-coach.cd-coach--overfoot {
+  inset-block-end: calc(100% + var(--salt-spacing-200));
+  inset-block-start: auto;
+}
+.cc-coach.cd-coach--overfoot::after {
+  inset-block-end: calc(var(--cc-arrow) / -2);
+  inset-block-start: auto;
+  border-block-start: 0;
+  border-inline-start: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   THE PROJECTIONS MODULE, INSIDE THIS FRAME
+   ---------------------------------------------------------------------------
+   The screen arrives wearing `.cc-frame`, which in its own prototype IS the
+   1440 x 1024 page: fixed size, three rows, its own background. Here it is
+   one row of somebody else's page, so those four things are taken back and
+   NOTHING ELSE IS. Everything the class is really carrying - the box-sizing,
+   the type, the colours, and above all the rule that keeps an inline <svg>
+   from stretching to 300px - is left exactly as it is, which is why the
+   screen looks the same here as it does there. */
+#cd-proj.cc-frame {
+  inline-size: auto;
+  block-size: auto;
+  min-block-size: 0;
+  grid-template-rows: minmax(0, 1fr);
+  background: none;
+}
+#cd-proj[hidden] { display: none; }
+
+/* ---- the veil between the two screens ---- */
+.cd-veil {
+  z-index: 60;
+  display: grid; place-content: center; justify-items: center;
+  gap: var(--salt-spacing-300);
+  background: var(--salt-container-secondary-background);
+}
+.cd-veil[hidden] { display: none; }
+.cd-veil-says {
+  margin: 0; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--salt-content-secondary-foreground);
+}
+/* AN ARC, NOT A FULL RING - a complete circle turning looks like a circle
+   standing still, because there is nothing on it for the eye to follow.
+   The same arc the projections module uses for its own waits. */
+/* SIZED THROUGH THE VEIL, not on its own. Every other icon in this frame
+   is tied to the text beside it by `.cd-frame svg`, which is a shade more
+   specific than a bare class - so a bare `.cd-spinner` would lose to it and
+   come out 12px across. */
+.cd-veil .cd-spinner {
+  inline-size: 48px; block-size: 48px;
+  color: var(--salt-content-primary-foreground);
+  animation: cd-turn 1s linear infinite;
+}
+@keyframes cd-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .cd-veil .cd-spinner { animation: cd-breathe 1.6s ease-in-out infinite; }
+  @keyframes cd-breathe { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+}
+.cd-frame[data-rail="collapsed"] .cd-body { --cd-rail: 52px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cd-body { transition: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   THE VIEW SELECTOR
+   --------------------------------------------------------------------------- */
+/* `grid-template-columns` LOOKS REDUNDANT ON A ONE-COLUMN GRID AND IS NOT.
+   A grid column with nothing said about it is `auto`, which means "as wide
+   as the widest thing in it" - so the rail's own 272px did not bind its
+   contents and the list sat 22px wider than the rail it lives in.
+   `minmax(0, 1fr)` is the column saying it may be narrower than its
+   content, which is what lets the long names clip instead of push. */
+.cd-rail {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  min-block-size: 0;
+  min-inline-size: 0;
+  background: var(--salt-container-primary-background);
+  border-inline-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                     var(--salt-separable-secondary-borderColor);
+}
+
+.cd-rail-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--salt-spacing-200);
+  padding: var(--salt-spacing-200) var(--cd-rail-pad);
+  background: var(--salt-container-tertiary-background);
+}
+.cd-rail-title {
+  margin: 0;
+  font-size: var(--salt-text-fontSize);
+  font-weight: var(--salt-text-fontWeight-strong);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* THE COLLAPSE BUTTON IS THE ONE THING THAT STAYS when the rail is shut,
+   so it is the only child not inside .cd-rail-open. Its chevron turns to
+   point the way it will go, which is the whole of the affordance. */
+.cd-rail-toggle svg { transition: transform 180ms ease; }
+.cd-frame[data-rail="collapsed"] .cd-rail-toggle svg { transform: rotate(180deg); }
+
+/* WHEN THE RAIL IS SHUT THERE IS NO ROOM FOR ITS NAME. The title is
+   `white-space: nowrap`, so at 52px it did not wrap or clip - it pushed
+   the toggle out of the rail and spilled the words across the panel
+   behind it. Shutting the rail takes the title out and leaves the button
+   centred in what is left. */
+.cd-frame[data-rail="collapsed"] .cd-rail-title { display: none; }
+.cd-frame[data-rail="collapsed"] .cd-rail-head {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+/* EVERYTHING ELSE IN THE RAIL IS HIDDEN WITH `hidden`, not with width.
+   A squeezed-to-zero element still holds focus and is still read aloud,
+   so a collapsed rail would quietly put eleven invisible stops in the
+   Tab order. `hidden` takes them out of the page entirely. */
+.cd-rail-open {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--salt-spacing-200);
+  min-block-size: 0;
+  padding: var(--cd-rail-pad);
+}
+.cd-rail-open[hidden] { display: none; }
+
+/* THE GROUP-BY CONTROL. It used to borrow the client rows' class and an
+   inline `style="margin:0"` to undo the part that did not fit, which is
+   exactly the baked-in shortcut we are trying not to write. It is its own
+   thing now, and no element on the page carries a style attribute. */
+.cd-groupby {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--salt-spacing-200);
+  inline-size: 100%;
+  font: inherit;
+  font-size: var(--salt-text-fontSize);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  text-align: start;
+  block-size: var(--salt-size-base);
+  padding-inline: var(--salt-spacing-200);
+  cursor: pointer;
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-editable-background, transparent);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-editable-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+}
+.cd-groupby:hover { background: var(--salt-selectable-background-hover); }
+.cd-groupby:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+
+.cd-railsearch {
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  block-size: var(--salt-size-base);
+  padding-inline: var(--salt-spacing-200);
+  background: var(--salt-editable-background, transparent);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-editable-borderColor);
+  border-radius: 999px;
+  color: var(--salt-content-secondary-foreground);
+}
+.cd-railsearch input {
+  flex: 1 1 auto; min-inline-size: 0;
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  color: var(--salt-content-primary-foreground);
+  background: none; border: none; outline: none;
+}
+
+.cd-listlabel {
+  margin: 0;
+  font-size: var(--salt-text-fontSize);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--salt-content-secondary-foreground);
+}
+
+/* the list is the only part of the rail that scrolls */
+.cd-clients { min-block-size: 0; overflow: auto; margin: 0; padding: 0; list-style: none; }
+.cd-clients ul { margin: 0; padding: 0; list-style: none; }
+
+/* EVERY ROW RUNS THE FULL WIDTH OF THE RAIL, with only the rail's own
+   12px edge margin either side. `display: flex` on a button already makes
+   it fill its row, so no width is declared here at all - declaring one
+   was the old bug (100% of the row PLUS an indent is wider than the rail,
+   which is what put a sideways scrollbar under the list).
+
+   `inline-size: 100%` IS NOT REDUNDANT HERE, though it looks it. A <div>
+   with `display: flex` fills its row; a <button> does not - form controls
+   shrink to their contents whatever their display is. Without the 100%
+   the rows ended wherever their text did, which is what you were seeing.
+
+   THE SUBSIDIARIES ARE STILL INDENTED, but from the INSIDE: the indent is
+   padding within a full-width row rather than a margin that shortens it.
+   The hierarchy still reads and the right-hand edges all line up. */
+.cd-client, .cd-sub {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--salt-spacing-200);
+  inline-size: 100%;
+  font: inherit;
+  font-size: var(--salt-text-fontSize);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  text-align: start;
+  padding: var(--salt-spacing-200);
+  margin-block-end: var(--salt-spacing-100);
+  cursor: pointer;
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-container-secondary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) transparent;
+  border-radius: var(--salt-palette-corner-weak);
+}
+.cd-sub { padding-inline-start: var(--salt-spacing-300); }
+.cd-client:hover, .cd-sub:hover { background: var(--salt-selectable-background-hover); }
+.cd-client:focus-visible, .cd-sub:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+/* THE CHOSEN SUBSIDIARY IS MARKED BY A RULE DOWN ITS EDGE as well as by
+   the fill, because the fill alone is a small difference between two
+   greys and this is the one thing on the page that says what you are
+   looking at. */
+.cd-sub[aria-current="true"] {
+  background: var(--salt-container-primary-background);
+  border-color: var(--salt-separable-secondary-borderColor);
+  border-inline-start: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+                       var(--salt-actionable-cta-background);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.cd-client svg { transition: transform 160ms ease; flex: 0 0 auto; }
+.cd-client[aria-expanded="true"] svg { transform: rotate(180deg); }
+.cd-subs[hidden] { display: none; }
+
+/* ---------------------------------------------------------------------------
+   THE RIGHT-HAND COLUMN — a still panel over a scrolling deck
+   --------------------------------------------------------------------------- */
+/* NO PADDING AT THE TOP. The panel is anchored to the bottom edge of the
+   page band above it, so there is nothing between them; 16px then runs
+   down both sides, between the panel and the deck, and along the bottom. */
+.cd-main {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-block-size: 0;
+  min-inline-size: 0;
+  padding: 0 var(--cd-gap) var(--cd-gap);
+  gap: var(--cd-gap);
+}
+
+/* THE TOP TWO CORNERS ARE SQUARE and the top border is gone, because the
+   panel is hanging off the band rather than floating near it. A rounded
+   box butted against a straight edge reads as a mistake; a square one
+   reads as the same piece of chrome continuing. */
+.cd-panel {
+  padding: var(--salt-spacing-300);
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-container-primary-borderColor);
+  border-block-start: none;
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+  border-end-start-radius: var(--salt-palette-corner-strong);
+  border-end-end-radius: var(--salt-palette-corner-strong);
+}
+.cd-panel-top { display: flex; align-items: flex-start; justify-content: space-between;
+                gap: var(--salt-spacing-300); }
+.cd-subject { margin: 0; font-size: var(--salt-text-h2-fontSize, 1.25rem);
+              font-weight: var(--salt-text-fontWeight-strong);
+              letter-spacing: 0.03em; text-transform: uppercase; }
+.cd-parent  { margin: var(--salt-spacing-100) 0 0; font-size: var(--salt-text-fontSize);
+              text-transform: uppercase; letter-spacing: 0.03em;
+              color: var(--salt-content-secondary-foreground); }
+
+/* the two grey bars in the reference: a placeholder for whatever summary
+   goes here, drawn as a placeholder rather than as filler words */
+.cd-rules { display: grid; gap: var(--salt-spacing-100); margin-block-start: var(--salt-spacing-300); }
+.cd-rule { block-size: var(--salt-spacing-200); border-radius: var(--salt-palette-corner-weak);
+           background: var(--salt-container-tertiary-background); }
+.cd-rule--short { inline-size: 32%; }
+
+.cd-actions {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-200);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  block-size: var(--salt-size-base);
+  padding-inline: var(--salt-spacing-300);
+  cursor: pointer; flex: 0 0 auto;
+  color: var(--salt-actionable-cta-foreground);
+  background: var(--salt-actionable-cta-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) transparent;
+  border-radius: var(--salt-palette-corner-weak);
+}
+/* the chevron turns over while the menu is open, so the button says
+   which way it will go rather than only that it has a menu */
+.cd-actions svg { transition: transform 160ms ease; }
+.cd-actions[aria-expanded="true"] svg { transform: rotate(180deg); }
+.cd-actions:hover { background: var(--salt-actionable-cta-background-hover); }
+.cd-actions:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+
+/* ---- the three tabs ---- */
+.cd-tabs { display: flex; gap: var(--salt-spacing-300);
+           margin-block-start: var(--salt-spacing-300);
+           border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                             var(--salt-separable-tertiary-borderColor); }
+.cd-tab {
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  padding: var(--salt-spacing-200) 0;
+  cursor: pointer;
+  color: var(--salt-content-secondary-foreground);
+  background: none; border: none;
+  border-block-end: var(--salt-size-fixed-200) var(--salt-borderStyle-solid) transparent;
+  margin-block-end: calc(-1 * var(--salt-size-fixed-100));
+}
+.cd-tab:hover { color: var(--salt-content-primary-foreground); }
+.cd-tab[aria-selected="true"] {
+  color: var(--salt-content-primary-foreground);
+  font-weight: var(--salt-text-fontWeight-strong);
+  border-block-end-color: var(--salt-actionable-cta-background);
+}
+.cd-tab:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+
+/* ---- THE SCROLLING DECK ----
+   THE WIDGETS' RIGHT EDGE MUST LAND ON THE PANEL'S RIGHT EDGE, on every
+   machine. That is harder than it sounds, because of the scrollbar.
+
+   On a Mac the scrollbar floats over the content and costs nothing, so
+   the deck and the panel are already the same width. On Windows and on
+   Linux the bar is a solid strip that EATS width from the inside: the
+   deck's box still lines up with the panel, but everything in it is
+   pushed left by about 15px, and the widgets stop short of the panel's
+   edge. That is the misalignment, and it is invisible on a Mac.
+
+   THE FIX IS TWO LINES THAT CANCEL EACH OTHER OUT.
+
+     `scrollbar-gutter: stable`  always leaves room for the bar, whether
+                                 or not it is showing, so the inset is a
+                                 constant instead of flickering per tab.
+     `margin-inline-end: -<bar>` makes the deck exactly that much WIDER
+                                 to the right, so the strip it loses is
+                                 the strip it just gained.
+
+   The content box therefore ends on the panel's edge, and the bar itself
+   sits out in the 16px margin where there was nothing anyway. The bar's
+   width is measured once at runtime into `--cd-sbw` - see dashboard.js -
+   and is 0 on a Mac, where both lines then do nothing at all. */
+.cd-deck {
+  scrollbar-gutter: stable;
+  margin-inline-end: calc(-1 * var(--cd-sbw, 0px));
+  min-block-size: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--salt-separable-secondary-borderColor) transparent;
+}
+.cd-deck::-webkit-scrollbar { inline-size: 6px; }
+.cd-deck::-webkit-scrollbar-track { background: transparent; }
+.cd-deck::-webkit-scrollbar-thumb {
+  background: var(--salt-separable-secondary-borderColor);
+  border-radius: var(--salt-palette-corner-strong);
+}
+
+.cd-pane[hidden] { display: none; }
+.cd-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+           gap: var(--cd-gap); align-content: start; }
+.cd-wide { grid-column: 1 / -1; }
+
+/* a pane holding one expanded widget and nothing else */
+.cd-pane--single { display: block; }
+
+/* ---- a placeholder widget ---- */
+.cd-widget {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-inline-size: 0;
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-container-primary-borderColor);
+  border-radius: var(--salt-palette-corner-strong);
+  overflow: hidden;
+}
+.cd-widget-head, .cd-widget-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--salt-spacing-200);
+  padding: var(--salt-spacing-200) var(--salt-spacing-300);
+}
+/* WHITE, LIKE THE BODY UNDER IT. The rule is what separates the name from
+   the contents; a band of colour as well was saying the same thing twice. */
+.cd-widget-head { background: var(--salt-container-primary-background);
+                  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                                    var(--salt-separable-tertiary-borderColor); }
+.cd-widget-foot { border-block-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                                      var(--salt-separable-tertiary-borderColor); }
+.cd-widget-name {
+  margin: 0; font-size: var(--salt-text-fontSize);
+  font-weight: var(--salt-text-fontWeight-strong);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.cd-widget-tools { display: flex; gap: var(--salt-spacing-100); }
+.cd-widget-tool {
+  display: inline-grid; place-items: center;
+  inline-size: var(--salt-size-base); block-size: var(--salt-size-base);
+  padding: 0; cursor: pointer;
+  color: var(--salt-content-secondary-foreground);
+  background: none; border: none;
+  border-radius: var(--salt-palette-corner-weak);
+}
+.cd-widget-tool:hover { color: var(--salt-content-primary-foreground); }
+.cd-widget-tool:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+/* THE BODY IS DRAWN AS A PLACEHOLDER rather than filled with invented
+   content: this widget has no subject yet, and a convincing-looking chart
+   in it would be a lie about how far the design has got. */
+.cd-widget-body {
+  margin: var(--salt-spacing-300);
+  min-block-size: 180px;
+  border-radius: var(--salt-palette-corner-strong);
+  background: var(--salt-container-tertiary-background);
+}
+.cd-secondary { font-size: var(--salt-text-fontSize); text-transform: uppercase;
+                letter-spacing: 0.03em; color: var(--salt-content-secondary-foreground); }
+.cd-cta {
+  display: inline-flex; align-items: center; gap: var(--salt-spacing-200);
+  font: inherit; font-size: var(--salt-text-fontSize);
+  text-transform: uppercase; letter-spacing: 0.03em;
+  block-size: var(--salt-size-base); padding-inline: var(--salt-spacing-200);
+  cursor: pointer;
+  color: var(--salt-actionable-cta-foreground);
+  background: var(--salt-actionable-cta-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid) transparent;
+  border-radius: var(--salt-palette-corner-weak);
+}
+.cd-cta:hover { background: var(--salt-actionable-cta-background-hover); }
+.cd-cta:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: var(--salt-size-fixed-100);
+}
+
+/* ---- THE PERFORMANCE TO PLAN WIDGET, IN A COLUMN ----
+   The two knobs widget.css exposes, and nothing else. The widget itself is
+   untouched: it is the same file the standalone 1060 x 720 version uses. */
+.cd-deck .ptp-widget { --ptp-w: 100%; --ptp-h: auto; }
+.cd-deck .ptp-body   { min-block-size: 280px; }
+
+/* ---- a tab with nothing in it ----
+   Used only when a tab's list in data/widgets.js is empty. It says what
+   is true - there is nothing here yet - and nothing more. */
+.cd-empty {
+  display: grid; place-items: center;
+  min-block-size: 320px;
+  padding: var(--salt-spacing-400);
+  text-align: center;
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-dashed)
+          var(--salt-separable-secondary-borderColor);
+  border-radius: var(--salt-palette-corner-strong);
+  color: var(--salt-content-secondary-foreground);
+}
+.cd-empty-line { margin: 0; font-size: var(--salt-text-fontSize); }
+
+/* ---------------------------------------------------------------------------
+   THE DROPDOWN MENUS
+   ---------------------------------------------------------------------------
+   One set of rules for every menu on the page - the ACTIONS button and the
+   "..." in a widget header both use these, so they cannot drift apart.
+
+   THE MENU IS A SIBLING OF ITS BUTTON inside a small positioned wrapper,
+   not a child of it. A <button> may not contain other interactive
+   elements, and a menu full of buttons inside a button is exactly that.
+   The wrapper is what `position: absolute` measures from.
+   --------------------------------------------------------------------------- */
+.cd-menuwrap { position: relative; display: inline-flex; }
+
+.cd-menu {
+  position: absolute;
+  z-index: 20;
+  inset-block-start: calc(100% + var(--salt-spacing-100));
+  inset-inline-end: 0;            /* hangs from the button's right edge */
+  min-inline-size: 13rem;
+  padding: var(--salt-spacing-100) 0;
+  background: var(--salt-container-primary-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+  box-shadow: var(--salt-overlayable-shadow);
+}
+.cd-menu[hidden] { display: none; }
+
+.cd-menuitem {
+  display: block;
+  inline-size: 100%;
+  font: inherit;
+  font-size: var(--salt-text-fontSize);
+  text-align: start;
+  white-space: nowrap;
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  cursor: pointer;
+  color: var(--salt-content-primary-foreground);
+  background: none;
+  border: none;
+}
+.cd-menuitem:hover { background: var(--salt-selectable-background-hover); }
+.cd-menuitem:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: calc(-1 * var(--salt-size-fixed-200));
+}
+
+/* ---------------------------------------------------------------------------
+   THE CLOSABLE TAB
+   ---------------------------------------------------------------------------
+   Opened by a widget's expand icon, and inserted immediately to the left
+   of CLIENT EXPOSURE.
+
+   IT IS A <div role="tab">, NOT A <button>, for the same reason the menu
+   is a sibling: it has a real close button inside it, and a button inside
+   a button is not allowed. To a screen reader the two are the same thing.
+   --------------------------------------------------------------------------- */
+.cd-tab--closable {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--salt-spacing-200);
+  cursor: pointer;
+}
+.cd-tab--closable .cd-tab-label { pointer-events: none; }
+
+.cd-tabclose {
+  display: inline-grid; place-items: center;
+  inline-size: var(--salt-size-base);
+  block-size: var(--salt-size-base);
+  margin-inline-end: calc(-1 * var(--salt-spacing-200));
+  padding: 0;
+  font-size: var(--salt-text-fontSize);
+  cursor: pointer;
+  color: var(--salt-content-secondary-foreground);
+  background: none;
+  border: none;
+  border-radius: 999px;
+}
+.cd-tabclose:hover {
+  color: var(--salt-content-primary-foreground);
+  background: var(--salt-selectable-background-hover);
+}
+.cd-tabclose:focus-visible {
+  outline: var(--salt-size-fixed-200) var(--salt-borderStyle-solid)
+           var(--salt-focused-outlineColor);
+  outline-offset: calc(-1 * var(--salt-size-fixed-100));
+}
+
+/* an expanded widget fills the deck rather than sitting in a column */
+.cd-pane--single > section { display: block; }
+.cd-pane--single .ptp-body { min-block-size: 420px; }

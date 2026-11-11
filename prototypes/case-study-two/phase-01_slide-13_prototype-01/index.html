@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client Dashboard — CreditRisk</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap">
+
+<link rel="stylesheet" href="css/salt-theme-caraxes.css">
+<link rel="stylesheet" href="css/widget.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/projections.css">
+</head>
+
+<body class="salt-theme" data-mode="light" data-density="medium">
+
+<!-- ===========================================================================
+     THE STAGE — the mount board the frame is scaled inside.
+
+     The frame below is always drawn at its true 1440 x 1024. The stage
+     measures whatever room it has been given and scales the frame to fit,
+     keeping the shape exactly. See js/fit.js.
+     =========================================================================== -->
+<div class="fit-stage" id="cd-stage" data-fit-w="1440" data-fit-h="1024">
+
+<!-- ===========================================================================
+     THE FRAME — 1440 x 1024
+
+     Ids are `cd-` for the dashboard shell and `ptp-` for the Performance to
+     Plan widget inside it, which keeps its own names from the standalone
+     build. Every one is listed in README.md for you to rename.
+     =========================================================================== -->
+<div class="cd-frame fit-frame" id="cd-frame" data-rail="open">
+
+  <!-- ---- the app bar ----
+       THREE COLUMNS, NOT A ROW. `1fr auto 1fr` puts the nav in the true
+       centre of the bar whatever the brand and the account tools weigh;
+       in a plain flex row "centre" only means "centre of the space left
+       over", which drifts as soon as either side changes. -->
+  <header class="cd-appbar" id="cd-appbar" data-salt-surface="accented">
+    <span class="cd-brand" id="cd-brand">CreditRisk</span>
+
+    <nav class="cd-nav" id="cd-nav" aria-label="Main">
+      <button type="button" class="cd-navitem" id="cd-nav-surveillance">Surveillance</button>
+      <button type="button" class="cd-navitem" id="cd-nav-clients" aria-current="page">Clients</button>
+      <button type="button" class="cd-navitem" id="cd-nav-portfolios">Portfolios
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+      <button type="button" class="cd-navitem" id="cd-nav-create">Create &amp; manage
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+      <button type="button" class="cd-navitem" id="cd-nav-analyze">Analyze
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+    </nav>
+
+    <div class="cd-appbar-right" id="cd-appbar-right">
+      <div class="cd-search" id="cd-globalsearch">
+        <input type="search" id="cd-globalsearch-input" placeholder="Global search" aria-label="Global search">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+      </div>
+      <button type="button" class="cd-iconbtn" id="cd-mode" aria-label="Switch between light and dark">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z"/></svg>
+      </button>
+      <button type="button" class="cd-iconbtn" id="cd-account" aria-label="Your account">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="5.5" r="2.6"/><path d="M2.8 14c.6-2.8 2.7-4.2 5.2-4.2s4.6 1.4 5.2 4.2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ---- the page band ---- -->
+  <div class="cd-pageband" id="cd-pageband">
+    <h1 class="cd-pagetitle" id="cd-pagetitle">Client dashboard</h1>
+  </div>
+
+  <div class="cd-body" id="cd-body">
+
+    <!-- ===== THE VIEW SELECTOR ===== -->
+    <aside class="cd-rail" id="cd-rail" aria-label="View selector">
+      <div class="cd-rail-head" id="cd-rail-head">
+        <h2 class="cd-rail-title" id="cd-rail-title">View selector</h2>
+        <button type="button" class="cd-iconbtn cd-rail-toggle" id="cd-rail-toggle"
+                aria-expanded="true" aria-controls="cd-rail-open"
+                aria-label="Collapse the view selector">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M9.5 3.5L5 8l4.5 4.5M13 3.5L8.5 8l4.5 4.5"/></svg>
+        </button>
+      </div>
+
+      <div class="cd-rail-open" id="cd-rail-open">
+        <button type="button" class="cd-groupby" id="cd-groupby" aria-haspopup="listbox" aria-expanded="false">
+          <span>Group by family</span>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+        </button>
+
+        <div class="cd-railsearch" id="cd-railsearch">
+          <input type="search" id="cd-railsearch-input" placeholder="Search" aria-label="Search clients">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+        </div>
+
+        <div class="cd-listwrap" id="cd-listwrap">
+          <p class="cd-listlabel" id="cd-listlabel">List of clients</p>
+          <ul class="cd-clients" id="cd-clients">
+            <li><button type="button" class="cd-client" id="cd-family-1">Client family 1</button></li>
+
+            <li>
+              <button type="button" class="cd-client" id="cd-family-2"
+                      aria-expanded="true" aria-controls="cd-family-2-subs">
+                Client family 2
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+              </button>
+              <ul class="cd-subs" id="cd-family-2-subs">
+                <li><button type="button" class="cd-sub" id="cd-sub-1" aria-current="true" data-subject="Subsidiary one">Subsidiary 1</button></li>
+                <li><button type="button" class="cd-sub" id="cd-sub-2" data-subject="Subsidiary two">Subsidiary 2</button></li>
+                <li><button type="button" class="cd-sub" id="cd-sub-3" data-subject="Subsidiary three">Subsidiary 3</button></li>
+                <li><button type="button" class="cd-sub" id="cd-sub-4" data-subject="Subsidiary four">Subsidiary 4</button></li>
+              </ul>
+            </li>
+
+            <li><button type="button" class="cd-client" id="cd-family-3">Client family 3</button></li>
+            <li><button type="button" class="cd-client" id="cd-family-4">Client family 4</button></li>
+            <li><button type="button" class="cd-client" id="cd-family-5">Client family 5</button></li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== THE PANEL, AND THE DECK UNDER IT ===== -->
+    <main class="cd-main" id="cd-main">
+
+      <!-- The panel is ANCHORED TO THE BAND ABOVE IT: no gap, and the top
+           two corners square, so the two read as one piece of chrome
+           rather than as a card that happens to be near the top. -->
+      <section class="cd-panel" id="cd-panel" aria-labelledby="cd-subject">
+        <div class="cd-panel-top" id="cd-panel-top">
+          <div>
+            <h2 class="cd-subject" id="cd-subject">Subsidiary one</h2>
+            <p class="cd-parent" id="cd-parent">Client family two</p>
+          </div>
+          <button type="button" class="cd-actions" id="cd-actions"
+                  aria-haspopup="menu" aria-expanded="false">
+            <span>Actions</span>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+          </button>
+        </div>
+
+        <div class="cd-rules" id="cd-summary" aria-hidden="true">
+          <span class="cd-rule"></span>
+          <span class="cd-rule cd-rule--short"></span>
+        </div>
+
+        <!-- The expanded-widget tab is inserted into this list at runtime,
+             immediately before CLIENT EXPOSURE. -->
+        <div class="cd-tabs" id="cd-tabs" role="tablist" aria-label="Client views">
+          <button type="button" class="cd-tab" id="cd-tab-profile"
+                  role="tab" aria-selected="true" aria-controls="cd-pane-profile">Client profile</button>
+          <button type="button" class="cd-tab" id="cd-tab-health"
+                  role="tab" aria-selected="false" aria-controls="cd-pane-health">Client health</button>
+          <button type="button" class="cd-tab" id="cd-tab-exposure"
+                  role="tab" aria-selected="false" aria-controls="cd-pane-exposure">Client exposure</button>
+
+          <!-- THE NUDGE, STEP ONE. It lives inside the tab strip so it is
+               placed by SITTING IN the thing it points at rather than by
+               measurement, which matters because the whole canvas is
+               scaled. Only its arrow is aimed, and that is one number. -->
+          <div class="cc-coach cd-coach--tab" id="cd-coach-1" role="tooltip" hidden>
+            <p class="cc-coach-says">Start here &mdash; open <b>Client health</b>.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- THE ONLY THING ON THE PAGE THAT SCROLLS.
+           The three panes are empty here on purpose: what goes in each one
+           is listed in data/widgets.js, which is the file to edit. -->
+      <!-- THE NUDGE, STEP TWO. Declared here so it has a name you can
+           change, but the footer it belongs to does not exist until
+           js/widget.js has built the widget - so dashboard.js moves it
+           there once that has happened. -->
+      <div class="cc-coach cd-coach--overfoot" id="cd-coach-2" role="tooltip" hidden>
+        <p class="cc-coach-says">Now open the <b>latest projection</b>.</p>
+      </div>
+
+      <div class="cd-deck" id="cd-deck">
+        <div class="cd-pane" id="cd-pane-profile"  role="tabpanel" aria-labelledby="cd-tab-profile"  tabindex="0"></div>
+        <div class="cd-pane" id="cd-pane-health"   role="tabpanel" aria-labelledby="cd-tab-health"   tabindex="0" hidden></div>
+        <div class="cd-pane" id="cd-pane-exposure" role="tabpanel" aria-labelledby="cd-tab-exposure" tabindex="0" hidden></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===========================================================================
+       THE PROJECTIONS MODULE — the second screen
+
+       It is the SAME screen as the case-comparison prototype, carried here
+       whole: css/projections.css and js/projections.js are byte-identical
+       copies of that prototype's app.css and app.js, and data/projections.js
+       and data/clients.js are the same files again. Nothing was re-drawn.
+
+       It sits in the SAME GRID ROW as `cd-body` rather than after it, so the
+       two screens occupy one space and swapping them moves nothing else on
+       the page. Both rows are named explicitly in the CSS - an item placed
+       by hand makes the grid stop guessing where the rest go.
+
+       COMPARISONS ARE OFF HERE. `CC_ALLOW_COMPARISON = false` below, read by
+       js/projections.js in two places: the Actions menu, and whether its own
+       tour runs. The menu still opens and still lists what it lists, drawn
+       and inert, exactly as Export is.
+       =========================================================================== -->
+  <div class="cc-frame cd-proj" id="cd-proj" hidden>
+  <main class="cc-card" id="cc-card">
+
+    <!-- ========== THE CLIENT LOADER ==========
+         It sits ABOVE the tabs and bleeds to the card's edges, because it
+         names the subject of everything below it: the tabs, the ledger and
+         any comparison all describe whoever is named here.
+
+         The band is one big button. Its panel is a SIBLING, not a child -
+         a button may not contain another button, and the panel is full of
+         them. -->
+    <div class="cc-client" id="cc-client">
+      <button type="button" class="cc-client-head" id="cc-client-head"
+              aria-expanded="false" aria-controls="cc-client-panel">
+        <span class="cc-avatar" id="cc-client-avatar" aria-hidden="true"></span>
+
+        <span class="cc-client-id" id="cc-client-id">
+          <span class="cc-client-name" id="cc-client-name"></span>
+          <span class="cc-client-family" id="cc-client-family"></span>
+        </span>
+
+        <span class="cc-pills" id="cc-client-pills"></span>
+
+        <!-- DRAWN, NOT WIRED, exactly like Export: the reference puts an
+             org-chart glyph here and the prototype has not designed what
+             it opens. -->
+        <span class="cc-orgchart" id="cc-client-orgchart" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="6" y="1.5" width="4" height="3.2" rx="0.6"/><rect x="1.5" y="11.3" width="4" height="3.2" rx="0.6"/><rect x="10.5" y="11.3" width="4" height="3.2" rx="0.6"/><path d="M8 4.7v3.6M3.5 11.3V8.3h9v3"/></svg>
+        </span>
+
+        <!-- the band reads out its client already; this says what pressing
+             it does, which nothing visible on it says -->
+        <span class="cc-sr">Change client</span>
+
+        <span class="cc-client-chev" id="cc-client-chev" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>
+        </span>
+      </button>
+
+      <!-- THE PANEL OVERLAYS THE PAGE rather than pushing it down. Nothing
+           below it moves, so the reader's place is still there when they
+           close it again. -->
+      <div class="cc-client-panel" id="cc-client-panel" hidden>
+        <div class="cc-client-search" id="cc-client-search">
+          <input type="search" id="cc-client-search-input" placeholder="Search" aria-label="Search clients"
+                 autocomplete="off" spellcheck="false">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+        </div>
+
+        <div class="cc-client-list" id="cc-client-list"></div>
+
+        <p class="cc-client-none" id="cc-client-none" hidden>No client matches that search.</p>
+      </div>
+    </div>
+
+    <!-- the results tab is added here at runtime, after Apply -->
+    <div class="cc-tabs" id="cc-tabs" role="tablist" aria-label="Projection section">
+      <button type="button" class="cc-tab" id="cc-tab-latest" role="tab"
+              aria-selected="true" aria-controls="cc-pane-latest">Latest projection</button>
+      <button type="button" class="cc-tab" id="cc-tab-inventory" role="tab"
+              aria-selected="false" aria-controls="cc-pane-inventory">Projection inventory</button>
+    </div>
+
+    <!-- ---------- 1 · LATEST PROJECTION ---------- -->
+    <section class="cc-pane" id="cc-pane-latest" role="tabpanel" aria-labelledby="cc-tab-latest" tabindex="0">
+      <div class="cc-toolbar" id="cc-latest-toolbar">
+        <p class="cc-meta" id="cc-latest-meta"></p>
+        <div class="cc-toolbar-right">
+          <div class="cc-select-wrap">
+            <select class="cc-select" id="cc-case" aria-label="Which case"></select>
+          </div>
+          <!-- THE NUDGE'S FIRST STEP lives inside the menu's own box, so it
+               is placed by sitting in the thing it points at rather than by
+               measurement - which matters because the canvas is scaled. -->
+          <div class="cc-menuwrap" id="cc-actions-wrap">
+            <button type="button" class="cc-btn cc-btn--cta" id="cc-actions-btn"
+                    aria-haspopup="menu" aria-expanded="false">
+              Actions
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+            </button>
+
+            <div class="cc-coach cc-coach--above" id="cc-coach-1" role="tooltip" hidden>
+              <p class="cc-coach-says">Start here &mdash; open <b>Actions</b>.</p>
+            </div>
+
+            <div class="cc-menu" id="cc-actions-menu" role="menu" aria-labelledby="cc-actions-btn" hidden>
+              <p class="cc-menu-group">Export</p>
+              <button type="button" class="cc-menu-item" role="menuitem" data-cc-value="export-projection">Export projection</button>
+              <hr class="cc-menu-rule">
+              <p class="cc-menu-group">Generate analysis</p>
+              <button type="button" class="cc-menu-item" role="menuitem" data-cc-value="case-comparison" id="cc-cmp-item">Case comparison</button>
+              <button type="button" class="cc-menu-item" role="menuitem" data-cc-value="analysis-2">Analysis #2</button>
+              <button type="button" class="cc-menu-item" role="menuitem" data-cc-value="analysis-3">Analysis #3</button>
+
+              <div class="cc-coach cc-coach--left" id="cc-coach-2" role="tooltip" hidden>
+                <p class="cc-coach-says">Now choose <b>Case comparison</b>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- every section, every row and every figure is drawn from
+           data/projections.js, so the markup never falls out of step -->
+      <div class="cc-scroll" id="cc-ledger"></div>
+    </section>
+
+    <!-- ---------- 2 · PROJECTION INVENTORY ---------- -->
+    <section class="cc-pane" id="cc-pane-inventory" role="tabpanel" aria-labelledby="cc-tab-inventory" tabindex="0" hidden>
+      <div class="cc-scroll" id="cc-inventory-scroll">
+        <table class="cc-table cc-table--inventory" id="cc-inventory">
+          <caption class="cc-sr">Saved projections</caption>
+          <thead><tr>
+            <th scope="col">Saved on</th>
+            <th scope="col">Saved by</th>
+            <th scope="col" class="cc-divide" colspan="6">Cases</th>
+            <th scope="col">Narrative</th>
+            <th scope="col" class="cc-divide"><span class="cc-sr">Actions</span></th>
+          </tr></thead>
+          <tbody id="cc-inventory-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ---------- 3 · RESULTS ---------- -->
+    <section class="cc-pane" id="cc-pane-results" role="tabpanel" aria-labelledby="cc-tab-results" tabindex="0" hidden>
+      <div class="cc-toolbar" id="cc-results-toolbar">
+        <p class="cc-meta" id="cc-results-meta"></p>
+        <div class="cc-toolbar-right">
+          <button type="button" class="cc-btn cc-btn--quiet" id="cc-adjust">
+            Adjust parameters
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 4.5h4M9 4.5h5M2 11.5h5M10 11.5h4M7.5 2.5v4M8.5 9.5v4"/></svg>
+          </button>
+          <button type="button" class="cc-btn cc-btn--quiet" id="cc-export">
+            Export
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M8 11V2.5M5 5.5L8 2.5l3 3M2.5 10.5v3h11v-3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="cc-loader" id="cc-loading">
+        <!-- AN ARC, NOT A FULL RING. The gap is the whole of the effect:
+             a complete circle turning looks like a circle standing still,
+             because there is nothing on it for the eye to follow. -->
+        <svg class="cc-spinner" id="cc-spinner" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="24" r="19" fill="none" stroke="currentColor"
+                  stroke-width="4" stroke-linecap="round"
+                  stroke-dasharray="94 25" />
+        </svg>
+        <p class="cc-loader-says" id="cc-loader-says">Generating case comparison</p>
+      </div>
+
+      <div class="cc-scroll" id="cc-result" hidden>
+        <table class="cc-table cc-table--grid" id="cc-grid">
+          <caption class="cc-sr">Each case against the base, by attribute and year</caption>
+          <thead><tr id="cc-grid-head"></tr></thead>
+          <tbody id="cc-grid-body"></tbody>
+        </table>
+      </div>
+
+      <!-- THE LEGEND SITS UNDER THE GRID AND DOES NOT SCROLL WITH IT. A key
+           that scrolls away is a key you cannot check against the thing it
+           explains. -->
+      <div class="cc-legend" id="cc-legend" hidden>
+        <span class="cc-legend-item"><i class="cc-swatch cc-swatch--good"></i>Positive correlation</span>
+        <span class="cc-legend-item"><i class="cc-swatch cc-swatch--bad"></i>Negative correlation</span>
+      </div>
+    </section>
+
+    <!-- ========== THE RELOAD VEIL ==========
+         Loading a different client is a real wait in the real product, so
+         the prototype shows one: the same arc the comparison uses, over
+         everything the client owns. -->
+    <div class="cc-veil" id="cc-veil" hidden>
+      <svg class="cc-spinner" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="19" fill="none" stroke="currentColor"
+                stroke-width="4" stroke-linecap="round" stroke-dasharray="94 25" />
+      </svg>
+      <p class="cc-loader-says" id="cc-veil-says">Loading client</p>
+    </div>
+  </main>
+  </div>
+
+  <!-- THE VEIL BETWEEN THE TWO SCREENS. Loading a module is a real wait in
+       the real product, so the prototype shows one. -->
+  <div class="cd-veil" id="cd-veil" hidden>
+    <svg class="cd-spinner" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="19" fill="none" stroke="currentColor"
+              stroke-width="4" stroke-linecap="round" stroke-dasharray="94 25" />
+    </svg>
+    <p class="cd-veil-says" id="cd-veil-says">Opening the projections module</p>
+  </div>
+</div>
+
+<!-- ================= THE SETUP MODAL ================= -->
+<div class="cc-scrim" id="cc-scrim" hidden></div>
+
+<div class="cc-modal" id="cc-setup" role="dialog" aria-modal="true" aria-labelledby="cc-setup-title" hidden>
+  <div class="cc-modal-head">
+    <h2 class="cc-modal-title" id="cc-setup-title">Setup parameters</h2>
+  </div>
+
+  <!-- TWO COLUMNS WITH A RULE BETWEEN THEM, as page 3 draws it: what is
+       being compared on the left, how the difference is expressed on the
+       right. They are two different questions and the rule says so. -->
+  <div class="cc-modal-body">
+    <div class="cc-col" id="cc-col-what">
+      <div class="cc-field">
+        <label class="cc-label" for="cc-period">Projection period</label>
+        <select class="cc-select" id="cc-period">
+          <option value="3">3 years</option>
+          <option value="5">5 years</option>
+          <option value="10" selected>10 years</option>
+        </select>
+      </div>
+
+      <div class="cc-field">
+        <label class="cc-label" for="cc-base">Base case</label>
+        <select class="cc-select" id="cc-base"></select>
+      </div>
+
+      <div class="cc-field">
+        <span class="cc-label" id="cc-against-label">Compare to</span>
+        <div class="cc-multi" id="cc-against" data-cc-multi aria-labelledby="cc-against-label"></div>
+      </div>
+
+      <div class="cc-field">
+        <span class="cc-label" id="cc-attrs-label">Attribute(s)</span>
+        <div class="cc-multi" id="cc-attrs" data-cc-multi aria-labelledby="cc-attrs-label"></div>
+      </div>
+    </div>
+
+    <div class="cc-col" id="cc-col-how">
+      <p class="cc-col-head" id="cc-deltas-head">Deltas</p>
+
+      <div class="cc-check-row">
+        <button type="button" class="cc-check" id="cc-show-deltas" role="checkbox" aria-checked="true">
+          <span class="cc-check-box">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M3.5 8.5l3 3L12.5 5"/></svg>
+          </span>
+          <span class="cc-check-label">Show deltas</span>
+        </button>
+      </div>
+
+      <div class="cc-field">
+        <label class="cc-label" for="cc-delta-logic">Delta calculation logic</label>
+        <select class="cc-select" id="cc-delta-logic">
+          <option value="pct" selected>Percentage</option>
+          <option value="abs">Absolute</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="cc-modal-foot">
+    <button type="button" class="cc-btn cc-btn--link" id="cc-cancel">Cancel</button>
+    <button type="button" class="cc-btn cc-btn--cta" id="cc-apply">
+      Apply
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8.5l3.5 3.5L13 5"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ================= THE "ARE YOU SURE" DIALOG =================
+     It has a scrim of its OWN rather than sharing the setup modal's, for one
+     plain reason: a click on that scrim closes the setup modal, and a
+     question you can dismiss by clicking next to it is not a question. This
+     one is answered by answering it, or by Escape. -->
+<div class="cc-scrim" id="cc-ask-scrim" hidden></div>
+
+<div class="cc-modal cc-modal--ask" id="cc-ask" role="alertdialog" aria-modal="true"
+     aria-labelledby="cc-ask-title" aria-describedby="cc-ask-says" hidden>
+  <div class="cc-modal-head">
+    <h2 class="cc-modal-title" id="cc-ask-title">Change client?</h2>
+  </div>
+
+  <div class="cc-modal-body cc-modal-body--one" id="cc-ask-body">
+    <p class="cc-ask-says" id="cc-ask-says">You will lose the generated case
+      comparison results if you change the client. Are you sure you want to
+      proceed?</p>
+  </div>
+
+  <div class="cc-modal-foot">
+    <button type="button" class="cc-btn cc-btn--link" id="cc-ask-no">Cancel</button>
+    <button type="button" class="cc-btn cc-btn--cta" id="cc-ask-yes">
+      Proceed
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8.5h10M9 4.5l4 4-4 4"/></svg>
+    </button>
+  </div>
+</div>
+
+</div><!-- /.fit-stage -->
+
+<script src="js/fit.js"></script>
+<script src="data/ptp.js"></script>
+<script src="data/widgets.js"></script>
+<script src="js/widget.js"></script>
+
+<!-- THE FLAG GOES IN BEFORE THE SCREEN DOES. js/projections.js reads it as
+     it starts, so it has to be set first. -->
+<script>window.CC_ALLOW_COMPARISON = false;</script>
+<script src="data/projections.js"></script>
+<script src="data/clients.js"></script>
+<script src="js/projections.js"></script>
+
+<script src="js/dashboard.js"></script>
+</body>
+</html>

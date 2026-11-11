@@ -1,0 +1,273 @@
+/* ===========================================================================
+   drawer.css — the trend panel that opens from a sparkline, and the two
+   charts inside it.
+
+   WHY IT IS A DRAWER AND NOT A PAGE. The reader is in the middle of reading
+   a grid; the trend answers "what has this one line been doing?" and then
+   they go back to the grid. A page would lose their place in it — the scroll
+   position, the column they had scrolled to, the row under their finger.
+   =========================================================================== */
+
+.kim-scrim {
+  position: absolute; inset-block: var(--kim-bar-h) 0; inset-inline: 0;
+  z-index: 80;
+  background: var(--salt-overlayable-scrim);
+}
+.kim-scrim[hidden] { display: none; }
+
+.kim-drawer {
+  position: absolute;
+  inset-block: var(--kim-bar-h) 0;
+  inset-inline-end: 0;
+  z-index: 90;
+  inline-size: 740px;
+  display: grid; grid-template-rows: auto minmax(0, 1fr);
+  background: var(--salt-overlayable-background);
+  color: var(--salt-content-primary-foreground);
+  border-inline-start: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                       var(--salt-separable-secondary-borderColor);
+  box-shadow: var(--salt-overlayable-shadow);
+  /* IT COMES IN FROM THE EDGE IT BELONGS TO. The panel slides its own full
+     width, decelerating — the standard "entering" curve: quick off the
+     mark, slow as it lands, so the eye follows it to a stop rather than
+     being startled by it. It used to nudge 24px, which reads as a flinch
+     rather than as a drawer arriving. */
+  animation: kim-slide 280ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.kim-drawer[hidden] { display: none; }
+@keyframes kim-slide { from { transform: translateX(100%); } }
+
+.kim-scrim { animation: kim-fade 280ms ease both; }
+@keyframes kim-fade { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .kim-drawer, .kim-scrim { animation: none; }
+}
+
+/* ---- the drawer's own wait ---- */
+.kim-drawer-loading {
+  /* it covers the body only, so the crumb and the close are live the whole
+     time — a panel you cannot shut while it loads is a trap */
+  inset-block-start: calc(var(--salt-size-base) + var(--salt-spacing-200));
+  background: var(--salt-overlayable-background);
+}
+
+.kim-drawer-top {
+  display: flex; align-items: center; gap: var(--salt-spacing-200);
+  padding: var(--salt-spacing-100) var(--salt-spacing-200)
+           var(--salt-spacing-100) var(--salt-spacing-300);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-tertiary-borderColor);
+}
+.kim-drawer-crumb {
+  margin: 0; flex: 1 1 auto;
+  font-size: var(--salt-text-fontSize);
+  color: var(--salt-content-secondary-foreground);
+}
+.kim-drawer-body {
+  overflow: auto; min-block-size: 0;
+  padding: var(--salt-spacing-300);
+  display: grid; align-content: start; gap: var(--salt-spacing-400);
+  font-size: var(--salt-text-fontSize);
+}
+
+.kim-sect-title {
+  margin: 0 0 var(--salt-spacing-200);
+  font-size: var(--salt-text-h3-fontSize);
+  line-height: var(--salt-text-h3-lineHeight);
+  font-weight: var(--salt-text-fontWeight-strong);
+}
+.kim-sect-when {
+  font-size: var(--salt-text-fontSize);
+  font-weight: var(--salt-text-fontWeight);
+  color: var(--salt-content-secondary-foreground);
+}
+
+/* ---- the percent change table ---- */
+.kim-pcttable {
+  inline-size: 100%;
+  border-collapse: separate; border-spacing: 0;
+  font-size: var(--salt-text-fontSize);
+}
+.kim-pcttable th {
+  text-align: start; font-weight: var(--salt-text-fontWeight-strong);
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  background: var(--salt-container-tertiary-background);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-accented-borderColor);
+}
+.kim-pcttable td {
+  padding: var(--salt-spacing-200);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-tertiary-borderColor);
+}
+.kim-pcttable .kim-th-sub {
+  display: block; font-weight: var(--salt-text-fontWeight);
+  color: var(--salt-content-secondary-foreground);
+  font-size: var(--salt-text-label-fontSize);
+}
+
+/* ---- the range tabs ---- */
+.kim-ranges {
+  display: flex; gap: var(--salt-spacing-300);
+  border-block-end: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                    var(--salt-separable-tertiary-borderColor);
+}
+.kim-range {
+  font: inherit; font-size: var(--salt-text-fontSize);
+  padding: var(--salt-spacing-100) 0;
+  cursor: pointer; background: none;
+  color: var(--salt-selectable-foreground);
+  border: none;
+  border-block-end: var(--salt-size-fixed-200) var(--salt-borderStyle-solid) transparent;
+  margin-block-end: calc(var(--salt-size-fixed-100) * -1);
+}
+.kim-range:hover { color: var(--salt-selectable-foreground-selected); }
+.kim-range[aria-pressed="true"] {
+  color: var(--salt-selectable-foreground-selected);
+  font-weight: var(--salt-text-fontWeight-strong);
+  border-block-end-color: var(--salt-selectable-borderColor-selected);
+}
+
+/* ---- the two-handle range slider ----
+   IT IS A TRACK WITH TWO BUTTONS ON IT, not an <input type="range"> pair:
+   two native sliders cannot be made to share one track without one of them
+   sitting on top of the other and stealing every press near the middle.
+   Both handles carry the slider role and its three aria values, so a
+   keyboard reader gets the same control the pointer does. */
+.kim-slider {
+  position: relative;
+  block-size: var(--salt-size-base);
+  display: flex; align-items: center;
+  touch-action: none;
+}
+.kim-slider-track {
+  position: absolute; inset-inline: 0;
+  block-size: 4px; border-radius: 999px;
+  background: var(--salt-container-tertiary-background);
+}
+.kim-slider-fill {
+  position: absolute; block-size: 4px; border-radius: 999px;
+  background: var(--salt-actionable-cta-background);
+}
+.kim-slider-handle {
+  position: absolute;
+  inline-size: 14px; block-size: 20px;
+  margin-inline-start: -7px;
+  padding: 0; cursor: ew-resize;
+  background: var(--salt-actionable-cta-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-actionable-cta-background);
+  border-radius: var(--salt-palette-corner-weak);
+  display: grid; place-items: center;
+}
+.kim-slider-handle::after {
+  content: ''; inline-size: 4px; block-size: 9px;
+  border-inline: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+                 var(--salt-actionable-cta-foreground);
+}
+
+/* ---- the charts ---- */
+.kim-chartwrap { display: grid; gap: var(--salt-spacing-200); }
+/* IT HAS TO OUT-WEIGH THE ICON RULE, and that is the whole reason this
+   selector names the drawer. shell.css ties every <svg> inside the frame to
+   the size of the text beside it — which is right for thirty icons and
+   catastrophic for a chart: both charts came out 12 pixels wide, drawn
+   correctly and far too small to see. A plain `.kim-chart` is lighter than
+   `.kim-drawer svg`, so it lost. */
+.kim-drawer .kim-chart {
+  inline-size: 100%; block-size: auto;
+  display: block; flex: 1 1 auto;
+}
+.kim-chart text {
+  font-family: var(--salt-text-fontFamily);
+  font-size: var(--salt-text-label-fontSize);
+  fill: var(--salt-content-secondary-foreground);
+}
+.kim-chart .kim-axis-title { fill: var(--salt-content-secondary-foreground); }
+.kim-chart .kim-gridline { stroke: var(--salt-separable-tertiary-borderColor); }
+.kim-chart .kim-axisline { stroke: var(--salt-separable-primary-borderColor); }
+.kim-chart .kim-line {
+  fill: none; stroke: var(--salt-category-1-foreground); stroke-width: 1.6;
+  stroke-linejoin: round; stroke-linecap: round;
+}
+/* THE ACTUAL-VALUE LINE IS MIST — your own plum — rather than the teal.
+   Two charts stacked in one panel in the same colour read as one picture
+   cut in half; this way the eye knows at a glance which of the two it is
+   looking at. The percent-change chart below keeps the teal, since its
+   filled area is already drawn in it. */
+.kim-chart--abs .kim-line { stroke: var(--salt-category-5-foreground); }
+.kim-chart .kim-area { fill: var(--salt-category-1-background); }
+/* A MATERIAL MOVE IS MARKED TWICE, in colour and in shape: a dashed rule
+   down the chart and a dot on the line. Colour alone would be the only
+   thing telling an increase from a decrease, which is exactly what a
+   reader who cannot separate the two hues would lose. */
+.kim-chart .kim-mark { stroke-dasharray: 3 3; stroke-width: 1; }
+.kim-chart .kim-mark--up { stroke: var(--salt-content-positive-foreground); }
+.kim-chart .kim-mark--down { stroke: var(--salt-content-negative-foreground); }
+.kim-chart .kim-markdot--up { fill: var(--salt-content-positive-foreground); }
+.kim-chart .kim-markdot--down { fill: var(--salt-content-negative-foreground); }
+
+/* ---- the hover readout ----
+   The guide and the dot are drawn INSIDE the chart, in its own
+   coordinates; the label is an HTML box placed in PER CENT of the chart,
+   which is what lets it survive the canvas being scaled. */
+.kim-chart .kim-guide {
+  stroke: var(--salt-separable-primary-borderColor);
+  stroke-width: 1; stroke-dasharray: 2 2;
+  pointer-events: none;
+}
+.kim-chart .kim-guidedot {
+  fill: var(--salt-container-primary-background);
+  stroke: var(--salt-category-5-foreground); stroke-width: 2;
+  pointer-events: none;
+}
+.kim-chart:not(.kim-chart--abs) .kim-guidedot { stroke: var(--salt-category-1-foreground); }
+
+.kim-chartwrap { position: relative; }
+.kim-tip {
+  position: absolute; z-index: 5;
+  display: grid; gap: 1px;
+  transform: translate(-50%, calc(-100% - 12px));
+  padding: var(--salt-spacing-100) var(--salt-spacing-200);
+  white-space: nowrap;
+  background: var(--salt-overlayable-background);
+  border: var(--salt-size-fixed-100) var(--salt-borderStyle-solid)
+          var(--salt-separable-secondary-borderColor);
+  border-radius: var(--salt-palette-corner-weak);
+  box-shadow: var(--salt-overlayable-shadow);
+  /* IT MUST NOT EAT THE POINTER IT IS FOLLOWING. The label sits over the
+     chart it is reading from; catching the pointer would make it flicker
+     as the pointer moved on to it. */
+  pointer-events: none;
+}
+.kim-tip[hidden] { display: none; }
+.kim-tip.is-start { transform: translate(-8px, calc(-100% - 12px)); }
+.kim-tip.is-end { transform: translate(calc(-100% + 8px), calc(-100% - 12px)); }
+.kim-tip-when {
+  font-size: var(--salt-text-label-fontSize);
+  letter-spacing: var(--salt-text-label-letterSpacing);
+  text-transform: uppercase;
+  color: var(--salt-content-secondary-foreground);
+}
+.kim-tip-val {
+  font-size: var(--salt-text-fontSize);
+  font-weight: var(--salt-text-fontWeight-strong);
+  color: var(--salt-content-primary-foreground);
+}
+
+.kim-chartkey {
+  display: flex; flex-wrap: wrap; gap: var(--salt-spacing-400);
+  margin: 0; padding: 0; list-style: none;
+  justify-content: center;
+  font-size: var(--salt-text-label-fontSize);
+  color: var(--salt-content-secondary-foreground);
+}
+.kim-chartkey li { display: inline-flex; align-items: center; gap: var(--salt-spacing-100); }
+/* A SWATCH IS A CHART IN EVERY RESPECT BUT SIZE: it is drawn with the same
+   classes so its line and its markers cannot drift from the chart's, and
+   it is told its own size here, after the rule above, so it does not
+   inherit the chart's full width. */
+.kim-drawer .kim-chart--key {
+  inline-size: 2.2em; block-size: 1em; flex: 0 0 auto;
+}
