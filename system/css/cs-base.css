@@ -1,0 +1,342 @@
+﻿/* cs-base.css — reset and the seven type roles from the typography spec. */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--cs-bg-1);
+  color: var(--cs-text-1);
+  font-family: var(--cs-font-body);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+p, h1, h2, h3, figure, ul { margin: 0; padding: 0; }
+ul { list-style: none; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+:focus-visible { outline: 2px dashed var(--cs-accent-1); outline-offset: 4px; }
+
+.cs-sr {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------- the type roles ----------
+   Every size, line height and weight comes from common/type.css. The classes
+   below are the case study's own names for those roles, so the markup reads
+   in its own language while the system stays single-sourced.
+
+   NOTE, worth a look: the high-fidelity sheet sets body at 24, caption at 16
+   and meta at 12. The system runs larger than that — body 30, caption 22,
+   meta 19 — because the brief was to make running text more legible. The
+   headings are unchanged. */
+
+/* ---------------------------------------------------------------------------
+   EVERYTHING IS CENTRED.
+
+   Titles, sub-headings, body copy, captions - all of it, on every slide. The
+   centring is declared here, once per role, rather than per template, so a
+   template added tomorrow is centred without anyone remembering to say so.
+
+   The two places that opt back out are the ones where centring would be
+   wrong rather than merely different: a LIST, whose items have to share a
+   left edge or the eye cannot find the next one, and a NUMBERED GRID, where
+   the number leads. Both say so for themselves further down.
+   ------------------------------------------------------------------------ */
+
+.cs-hero-title {
+  text-align: center;
+  /* 01 A - `case-study-title`. Its own role now: the title of the case
+     study and nothing else on the site. */
+  font-family: var(--t-case-study-title-hand);
+  font-size: var(--t-size-case-study-title);
+  line-height: var(--t-case-study-title-lh);
+  letter-spacing: var(--t-case-study-title-ls);
+  font-weight: var(--t-case-study-title-w);
+  color: var(--cs-accent-1);
+  text-wrap: balance;
+}
+
+.cs-impact {
+  text-align: center;
+  font-family: var(--t-h1-hand);
+  font-size: var(--t-size-h1);
+  line-height: var(--t-h1-lh);
+  letter-spacing: var(--t-h1-ls);
+  font-weight: var(--t-h1-w);
+  color: var(--cs-accent-1);
+  text-wrap: balance;
+}
+
+/* A SECTION TITLE IS CENTRED, AND CARRIES NO RULE.
+
+   It used to have a short upright line in the primary accent down its left
+   side - the high-fidelity sheets drew one - and it used to sit hard left.
+   Both are gone. A left-hand rule only reads as a rule when the text beside
+   it starts at a fixed edge; centred, it becomes a mark floating in the
+   middle of the slide pointing at nothing. And with every title and every
+   paragraph now centred on its own column, the slide holds together on one
+   axis rather than two. */
+/* A SLIDE'S OWN HEADING HAS ITS OWN ROLE IN THE SCALE, `title`, and it is
+   set at the same size as an impact line.
+
+   It used to borrow the `h2` role, which it shared with the drawer's
+   title, the hero's second line and a panel heading - so there was no way
+   to move a slide heading without moving those three with it. Now there
+   is: `--t-title` in common/type-scale.css, on its own line. It happens
+   to hold the same number as `--t-h1` today; that is a default, not a
+   link between them.
+
+   The class name stays `cs-section-title` because every template in
+   cs-templates.js and every stylesheet below writes it. Renaming it would
+   be a hundred edits to say the same thing. */
+.cs-section-title {
+  /* 03 A - `slide-title`. Any text at the top of a slide spanning its
+     whole width. The one exception is the rule-title template, whose
+     heading is a chapter mark and takes `chapter-name` instead. */
+  font-family: var(--t-slide-title-hand);
+  font-size: var(--t-size-slide-title);
+  line-height: var(--t-slide-title-lh);
+  letter-spacing: var(--t-slide-title-ls);
+  font-weight: var(--t-slide-title-w);
+  color: var(--cs-accent-2);
+  text-align: center;
+}
+
+/* a sub-heading: a tile's name, a phase label's partner */
+.cs-sub-title {
+  text-align: center;
+  font-family: var(--t-h3-hand);
+  font-size: var(--t-size-h3);
+  line-height: var(--t-h3-lh);
+  letter-spacing: var(--t-h3-ls);
+  font-weight: var(--t-h3-w);
+  color: var(--cs-text-1);
+}
+
+/* AN ORDINARY LEAD PARAGRAPH, on any slide. It is NOT the case study's
+   tagline any more: that line used to share this role, so moving one moved
+   the other, and the rule below splits them. `lead` is one of the roles
+   still waiting for a name from you. */
+.cs-lead {
+  font-family: var(--t-lead-hand);
+  font-size: var(--t-size-lead);
+  line-height: var(--t-lead-lh);
+  font-weight: var(--t-lead-w);
+  color: var(--cs-text-1);
+}
+
+/* 01 B - `case-study-tagline`. The line right under the case study's
+   title, and only that. It carries `.cs-lead` as well, so this rule comes
+   after it and wins on being later rather than on being louder - which is
+   also what makes it easy to see that the two are deliberately a pair. */
+.cs-hero-lead {
+  font-family: var(--t-case-study-tagline-hand);
+  font-size: var(--t-size-case-study-tagline);
+  line-height: var(--t-case-study-tagline-lh);
+  letter-spacing: var(--t-case-study-tagline-ls);
+  font-weight: var(--t-case-study-tagline-w);
+}
+
+/* =========================================================================
+   THE LEAD AS A ROW OF PIECES  -  `lead: [ `12 weeks`, `4 teams` ]`
+   =========================================================================
+
+   SEPARATE THINGS THAT ARE STILL ONE STATEMENT. That is the whole brief,
+   and it is a question about SPACING before it is a question about rules:
+   the pieces have to sit closer to each other than the row sits to
+   anything above or below it, or they stop being one thing. The row gap
+   here is smaller than the band the hero gives this line, which is what
+   holds them together; the rules between them are what tells them apart.
+
+   THE RULE IS A BORDER, NOT A CHARACTER. Three reasons, and the first is
+   the one that matters: a `|` typed into the words is READ OUT by a screen
+   reader, once per gap, which turns a line of figures into a line of
+   noise. The second is that a border is a line rather than a glyph, so it
+   does not change shape with the drawn face or sit at the wrong height
+   above the baseline. The third is that it can be turned off for one
+   breakpoint without touching the words.
+
+   IT SITS HALFWAY BETWEEN THE TWO PIECES, because the gap and the padding
+   are the same number: text, gap, rule, gap, text. Give it only one of the
+   two and every rule hugs the piece on its right and looks attached to it.
+
+   THE ROW WRAPS RATHER THAN SHRINKING, and a piece that lands at the start
+   of a second line keeps its rule - which reads as a list continuing, not
+   as a mistake. If that ever looks wrong, it is three characters: drop
+   `flex-wrap` and let the row scroll instead.
+
+   WHERE IT SITS ACROSS THE SLIDE is `--cs-hero-lead-align`, so a study can
+   centre the row under the centred title from its own theme.css without
+   anybody editing this file:
+
+       :root { --cs-hero-lead-align: center; }
+
+   Left is the default, which is where the lead already sat. */
+.cs-hero-lead--row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: var(--cs-hero-lead-align, flex-start);
+  column-gap: calc(26 * var(--u));
+  row-gap: calc(8 * var(--u));
+}
+.cs-hero-lead--row > .cs-hero-lead-part + .cs-hero-lead-part {
+  padding-inline-start: calc(26 * var(--u));
+  border-inline-start: 1.4px solid
+    color-mix(in srgb, var(--cs-text-2) 62%, transparent);
+}
+
+/* ON A PHONE THEY STACK, AND THE RULES GO WITH THE ROW. Four figures side
+   by side on a 390-wide screen are four figures of one word each with a
+   rule between every pair, which is more rule than writing. Stacked, the
+   gap does the separating on its own - and it is a tighter gap than the
+   one above and below the block, so they still read as one thing. */
+@media (max-width: 820px) {
+  .cs-hero-lead--row {
+    flex-direction: column;
+    align-items: flex-start;
+    row-gap: 6px;
+  }
+  .cs-hero-lead--row > .cs-hero-lead-part + .cs-hero-lead-part {
+    padding-inline-start: 0;
+    border-inline-start: none;
+  }
+}
+
+/* =========================================================================
+   A COLUMN OF TEXT  -  the spec sheet of 26 October
+   =========================================================================
+
+   THREE RULES, AND THEY ARE ALL IN THIS ONE BLOCK:
+
+   1. THE TEXT IS ALWAYS LEFT-ALIGNED. Body copy used to be centred like
+      everything else on a slide. Centred prose gives every line a different
+      starting point, so the eye has to hunt for the start of each one; that
+      is a fine price for a single statement and a bad one for a paragraph.
+      Only the WRITING changes. Titles, section headings and the big impact
+      statements stay centred, which is why this rule is on .cs-body and not
+      on the slide.
+
+   2. IT HAS A MEASURE. A slide is about 1200px of usable width; a line of
+      text that long is roughly twice what is comfortable to read. 62
+      characters is the cap - in `ch`, so it is 62 characters at whatever
+      size the type happens to be rather than a pixel count that is right at
+      one width and wrong at another.
+
+   3. THE COLUMN IS CENTRED IN ITS SPACE. `margin-inline: auto` is the whole
+      of it: the writing sits left INSIDE the column, and the column itself
+      sits in the middle of whatever it was given. That is the sheet's
+      second drawing exactly - a left edge for the text, a centre line for
+      the block.
+
+   In a column that is already narrow - the explains panel beside a person,
+   the writing beside a stepped diagram - the cap never binds and only rule
+   1 is doing anything. */
+.cs-body {
+  font-family: var(--t-body-hand);
+  font-size: var(--t-size-body);
+  line-height: var(--t-body-lh);
+  font-weight: var(--t-body-w);
+  color: var(--cs-text-1);
+  text-align: left;
+  max-width: var(--cs-measure, 62ch);
+  margin-inline: auto;
+}
+
+/* ONE PARAGRAPH, THEN ANOTHER.
+
+   Writing `body: ['first', 'second']` in copy.js gives two paragraphs, and
+   this is what puts a gap between them. It is declared on .cs-body, so it
+   holds everywhere body copy appears - on a slide, inside a person's panel,
+   inside a drawer. It used to be declared on two named slots only
+   (.cs-sec-1-body and .cs-sec-2-body), which meant paragraphs separated on
+   most slides and ran straight into each other in the explains panel, with
+   nothing in the copy to explain the difference. */
+/* The rule is `anything after anything`, not `a paragraph after a
+   paragraph`. It used to be the narrower one, which meant a list sat hard
+   against the paragraph above it and the paragraph after it sat hard
+   against the list - a gap that appeared and disappeared depending on what
+   happened to be next to what. Lists and the raised surface carry no margin
+   of their own, so nothing is doubled up by saying it here once. */
+.cs-body > * + * { margin-top: 1em; }
+
+/* =========================================================================
+   THE FIRST LINE OF A NEW PARAGRAPH IS INDENTED
+   =========================================================================
+
+   `p + p` is the whole rule, and it says exactly what was asked for:
+   indent a paragraph that FOLLOWS ANOTHER PARAGRAPH. Everything that should
+   not be indented falls out of it without a word being written:
+
+       the first paragraph of a body    nothing in front of it
+       the first after a heading        an <h3> in front of it, not a <p>
+       the first after a list           a <ul> in front of it
+       EVERY BULLET POINT               a list item is an <li>, never a <p>
+
+   So indentation only ever appears where several paragraphs run together as
+   one cohesive piece of writing, which is the only place it means anything.
+   A single paragraph on its own is never indented: there is nothing above
+   for it to be stepped away from.
+
+   2em is two characters at the text's own size, so the step grows with the
+   type instead of being a fixed number of pixels. */
+.cs-body > p + p { text-indent: 2em; }
+
+/* A LIST KEEPS ITS OWN LEFT EDGE and takes no indent. The body is already
+   left-aligned, so this is now only for the lists that sit on a slide
+   OUTSIDE a body - the numbered grid is one - and for making sure no
+   inherited indent ever reaches a list item. */
+.cs-questions,
+.cs-numbered { text-align: left; text-indent: 0; }
+.cs-body li { text-indent: 0; }
+
+.cs-body--small { font-size: var(--t-size-body-sm); }
+.cs-body--secondary { color: var(--cs-text-2); }
+
+/* CAPTION AND META ARE NOW IN THE HAND.
+
+   The typography sheet puts both of them in Caveat, not the rounded body
+   face - so the line under a picture and a small label are written in the
+   same hand as a note in the margin. Meta also loses its small capitals and
+   its wide tracking: the sheet says tracking auto, and a handwritten face
+   has no small capitals to set it in. */
+.cs-caption {
+  text-align: center;
+  /* 03 E - `caption`. The one role on your sheet that already had your
+     name and your value, so nothing about it moved. */
+  font-family: var(--t-caption-hand);
+  font-size: var(--t-size-caption);
+  line-height: var(--t-caption-lh);
+  font-weight: var(--t-caption-w);
+  color: var(--cs-text-1);
+}
+
+.cs-meta {
+  text-align: center;
+  font-family: var(--t-meta-hand);
+  font-size: var(--t-size-meta);
+  line-height: var(--t-meta-lh);
+  letter-spacing: var(--t-meta-ls);
+  font-weight: var(--t-meta-w);
+  text-transform: none;
+  color: var(--cs-text-1);
+}
+
+/* an aside pencilled in the margin */
+.cs-hand {
+  font-family: var(--t-hand-face);
+  font-size: var(--t-size-lead);
+  line-height: 1.25;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
+

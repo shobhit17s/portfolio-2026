@@ -1,0 +1,418 @@
+﻿/* cs-flow.css — the flow-chart slide.
+
+   Everything about how a flow chart LOOKS is here. What it is made of is in
+   cs-templates.js under 'flow-chart'; what it does when you press a dot is
+   in cs-flowchart.js.
+
+   THE WHOLE SLIDE, top to bottom:
+
+       the rail        two rows of the slide's eight
+       the drawing     five
+       its line        one
+
+   THE RAIL IS A GRID and nothing else. Each step is given a column and a
+   row by the template, worked out once by CS.flowPlan, and the grid puts
+   it there. The line joining the dots is NOT in this file: it is an SVG
+   drawn from where the dots actually landed, because the sheet asks for a
+   line with no predetermined length and a border always has one.
+
+   Sizes are in `--u`, the slide's design pixel - 1/1920 of the slide's
+   content width - so the whole thing scales with the slide rather than
+   with the window. */
+
+/* ---------- where the four pieces sit on the slide ----------
+
+   THE DRAWING IS 1840 x 1000, from the sheet of 30 October, and only one
+   of those two numbers has to be written down.
+
+   1840 IS ALREADY WHAT THE SLIDE GIVES IT. A slide is 1920 design units
+   wide with 40 of padding each side, so the full width of its grid - all
+   twelve columns - is exactly 1840. The sheet and the slide were always
+   agreeing; nothing has to be set to make that true, and writing `width:
+   1840` would be a second copy of a number that can only go stale.
+
+   1000 IS THE ONE REAL INSTRUCTION, so the row the drawing sits in is
+   given exactly that height and the other three rows take what they need.
+
+   THE SLIDE THEN GROWS IF IT HAS TO. A flow chart is taller than 16:9 -
+   the rail, a thousand units of drawing, and a line underneath do not fit
+   in 1080 - and `min-height` on .cs-slide means 16:9 is a floor rather
+   than a ceiling. So the slide simply becomes as tall as the sheet draws
+   it instead of squeezing the drawing to fit a shape it was never in. */
+/* THREE ROWS NOW, NOT FOUR. The picture's title used to be a row of the
+   slide; the sheet of 5 November puts it inside the stage, under the
+   picture and between the two click areas, with the counter under that.
+   Which is right: they belong to the picture, and a title that sat
+   outside the click areas would look like it belonged to the slide. */
+.t-flow-chart {
+  grid-template-rows: auto auto auto;
+  align-content: center;
+}
+.t-flow-chart > .cs-section-title { grid-column: 1 / 13; grid-row: 1; align-self: center; }
+.t-flow-chart > .cs-flow-chart   { grid-column: 1 / 13; grid-row: 2; align-self: center; }
+.t-flow-chart > .cs-flow-stage   { grid-column: 1 / 13; grid-row: 3; }
+
+/* ---------- the rail ---------- */
+.cs-flow-chart { position: relative; width: 100%; }
+
+.cs-flow-rail {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--cs-flow-cols, 1), minmax(0, 1fr));
+  /* EXPLICIT ROWS, not auto ones, for one reason: a collective has to be
+     able to span from its own row to the last, and `grid-row: N / -1`
+     only means "to the end" when the grid knows where its end is. */
+  grid-template-rows: repeat(var(--cs-flow-rows, 1), minmax(calc(96 * var(--u)), auto));
+  align-items: start;
+  /* THE GAP BETWEEN ROWS IS WHERE THE LINES RUN. A join that leaves a
+     step downward travels along the middle of this gap before turning in,
+     so the gap is not spacing - it is the lane. Too small and a line runs
+     through the labels of the row it is passing. */
+  row-gap: calc(96 * var(--u));
+  padding-block: calc(18 * var(--u));
+}
+
+/* THE LINE SITS UNDER THE DOTS and never takes a click: a reader aiming at
+   a dot should not be able to miss it by a pixel and hit the line. */
+.cs-flow-line {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: var(--cs-line);
+  z-index: 0;
+}
+.cs-flow-line svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.cs-flow-path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: calc(2.5 * var(--u));
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  opacity: 0.85;
+}
+
+/* ---------- where a thing sits ----------
+   THE CELL IS PLACED, NOT THE STEP. A plain step used to be put on the
+   grid itself, which was fine while a step was the only thing that could
+   be on it. A collective is a box with a name above it and several steps
+   inside, so there is now a wrapper that holds a place and a thing that
+   fills it - and both kinds of thing fill it the same way. */
+.cs-flow-cell {
+  grid-column: var(--cs-flow-col);
+  grid-row: var(--cs-flow-row);
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+}
+
+/* ---------- one step ---------- */
+.cs-flow-step {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: calc(14 * var(--u));
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cs-flow-dot {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  border-radius: 50%;
+  background: var(--cs-accent-1-vivid, var(--cs-text-1));
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+/* A LABEL STAYS INSIDE ITS OWN STEP. Without this it is free to grow
+   past the column the grid gave it, and a long name quietly shoulders its
+   neighbours aside - the dots stay put, the words do not, and the two stop
+   lining up. Wrapping is the right answer rather than clipping: a name too
+   long for one line is still a name, and the rail simply gets taller. */
+.cs-flow-label {
+  font-size: calc(26 * var(--u));
+  line-height: 1.25;
+  text-align: center;
+  color: var(--cs-text-2);
+  transition: color 140ms ease;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.cs-flow-step { min-width: 0; }
+
+/* THE RING MARKS THE ONE YOU ARE LOOKING AT. Two rings rather than one: the
+   inner one is the slide's own background, so the dot reads as lifted off
+   the line it sits on rather than merged into it. */
+.cs-flow-step.is-on .cs-flow-dot {
+  box-shadow: 0 0 0 calc(5 * var(--u)) var(--cs-bg-1),
+              0 0 0 calc(8 * var(--u)) var(--cs-text-1);
+}
+.cs-flow-step.is-on .cs-flow-label { color: var(--cs-text-1); font-weight: 600; }
+
+.cs-flow-step:hover .cs-flow-dot { transform: scale(1.18); }
+.cs-flow-step:hover .cs-flow-label { color: var(--cs-text-1); }
+.cs-flow-step:focus-visible { outline: none; }
+.cs-flow-step:focus-visible .cs-flow-dot {
+  box-shadow: 0 0 0 calc(5 * var(--u)) var(--cs-bg-1),
+              0 0 0 calc(8 * var(--u)) var(--cs-accent-1-vivid, var(--cs-text-1));
+}
+
+/* ---------- the separator ---------- */
+/* An upright tick sitting on the line, marking a change in the KIND of
+   step rather than another step. It is centred on the dots' own centre -
+   half a dot down from the top of the row - so it crosses the line
+   squarely however tall the labels under it are. */
+.cs-flow-sep {
+  grid-column: var(--cs-flow-col);
+  grid-row: var(--cs-flow-row);
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  width: calc(2.5 * var(--u));
+  height: calc(52 * var(--u));
+  margin-top: calc(-15 * var(--u));
+  background: var(--cs-line);
+}
+.cs-flow-sep-label {
+  position: absolute;
+  top: calc(60 * var(--u));
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  color: var(--cs-text-2);
+}
+
+/* ---------- which way a line points ----------
+   A SOLID HEAD, NOT AN OUTLINE. At the size these are drawn - a little
+   under one dot across - an outlined triangle is three hairlines with a
+   hole in the middle, and at a glance it reads as a diamond. Filled, it
+   reads as an arrow at any size. It takes the line's own colour so the
+   two can never drift apart. */
+.cs-flow-arrow {
+  fill: currentColor;
+  stroke: none;
+  opacity: 0.85;
+}
+
+/* ---------- a collective ----------
+   A BOX OF SMALLER STEPS, and the box is the thing the lines reach. The
+   sheet draws the joins arriving at the box's edge rather than at any one
+   step inside it, which is what makes it read as one place in the flow
+   that happens to have parts, rather than as three loose steps that
+   happen to be near each other. */
+.cs-flow-cell--collective { align-content: stretch; justify-items: stretch; }
+.cs-flow-cell--collective { grid-row: var(--cs-flow-row) / -1; }
+
+.cs-flow-collective-name {
+  margin: 0 0 calc(14 * var(--u));
+  text-align: center;
+  font-size: calc(26 * var(--u));
+  line-height: 1.25;
+  color: var(--cs-text-2);
+}
+
+.cs-flow-collective {
+  display: grid;
+  align-content: space-around;
+  justify-items: center;
+  gap: calc(26 * var(--u));
+  padding: calc(28 * var(--u)) calc(20 * var(--u));
+  border-radius: calc(28 * var(--u));
+  /* A SURFACE, NOT A HOLE. The box is a shade off the slide rather than a
+     different colour: it is a grouping, and a grouping that shouts is a
+     second thing to read before the diagram. */
+  background: var(--cs-surface);
+  border: calc(2.5 * var(--u)) solid var(--cs-line);
+  min-width: 0;
+}
+
+/* a step inside a collective is the same step, quieter */
+.cs-flow-step--sub .cs-flow-dot {
+  width: calc(18 * var(--u));
+  height: calc(18 * var(--u));
+}
+.cs-flow-step--sub .cs-flow-label { font-size: calc(23 * var(--u)); }
+.cs-flow-step--sub { gap: calc(10 * var(--u)); }
+
+/* ---------- the picture, its click areas, its title and its counter ----------
+
+   THE SAME FURNITURE AS EVERY OTHER CAROUSEL HERE - the tall click strips
+   either side, the caption under, the counter under that. They are the
+   same components rather than lookalikes, so a reader who has met one
+   carousel on this site has met them all.
+
+   THE PICTURE KEEPS 1840:1000 AS A RATIO, not as a height. The sheet
+   writes "keep the image dimensions as 1840 x 1000 px, keep the ratio
+   consistent" - and it is the ratio that survives a change of scale. With
+   a click strip either side the picture is narrower than 1840, so a fixed
+   height would simply be the wrong shape; the ratio is right at every
+   width. */
+.cs-flow-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: calc(141 * var(--u)) minmax(0, 1fr) calc(141 * var(--u));
+  gap: calc(15 * var(--u));
+  align-items: stretch;
+  min-height: 0;
+}
+
+.cs-flow-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(14 * var(--u));
+}
+
+.cs-flow-shots {
+  position: relative;
+  display: grid;
+  aspect-ratio: 1840 / 1000;
+  min-height: 0;
+}
+.cs-flow-shots > .cs-flow-shot { width: 100%; height: 100%; }
+
+.cs-flow-title { margin: 0; text-align: center; }
+.cs-flow-count { margin: 0; text-align: center; justify-content: center; }
+.cs-flow-count[hidden] { display: none; }
+
+/* the strips run the height of the picture, not of the whole stage - the
+   title and the counter underneath are not part of what you are stepping
+   through */
+.cs-flow-stage > .cs-step { align-self: stretch; }
+
+/* ---------- a flow chart with no steps ---------- */
+.cs-flow-missing {
+  grid-column: 1 / 13;
+  grid-row: 1 / 9;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: calc(10 * var(--u));
+  text-align: center;
+}
+
+/* =======================================================================
+   ON A PHONE THE RAIL TURNS
+   =======================================================================
+
+   The same markup, read down the page instead of across: a step's COLUMN
+   becomes its row, and its ROW becomes how far it is indented. So the main
+   flow runs down the left and a branch steps to the right of it, which is
+   how a branch is drawn by hand on paper when there is no width to spare.
+
+   Nothing in cs-flowchart.js is told about this. It measures the dots and
+   draws a line through them, and the elbows take their direction from
+   whichever way the first run turned out to run. */
+@media (max-width: 820px) {
+  /* THE 1000 GOES AWAY ON A PHONE, BUT THE SHAPE DOES NOT. A thousand
+     design units is a height, and below 820 a slide stops being 1920 units
+     wide, so the number stops meaning what it meant. What the sheet is
+     really saying is "this drawing is 1840 by 1000" - a PROPORTION - and
+     that survives the change of scale when the number does not. So the row
+     gives up its fixed height and the drawing keeps 1840:1000 instead,
+     which is why a flow chart on a phone is the same picture, smaller,
+     rather than a differently shaped one. */
+  .t-flow-chart { grid-template-rows: none; align-content: start; }
+  .t-flow-chart > .cs-section-title { grid-column: 1 / 13; grid-row: auto; }
+  .t-flow-chart > .cs-flow-chart { grid-column: 1 / 13; grid-row: auto; }
+  .t-flow-chart > .cs-flow-stage { grid-column: 1 / 13; grid-row: auto; }
+
+  /* THE CLICK STRIPS STAY, NARROWER. Everywhere else on this site they go
+     on a phone, because they flank a picture that is already the width of
+     the screen and the pager's arrows take over. There is no pager here -
+     the strips are the only way through a step's drawings - so taking them
+     away would take the carousel away with them. 40px is enough to hit and
+     little enough to leave the picture most of the screen. */
+  .t-flow-chart .cs-arrow.cs-step { display: grid; }
+  .cs-flow-stage {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+    gap: 8px;
+  }
+  .cs-flow-title { text-align: left; }
+
+  /* ONE ROW PER STEP, IN READING ORDER - `--cs-flow-seq`, not the column
+     it had on the wide layout. Two steps that sat side by side as a branch
+     have the same column, and a narrow screen has no side by side to give
+     them: stacked in the order they are written is the only honest reading.
+
+     THE BRANCH SHOWS AS AN INDENT instead - `--cs-flow-depth`, which is
+     how deep in branches a step is. Both members of a branch are indented
+     together, so they still read as a pair hanging off the step above
+     rather than as two more steps in the queue. */
+  .cs-flow-rail {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(var(--cs-flow-seqs, 1), auto);
+    row-gap: calc(40 * var(--u));
+    padding-block: calc(12 * var(--u));
+    padding-inline-start: calc(12 * var(--u));
+  }
+
+  /* THE CELL GOES BACK TO BEING A ROW OF ITS OWN, in reading order, and a
+     collective stops spanning - there is nothing to span on a single
+     column. Its own steps simply read on down the page like every other
+     step, which is the honest narrow-screen reading of a box of things. */
+  .cs-flow-cell,
+  .cs-flow-cell--collective {
+    grid-column: 1;
+    grid-row: var(--cs-flow-seq);
+    justify-items: start;
+    align-content: start;
+  }
+  /* THE BOX STEPS CLEAR OF THE SPINE. On a phone the line runs down
+     through the dots at the left edge; a box starting at the same edge
+     would have the line running inside it. Indented, it reads as a thing
+     hanging off the flow, which is what it is. */
+  .cs-flow-cell--collective { grid-row: var(--cs-flow-seq); padding-inline-start: 26px; }
+  .cs-flow-collective {
+    grid-auto-flow: row;
+    justify-items: start;
+    padding: 14px;
+    border-radius: 14px;
+    width: 100%;
+  }
+  .cs-flow-collective-name { text-align: left; }
+
+  .cs-flow-step {
+    grid-column: 1;
+    grid-row: auto;
+    grid-auto-flow: column;
+    grid-template-columns: auto 1fr;
+    justify-items: start;
+    align-items: center;
+    align-content: center;
+    gap: calc(26 * var(--u));
+    text-align: left;
+    padding-inline-start: calc(var(--cs-flow-depth, 0) * 56 * var(--u));
+  }
+  .cs-flow-label { text-align: left; font-size: calc(30 * var(--u)); }
+
+  /* the tick lies across the line instead of along it */
+  .cs-flow-sep {
+    grid-column: 1;
+    grid-row: var(--cs-flow-seq);
+    position: relative;
+    z-index: 1;
+    justify-self: start;
+    width: calc(52 * var(--u));
+    height: calc(2.5 * var(--u));
+    margin-top: 0;
+    margin-left: calc(var(--cs-flow-depth, 0) * 56 * var(--u) - 15 * var(--u));
+  }
+  .cs-flow-sep-label { position: static; transform: none; display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-flow-dot, .cs-flow-label { transition: none; }
+  .cs-flow-step:hover .cs-flow-dot { transform: none; }
+}

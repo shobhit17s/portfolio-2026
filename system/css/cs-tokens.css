@@ -1,0 +1,489 @@
+﻿/* cs-tokens.css — every colour, size and typeface a case study may use.
+   Values come straight from the spec sheets.
+
+   THIS FILE IS PART OF THE ENGINE. It contains nothing about any particular
+   case study: no titles, no copy, no image paths. A study supplies its own
+   theme.css (its two accents) and its own content.js (everything else). */
+
+:root {
+  /* ---- dark mode (the default the high-fidelity specs are drawn in) ---- */
+  --cs-bg-1: #0A0D0A;          /* primary background   */
+  --cs-bg-2: #0D1B18;          /* secondary background */
+  --cs-bg-3: #18241F;          /* tertiary background  */
+  --cs-text-1: #B1C4C6;        /* primary text   */
+  /* SECONDARY TEXT - the one place the sheet and the contrast rule disagree.
+     #57798D off the sheet measures 4.21 / 3.81 / 3.45 against the three
+     backgrounds above, and normal-size text needs 4.5. Same hue, same
+     chroma, lifted only as far as it has to be.
+     The sheet's value is kept below for anything decorative. */
+  --cs-text-2-spec: #57798D;   /* exactly as drawn */
+  --cs-text-2: #6D90A4;        /* 4.70 on the worst of the three */
+  --cs-line: #B1C4C6;          /* what hand-drawn strokes are drawn in */
+  /* Text that sits ON the tertiary surface - the light/dark pill, a filled
+     tab. Levelled against that surface WITH its hairline border blended in,
+     which is a shade darker than the surface alone. */
+  --cs-text-on-3: #B1C4C6;
+
+  /* ---- the accents, common to both modes ----
+     Six of these come from the spec sheets. --cs-moon is the seventh, added
+     for the light/dark switch: the sun needed an opposite number. It is the
+     one colour on this list that is not off a spec sheet - it was picked for
+     the switch and is used by the moon badge on it. Change it here and the
+     switch follows; nothing else reads it. */
+  --cs-moon:   #E4E4A6;
+  --cs-sun:    #E49204;
+  --cs-fire:   #D3644A;
+  --cs-water:  #3A768B;
+  --cs-forest: #849E59;
+  --cs-stone:  #8A92A0;
+  --cs-mist:   #8F4471;
+
+  /* =====================================================================
+     READABLE BY CONSTRUCTION - three strengths of every accent
+     =====================================================================
+
+     A colour picked to look right as a FILL is not the same colour that can
+     be read as TEXT on top of a background. Fire on the pale green surface
+     measured 2.08 to 1 in light mode, which is why the label on the
+     prototype button disappeared. Picking a different accent would only move
+     the problem to the next pairing, so the palette now carries its own
+     answer: each colour exists at three strengths, and WHICH ONE A RULE
+     USES IS DECIDED BY WHAT THE RULE IS DOING, not by eye.
+
+         --cs-<name>          THE COLOUR, exactly as the spec sheet draws it.
+                              For FILLS and TINTS - a filled band, a 12%
+                              wash behind a hovered row. Nothing is read off
+                              it, so contrast does not apply.
+
+         --cs-<name>-on-bg    the same colour, levelled so it clears 3.0 to 1
+                              against all three backgrounds of the current
+                              mode. For LARGE TEXT (24px and up) and for
+                              GRAPHICS - drawn outlines, borders, marks,
+                              arrows. 3.0 is what the standard asks of both.
+
+         --cs-<name>-ink      the same colour again, levelled to clear 4.5
+                              to 1. For TEXT AT READING SIZE - button labels,
+                              tab names, captions, meta lines, links.
+
+     Same hue and same chroma in all three; only lightness moves, and only as
+     far as it has to. In dark mode five of the seven do not move at all.
+
+     THE DEFAULT IS THE SAFE ONE. A case study's --cs-accent-1 points at
+     -on-bg, not at the raw colour, so any rule that was never thought about
+     still clears the graphical threshold. A rule has to opt IN to the raw
+     colour by naming -vivid.
+
+     To check rather than trust:  node tools/contrast-check.js
+     To re-derive after a palette change:  python3 tools/contrast-derive.py
+     ===================================================================== */
+
+  /* dark mode. Sun, forest, stone and moon already pass at both levels, so
+     they are written as themselves rather than as a near-identical twin. */
+  --cs-moon-on-bg:   var(--cs-moon);    --cs-moon-ink:   var(--cs-moon);
+  --cs-sun-on-bg:    var(--cs-sun);     --cs-sun-ink:    var(--cs-sun);
+  --cs-fire-on-bg:   var(--cs-fire);    --cs-fire-ink:   #DA6A50;
+  --cs-water-on-bg:  #3B778C;           --cs-water-ink:  #5793A9;
+  --cs-forest-on-bg: var(--cs-forest);  --cs-forest-ink: var(--cs-forest);
+  --cs-stone-on-bg:  var(--cs-stone);   --cs-stone-ink:  var(--cs-stone);
+  --cs-mist-on-bg:   #A35683;           --cs-mist-ink:   #C172A0;
+  /* words ON a fill of that accent - the fill is the -ink, so these are
+     comfortable rather than borderline */
+  --cs-on-fill: var(--cs-bg-1);
+
+  /* ---- A FOURTH NAME, for the other direction ----
+     The three above answer "the background is fixed, what colour can the
+     words be?". A selected tab asks the opposite: the FILL is the accent,
+     so what colour can the words on top of it be? There are only two
+     sensible answers on this site - the near-black or the cream - and which
+     one wins depends on the accent. Dark water and dark mist are mid-toned
+     enough that near-black words on them measure 3.86 and 3.74; cream words
+     clear 4.75 and 4.89. Every other fill is the other way round. */
+  --cs-on-moon:   var(--cs-on-fill);
+  --cs-on-sun:    var(--cs-on-fill);
+  --cs-on-fire:   var(--cs-on-fill);
+  --cs-on-water:  #FCF9D9;          /* mid-toned even as ink; cream reads better */
+  --cs-on-forest: var(--cs-on-fill);
+  --cs-on-stone:  var(--cs-on-fill);
+  --cs-on-mist:   #FCF9D9;
+
+  /* Only two accents per case study. The engine ships a neutral default;
+     each case study names its own pair IN ONE WORD EACH, on the <html> tag
+     of its own index.html - see THE ONE-WORD ACCENT PICKER at the foot of
+     this file. These four lines are what a study gets if it names nothing. */
+  --cs-accent-1:       var(--cs-stone-on-bg);
+  --cs-accent-1-ink:   var(--cs-stone-ink);
+  --cs-accent-1-vivid: var(--cs-stone);
+  --cs-accent-1-on:    var(--cs-on-stone);
+  --cs-accent-2:       var(--cs-water-on-bg);
+  --cs-accent-2-ink:   var(--cs-water-ink);
+  --cs-accent-2-vivid: var(--cs-water);
+  --cs-accent-2-on:    var(--cs-on-water);
+
+  /* ---- typography ----
+     The families and the whole scale live in common/type.css, which the
+     landing page reads too. These three names are kept so that older rules
+     still resolve; each one simply points at the shared face.
+     'Font_kk_version_1' is Caraxes's own face; Shantell Sans stands in until
+     the real file is dropped into assets/fonts and named in type.css. */
+  --cs-font-display: var(--t-display-face);
+  --cs-font-body: var(--t-body-face);
+  --cs-font-meta: var(--t-body-face);
+  --cs-font-hand: var(--t-hand-face);
+
+  /* ---- the slide grid, exactly as specced ---- */
+  --cs-slide-w: 1920;
+  --cs-slide-h: 1080;
+
+  /* How wide a slide is drawn on screen.
+     Spec #0.2: a 1920px slide inside a 3840px window — the slide is half the
+     window. Held to that, with a floor so the type stays readable on a laptop
+     and a ceiling at the slide's own design width. */
+  /* THE ONE LEVER FOR HOW BIG A SLIDE IS DRAWN.
+
+     The slide is never drawn narrower than this, however small the window -
+     it simply scrolls. Everything on a slide is measured in --u, one 1920th
+     of the slide's own width, so this number scales the whole case study at
+     once: the type, the padding, the gaps, the pictures.
+
+     1200 was too small - a 1920 slide rendered at 0.625 of its design size,
+     which was half of why the type read small. 1360 fixed the type but left
+     a slide touching the 40px window margin on a laptop, with no air either
+     side. 1240 sits between the two: a 1440 laptop now shows about 100px of
+     room beyond the margin on each side, a 1600 one about 180px, and the
+     type is still well clear of the per-role floors in common/type.css. */
+  --cs-slide-floor: 1240px;
+  --cs-slide-drawn: clamp(
+      min(100%, var(--cs-slide-floor)),
+      50vw,
+      calc(var(--cs-slide-w) * 1px));
+  --cs-slide-margin: 40;
+  --cs-slide-gutter: 16;
+  --cs-slide-cols: 12;
+  --cs-slide-rows: 8;
+
+  /* ---- the window grid (8 columns), which the drawer width comes from ---- */
+  --cs-win-margin: 40px;
+  /* how tall the bar carrying the two view tabs is, all-in. The page below
+     it reserves exactly this much, so the two never disagree. */
+  --cs-viewbar-h: 78px;
+  --cs-win-gutter: 16px;
+  --cs-win-col: calc((100vw - 2 * var(--cs-win-margin) - 7 * var(--cs-win-gutter)) / 8);
+  --cs-drawer-w: calc(3 * var(--cs-win-col) + 2 * var(--cs-win-gutter) + var(--cs-win-margin));
+
+  /* How far outside its own edge the drawn line sits. cs-strokes.js reads
+     this, so the number lives in one place and anything that has to leave
+     room for a drawn line can do the arithmetic in CSS. */
+  --cs-stroke-out: 3px;
+
+  /* THE PAGE'S OWN DESIGN PIXEL, for everything that is NOT on a slide: the
+     top bar, the view tabs, the drawer, the password screen. A slide has its
+     own, a fraction of the slide's width (see the bottom of this file); this
+     one follows the window, because those pieces do. */
+  --t-u: clamp(0.42px, 0.225vw + 0.255px, 0.6px);
+
+  /* ---- motion ---- */
+  --cs-drawer-ms: 1200ms;
+  --cs-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* =======================================================================
+     THE FAINT SURFACE - one colour for every raised block on the site
+     =======================================================================
+     A card, a tile, a pill, a person's panel, the circle behind a carousel
+     arrow: all of them used to be `--cs-bg-3` at full strength, or
+     two-thirds of it, and at that strength a page with six of them on it
+     reads as six boxes before it reads as anything you have written.
+
+     THIS IS THE ACCORDION HEADER'S WASH, exactly - the same expression, so
+     every surface on the site is the same surface and changing one changes
+     them all. A tenth of the study's second colour over whatever is behind
+     it: enough to say "this is a thing", not enough to be the first thing
+     you see.
+
+     IT FOLLOWS THE STUDY'S ACCENT, which is the one consequence worth
+     knowing: a study whose second colour is amber gets amber-tinted
+     surfaces, not green ones. If you would rather they stayed neutral
+     whatever the study, this one line becomes
+         color-mix(in srgb, var(--cs-bg-3) 55%, transparent)
+     and nothing else has to change. */
+  --cs-surface: color-mix(in oklab, var(--cs-accent-2) 11%, transparent);
+
+  /* AND THE PEN THAT GOES ROUND ONE. Not the ink the words are written in -
+     that gives a dark ring, which is the thing a drawn edge is not meant to
+     be. A step up from the page instead, so the boundary reads as the
+     surface's own hand-drawn edge and nothing more. */
+  --cs-surface-edge: var(--cs-bg-2);
+}
+
+/* ---- light mode ---- */
+:root[data-cs-mode='light'] {
+  --cs-bg-1: #FCF9D9;
+  --cs-bg-2: #E3EDCF;
+  --cs-bg-3: #CBE2CA;
+  /* EXACTLY AS THE SHEET DRAWS IT. It used to be nudged three points darker,
+     because against the old tertiary (#AECAAD) it measured 4.37 - just under
+     the line. The new tertiary is lighter, so the same colour now measures
+     5.63 and the nudge is not needed. Your value, unaltered. */
+  --cs-text-1: #3F5757;        /* 5.63 on the worst of the three */
+  /* THE SAME DISAGREEMENT, AND MUCH LARGER HERE.
+     #999F74 on the cream background measures 2.60 - unreadable rather than
+     borderline. A pale olive cannot be body text on a pale cream, and this
+     colour carries "back to the worlds", the line under your name, the tile
+     labels and the small print on the password screen.
+
+     The new tertiary being lighter has helped: the levelled version is
+     #5C6139 now, where against the old one it had to go all the way to
+     #4E522A. Same hue, same chroma, lightness only.
+
+     The sheet's value is kept below, for anything that is looked at rather
+     than read. */
+  --cs-text-2-spec: #999F74;   /* exactly as drawn */
+  --cs-text-2: #5C6139;        /* 4.71 on the worst of the three */
+  --cs-line: #3F5757;
+  --cs-text-on-3: #2E4A4A;     /* 5.00 on the pill, border and all */
+
+  /* the accents, re-levelled for a pale page - see the block below */
+  /* on a pale page every accent is dark enough that cream words win on all
+     seven, so these collapse to one value */
+  --cs-on-fill: #FCF9D9;
+  --cs-on-moon: var(--cs-on-fill);   --cs-on-sun:    var(--cs-on-fill);
+  --cs-on-fire: var(--cs-on-fill);   --cs-on-water:  var(--cs-on-fill);
+  --cs-on-forest: var(--cs-on-fill); --cs-on-stone:  var(--cs-on-fill);
+  --cs-on-mist: var(--cs-on-fill);
+
+  /* RE-DERIVED against the new tertiary. #CBE2CA is lighter than the surface
+     it replaces, which means every accent has more room before it has to be
+     darkened - water and mist now clear the graphical bar as drawn, and the
+     other five move less far than they used to. */
+  --cs-sun-on-bg:    #B36500;  --cs-sun-ink:    #954900;
+  --cs-fire-on-bg:   #C4573D;  --cs-fire-ink:   #A53B22;
+  --cs-water-on-bg:  var(--cs-water);  --cs-water-ink: #28657A;
+  --cs-forest-on-bg: #68803C;  --cs-forest-ink: #4E6621;
+  --cs-stone-on-bg:  #717986;  --cs-stone-ink:  #575F6C;
+  --cs-mist-on-bg:   var(--cs-mist);   --cs-mist-ink:  #8F4471;
+  --cs-moon-on-bg:   #7C7B41;  --cs-moon-ink:   #626126;
+}
+
+/* One design pixel, expressed against the slide's own width, so every number
+   from the spec sheets can be written exactly as it was drawn. The shared
+   type system measures itself against the same pixel. */
+/* Layout uses --u exactly: the grid, the gutters and the padding must stay in
+   proportion to the slide or the design comes apart.
+   Type uses --t-u, the same pixel - but every type size in common/type.css
+   is written as a clamp with its OWN floor in real pixels, so between a
+   full-size slide and a phone the text stops shrinking while the grid
+   carries on. No amount of faithfulness to the grid is worth text nobody
+   can read. */
+.cs-slide {
+  --u: 0.0520833cqw;
+
+  /* =======================================================================
+     THE GUTTER - the space between one component on a slide and the next
+     =======================================================================
+
+     IT WAS 16, AND THAT WAS THE WRONG WAY ROUND. A line of body text on a
+     slide is about 29 of these units tall, and the gap between two
+     paragraphs INSIDE one block of writing is the same 29. So two things
+     that belonged to DIFFERENT components were sitting closer together than
+     two lines that belonged to the SAME one - which is exactly the reading
+     Gestalt says you get: the eye groups by proximity, and it was being told
+     the wrong groups.
+
+     32 PUTS IT BACK THE RIGHT WAY ROUND, and the restraint is deliberate.
+     The slide is a fixed eight-row grid 1080 units tall, so every unit of
+     gutter is taken out of the rows: at 16 the seven gaps cost 112 units,
+     at 32 they cost 224 - a fifth of the slide. Doubling it again would eat
+     a third of the height and the slides that are already full would start
+     to squeeze.
+
+     SO THE ORDER NOW READS, SMALLEST TO LARGEST:
+         ~14-20   inside a component - the gap between a tile and its label
+         ~29      between two paragraphs of one piece of writing
+         32       BETWEEN ONE COMPONENT AND THE NEXT
+         40-48    between a picture and the column of writing beside it,
+                  which is a gutter of its own and wants to be wider still
+
+     Change this one line and every slide follows. */
+  --cs-gutter: calc(32 * var(--u));
+
+  /* HOW SHORT A SLIDE IS ALLOWED TO GET. A slide is as tall as what is in
+     it; this is the floor underneath that, so a slide carrying two words
+     is still a page rather than a band of text. 440 units is about 290px
+     at today's widths. Raise it toward 1080 and the page goes back toward
+     uniform 16:9 panels. The long note is by `.cs-slide` in cs-layout.css. */
+  --cs-slide-min: calc(440 * var(--u));
+
+  /* AND THE SAME FOR A STRIP, which is a shallow band rather than a page,
+     so its floor is shallower too - about 240px. A chapter mark sets this
+     to zero, because its painted band IS the slide. */
+  --cs-strip-min: calc(360 * var(--u));
+
+  /* =======================================================================
+     THE EXPLAINS PANEL, AND THE PICTURE IT STANDS BESIDE
+     =======================================================================
+
+     ONE HEIGHT, TWO THINGS. The explains panel and the drawing next to it
+     are a matched pair on every slide that has both - slide 4, slide 5,
+     slides 11 to 14 - and they only look like a pair if they are the same
+     height. So the height is one number here rather than a number written
+     out in each of those places, where it would drift.
+
+         --cs-explains-h    682   how tall the panel is, ALWAYS. It does
+                                  not grow when the writing is long; the
+                                  writing scrolls inside it instead.
+         --cs-explains-pic-w 912  how wide the drawing beside it is on the
+                                  split stepped slides (4 and 9).
+
+     WHY A FIXED HEIGHT RATHER THAN A LARGEST-ALLOWED ONE. A panel free to
+     grow makes the slide grow, and a slide that is a different height from
+     the one before it breaks the rhythm of the scroll. Worse, the drawing
+     beside it cannot follow - it is a fixed shape - so the two stop being
+     a pair the moment somebody writes a long paragraph. */
+  --cs-explains-h: calc(682 * var(--u));
+  --cs-explains-pic-w: calc(912 * var(--u));
+  /* and the writing beside it. 602 on the sheet. It used to be "whatever
+     is left", which came to 642 - near enough that nobody would notice,
+     and far enough to be a different width on every screen. */
+  --cs-explains-panel-w: calc(602 * var(--u));
+  /* Type used to carry its own floor here - max(0.5px, …) - because without
+     one the text on a phone came out at a few pixels. That floor now lives
+     where it belongs, one per role, in common/type.css, so a heading and a
+     caption can have different ones instead of sharing a single number that
+     suited neither. This is simply the slide's design pixel. */
+  --t-u: 0.0520833cqw;
+}
+
+
+/* =========================================================================
+   THE ONE-WORD ACCENT PICKER
+   =========================================================================
+
+   A case study's two colours used to be eight lines of plumbing in its own
+   theme.css, with the family name repeated four times per accent. Four
+   chances to change three of them and leave the fourth saying "fire".
+
+   NOW IT IS TWO WORDS, ON ONE LINE, IN THE STUDY'S OWN index.html:
+
+       <html lang="en" data-cs-mode="dark"
+             data-cs-accent-1="sun" data-cs-accent-2="forest">
+
+   accent 1 is the PRIMARY - the study's title, impact lines, the drawn
+   outline on the golden surface, the picture frames.
+   accent 2 is the SECONDARY - section titles, the line of flow, the drawer,
+   the scrollbars.
+
+   The seven families are the palette at the top of this file:
+
+       sun   fire   water   forest   stone   mist   moon
+
+   Say nothing and you get the engine's neutral default - stone and water.
+   Say a word that is not in that list and you get the default too, silently;
+   there is no way for a stylesheet to complain. So check your spelling
+   against the seven above if a page comes out grey-blue when you expected
+   otherwise.
+
+   WHY IT IS ON <html> AND NOT IN A STYLESHEET. CSS cannot build a name out
+   of a word - there is no way to write "use whichever colour is called
+   `sun`". It can only MATCH a word that is already on the page. So the word
+   goes on the page, the matching lives here, and nothing has to run: the
+   colours are right from the first paint, with no flash of the wrong ones
+   and no JavaScript involved.
+
+   IF YOU EVER NEED A COLOUR THAT IS NOT ONE OF THE SEVEN, the study's own
+   theme.css is still there for it. Write the selector TWICE so it outranks
+   the one-word choice:
+
+       :root:root { --cs-accent-1: #7A4B2A; }
+
+   Four lines make up an accent, and all four should move together:
+       --cs-accent-N          large text and drawn lines
+       --cs-accent-N-ink      text at reading size (darker, clears 4.5:1)
+       --cs-accent-N-vivid    fills and tints (the raw colour)
+       --cs-accent-N-on       words printed ON a fill of it
+   ========================================================================= */
+
+/* ---- accent 1: the primary ---- */
+:root[data-cs-accent-1="sun"] {
+  --cs-accent-1:       var(--cs-sun-on-bg);
+  --cs-accent-1-ink:   var(--cs-sun-ink);
+  --cs-accent-1-vivid: var(--cs-sun);
+  --cs-accent-1-on:    var(--cs-on-sun);
+}
+:root[data-cs-accent-1="fire"] {
+  --cs-accent-1:       var(--cs-fire-on-bg);
+  --cs-accent-1-ink:   var(--cs-fire-ink);
+  --cs-accent-1-vivid: var(--cs-fire);
+  --cs-accent-1-on:    var(--cs-on-fire);
+}
+:root[data-cs-accent-1="water"] {
+  --cs-accent-1:       var(--cs-water-on-bg);
+  --cs-accent-1-ink:   var(--cs-water-ink);
+  --cs-accent-1-vivid: var(--cs-water);
+  --cs-accent-1-on:    var(--cs-on-water);
+}
+:root[data-cs-accent-1="forest"] {
+  --cs-accent-1:       var(--cs-forest-on-bg);
+  --cs-accent-1-ink:   var(--cs-forest-ink);
+  --cs-accent-1-vivid: var(--cs-forest);
+  --cs-accent-1-on:    var(--cs-on-forest);
+}
+:root[data-cs-accent-1="stone"] {
+  --cs-accent-1:       var(--cs-stone-on-bg);
+  --cs-accent-1-ink:   var(--cs-stone-ink);
+  --cs-accent-1-vivid: var(--cs-stone);
+  --cs-accent-1-on:    var(--cs-on-stone);
+}
+:root[data-cs-accent-1="mist"] {
+  --cs-accent-1:       var(--cs-mist-on-bg);
+  --cs-accent-1-ink:   var(--cs-mist-ink);
+  --cs-accent-1-vivid: var(--cs-mist);
+  --cs-accent-1-on:    var(--cs-on-mist);
+}
+:root[data-cs-accent-1="moon"] {
+  --cs-accent-1:       var(--cs-moon-on-bg);
+  --cs-accent-1-ink:   var(--cs-moon-ink);
+  --cs-accent-1-vivid: var(--cs-moon);
+  --cs-accent-1-on:    var(--cs-on-moon);
+}
+
+/* ---- accent 2: the secondary ---- */
+:root[data-cs-accent-2="sun"] {
+  --cs-accent-2:       var(--cs-sun-on-bg);
+  --cs-accent-2-ink:   var(--cs-sun-ink);
+  --cs-accent-2-vivid: var(--cs-sun);
+  --cs-accent-2-on:    var(--cs-on-sun);
+}
+:root[data-cs-accent-2="fire"] {
+  --cs-accent-2:       var(--cs-fire-on-bg);
+  --cs-accent-2-ink:   var(--cs-fire-ink);
+  --cs-accent-2-vivid: var(--cs-fire);
+  --cs-accent-2-on:    var(--cs-on-fire);
+}
+:root[data-cs-accent-2="water"] {
+  --cs-accent-2:       var(--cs-water-on-bg);
+  --cs-accent-2-ink:   var(--cs-water-ink);
+  --cs-accent-2-vivid: var(--cs-water);
+  --cs-accent-2-on:    var(--cs-on-water);
+}
+:root[data-cs-accent-2="forest"] {
+  --cs-accent-2:       var(--cs-forest-on-bg);
+  --cs-accent-2-ink:   var(--cs-forest-ink);
+  --cs-accent-2-vivid: var(--cs-forest);
+  --cs-accent-2-on:    var(--cs-on-forest);
+}
+:root[data-cs-accent-2="stone"] {
+  --cs-accent-2:       var(--cs-stone-on-bg);
+  --cs-accent-2-ink:   var(--cs-stone-ink);
+  --cs-accent-2-vivid: var(--cs-stone);
+  --cs-accent-2-on:    var(--cs-on-stone);
+}
+:root[data-cs-accent-2="mist"] {
+  --cs-accent-2:       var(--cs-mist-on-bg);
+  --cs-accent-2-ink:   var(--cs-mist-ink);
+  --cs-accent-2-vivid: var(--cs-mist);
+  --cs-accent-2-on:    var(--cs-on-mist);
+}
+:root[data-cs-accent-2="moon"] {
+  --cs-accent-2:       var(--cs-moon-on-bg);
+  --cs-accent-2-ink:   var(--cs-moon-ink);
+  --cs-accent-2-vivid: var(--cs-moon);
+  --cs-accent-2-on:    var(--cs-on-moon);
+}

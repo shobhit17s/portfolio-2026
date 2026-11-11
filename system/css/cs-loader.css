@@ -1,0 +1,196 @@
+﻿/* cs-loader.css — the orbit loader that plays over a prototype.
+
+   WHAT THIS IS, AND WHAT IT IS NOT
+
+   It is a faithful rebuild of the `Orbit loader` design mockup: the same
+   three nested rings, the same hand-boiled wobble, the same draw-on arc,
+   the same hatch wipe at the end, the same squiggle progress bar.
+
+   It is NOT the mockup's code. That mockup ships React, ReactDOM and a
+   design-tool runtime - about 400KB of machinery to animate nine paths -
+   and its own README says to treat it as a reference and rebuild the
+   values in your own system. This engine is plain scripts that have to
+   run from a folder with no server, so React would have been three new
+   files, a build step, and a page that breaks on file:// for a spinner.
+
+   TWO THINGS DELIBERATELY CHANGED FROM THE MOCKUP
+
+   1 · THE COLOURS ARE TOKENS, not the mockup's hard-coded cream and ink.
+       This site has a light theme and a dark one, and a loader painted
+       #F7F3E8 would have glowed like a torch on the dark pages.
+
+   2 · THE TYPE IS THE SITE'S OWN FACES. The mockup fetches Caveat and
+       Patrick Hand from Google Fonts. Nothing here fetches anything -
+       that is the whole point of the inlined face - so the loader is set
+       in the faces the page already has. */
+
+.cs-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--cs-bg-1);
+  --cs-ld-accent: var(--cs-accent-2);
+  --cs-ld-spd: 1;
+}
+
+/* the ruled paper of the mockup, in this site's own line colour and at a
+   strength that survives both themes */
+.cs-loader::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--cs-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cs-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+  opacity: 0.10;
+  pointer-events: none;
+}
+
+.cs-loader-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  animation: csLdIn 0.7s cubic-bezier(.16, 1, .3, 1) both;
+}
+@keyframes csLdIn {
+  from { opacity: 0; transform: scale(.7) rotate(-30deg); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- the rings ---------- */
+.cs-ld {
+  display: block;
+  overflow: visible;
+  color: var(--cs-text-1);
+}
+.cs-ld g { transform-box: view-box; transform-origin: 50% 50%; }
+.cs-ld path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+.cs-ld-track  { stroke: currentColor; stroke-opacity: .25; stroke-width: 1.4; }
+.cs-ld-outer  { animation: csLdSpin calc(2.2s / var(--cs-ld-spd)) linear infinite; }
+.cs-ld-arc-o  { stroke: currentColor; stroke-width: 4.2; stroke-dasharray: 100 100;
+                animation: csLdDraw calc(1.8s / var(--cs-ld-spd)) cubic-bezier(.65,0,.35,1) infinite; }
+.cs-ld-arc-o2 { stroke: currentColor; stroke-opacity: .45; stroke-width: 1.3;
+                stroke-dasharray: 100 100;
+                animation: csLdDraw calc(1.8s / var(--cs-ld-spd)) cubic-bezier(.65,0,.35,1) -.08s infinite; }
+.cs-ld-mid    { animation: csLdSpinR calc(1.4s / var(--cs-ld-spd)) cubic-bezier(.55,0,.45,1) infinite; }
+.cs-ld-arc-m  { stroke: var(--cs-ld-accent); stroke-width: 4.5; }
+.cs-ld-arc-m2 { stroke: var(--cs-ld-accent); stroke-opacity: .55; stroke-width: 1.6; }
+.cs-ld-orbit  { animation: csLdSpin calc(1s / var(--cs-ld-spd)) linear infinite; }
+.cs-ld-dot    { fill: var(--cs-ld-accent); fill-opacity: .5; }
+.cs-ld-dot-s  { stroke: var(--cs-ld-accent); stroke-width: 1.6; fill: none; }
+.cs-ld-core   { animation: csLdSpin calc(2.4s / var(--cs-ld-spd)) steps(12) infinite; }
+.cs-ld-star   { stroke: currentColor; stroke-width: 3.2; }
+
+/* THE BOIL. Three copies of the same jitter, offset in time, which is how
+   hand-drawn animation makes a still line look alive. `steps(1)` is what
+   makes it snap between positions rather than slide - a drawn line does
+   not tween, it is redrawn. */
+.cs-ld-boil   { animation: csLdBoil .42s steps(1) infinite; }
+.cs-ld-b2     { animation-delay: -.14s; }
+.cs-ld-b3     { animation-delay: -.28s; }
+
+@keyframes csLdSpin  { to { transform: rotate(360deg); } }
+@keyframes csLdSpinR { to { transform: rotate(-360deg); } }
+@keyframes csLdDraw {
+  0%   { stroke-dashoffset: 100; }
+  50%  { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -100; }
+}
+@keyframes csLdBoil {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  33%  { transform: translate(.5px, -.6px) rotate(1.2deg); }
+  66%  { transform: translate(-.6px, .3px) rotate(-.9deg); }
+}
+
+/* ---------- what it says ---------- */
+.cs-ld-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* PLAIN PIXELS, NOT THE SLIDE'S `--u`.
+     Everything else on a slide is measured in `--u` so it scales with the
+     slide. The loader is different: it is a piece of chrome laid OVER the
+     slide for a second and a half, and it should be the same size to the
+     reader whatever the slide is doing. Tying it to `--u` also made it
+     silently collapse wherever `--u` was not inherited - the squiggle
+     ended up drawn through the middle of the word above it. */
+  gap: 10px;
+  text-align: center;
+}
+.cs-ld-says {
+  margin: 0;
+  font-family: var(--t-display-face, inherit);
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--cs-text-1);
+}
+.cs-ld-pct {
+  margin: 0;
+  font-family: var(--t-body-face, inherit);
+  font-size: 15px;
+  color: var(--cs-text-2, var(--cs-text-1));
+  opacity: .8;
+  font-variant-numeric: tabular-nums;
+}
+.cs-ld-bar { display: block; overflow: visible; }
+
+/* FILL: NONE, AND WHY IT HAD TO BE SAID AGAIN HERE.
+
+   An SVG path is a FILLED SHAPE by default, and black by default. A
+   squiggle is an open curve, so the browser closes it with an invisible
+   straight line from the last point back to the first and paints the lens
+   shape between the two - which is the black line that was sitting behind
+   this bar. It was never a second line drawn on purpose; it was the
+   squiggle's own shadow.
+
+   The ring loader above never showed it because `.cs-ld path` already says
+   `fill: none`, and that rule stops at the ring's own SVG. The bar is a
+   different SVG, so it needs its own. */
+.cs-ld-bar path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.cs-ld-bar-track { stroke: var(--cs-text-1); stroke-opacity: .18; }
+.cs-ld-bar-fill  { stroke: var(--cs-ld-accent); transition: stroke-dashoffset .12s linear; }
+
+/* ---------- the way out ----------
+   The loader shrinks and spins away, the words fade, and then a hatched
+   wipe opens from the middle - which is the mockup's one real flourish and
+   the reason the hand-off does not feel like a box being swapped. */
+.cs-ld-hatch {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-45deg,
+              var(--cs-ld-accent) 0 2px, transparent 2px 9px);
+  clip-path: circle(0% at 50% 50%);
+  pointer-events: none;
+}
+.cs-loader.is-exit .cs-ld       { animation: csLdOut .55s cubic-bezier(.7,0,.84,0) forwards; }
+.cs-loader.is-exit .cs-ld-meta  { animation: csLdFade .3s ease forwards; }
+.cs-loader.is-exit .cs-ld-hatch { animation: csLdWipe .7s cubic-bezier(.76,0,.24,1) .3s forwards; }
+.cs-loader.is-exit              { animation: csLdFade .35s ease .85s forwards; }
+@keyframes csLdOut  { to { transform: scale(.35) rotate(140deg); opacity: 0; } }
+@keyframes csLdWipe { to { clip-path: circle(80% at 50% 50%); } }
+@keyframes csLdFade { to { opacity: 0; } }
+
+/* ---------- SOMEONE WHO HAS ASKED FOR LESS MOVEMENT ----------
+   The loader is not decoration - it is the thing saying "wait" - so it is
+   not removed, it is calmed: no boil, no spin, no shrink-and-wipe. The
+   rings slow to a crawl, the percentage still counts, and the reveal is a
+   plain fade. */
+@media (prefers-reduced-motion: reduce) {
+  .cs-loader-wrap { animation: none; }
+  .cs-ld-boil { animation: none; }
+  .cs-ld-outer, .cs-ld-mid, .cs-ld-orbit, .cs-ld-core,
+  .cs-ld-arc-o, .cs-ld-arc-o2 { animation-duration: 4s; }
+  .cs-loader.is-exit .cs-ld,
+  .cs-loader.is-exit .cs-ld-hatch { animation: none; }
+  .cs-loader.is-exit { animation: csLdFade .3s ease forwards; }
+}
