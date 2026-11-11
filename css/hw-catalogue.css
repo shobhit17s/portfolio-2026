@@ -1,0 +1,903 @@
+﻿/* hw-catalogue.css — the modal that opens from the pantheon.
+
+   ONE PANEL, TWO STATES. `data-hw-state` on #hw-catalogue says which, and
+   these rules are the whole of what that attribute does. Nothing is built
+   or torn down when you move between them: both states are in the page and
+   one of them is hidden, so going back to the catalogue returns you to
+   exactly the panel you left.
+
+   It arrives the way the drawer does - the scrim a beat before the panel -
+   so a reader who has seen one recognises the other.
+
+   COLOURS. Every word in here reads an -ink or a text token, never a raw
+   accent, because an accent is a colour to look at and not one to read.
+   The one exception is the filled button, where the accent IS the
+   background and the label takes --cs-on-fill. */
+
+#hw-catalogue-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: color-mix(in srgb, var(--hw-sky) 78%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 380ms var(--hw-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+/* ---------------------------------------------------------------------------
+   THE PANEL, AS THE SHEET OF 10 NOVEMBER DRAWS IT
+   ---------------------------------------------------------------------------
+   EVERY NUMBER IN THIS FILE IS MEASURED OFF THAT SHEET rather than chosen,
+   and they are all in one block here so the proportions can be read at a
+   glance and changed together.
+
+   The sheet is a 1440 x 1024 frame with the panel dead centre at 934 x 656 -
+   about two thirds of the window each way. Three bands: a header of 104, the
+   body, and a footer of 105, with a hairline in fire between them. The body
+   holds one row of 410 x 410 cards.
+   --------------------------------------------------------------------------- */
+#hw-catalogue {
+  /* ---- the sheet's own numbers ---- */
+  --hwc-w: 934px;          /* the panel */
+  --hwc-h: 656px;
+  --hwc-band: 104px;       /* the header */
+  --hwc-foot: 105px;       /* the footer */
+  --hwc-band-pad: 18px;    /* the air inside the two bands... */
+  --hwc-body-pad: 41px;    /* ...which is NOT the body's: see the note below */
+  --hwc-card: 410px;       /* a card, square */
+  --hwc-card-pad: 15px;
+  --hwc-fig: 181px;        /* the drawing, square, inside that padding */
+  --hwc-gut: 28px;         /* between two cards, with the rule down its middle */
+  --hwc-title-gap: 2px;    /* between the company and "Case Study Catalogue" */
+
+  /* HOW MANY LINES EACH PIECE OF WRITING GETS BEFORE IT ENDS IN AN
+     ELLIPSIS. The card is a fixed square, so something longer than the room
+     it has must stop somewhere, and stopping it honestly beats letting it
+     run under the drawing. Each of these is used TWICE in the rule it
+     belongs to - once as a line clamp and once as a height - because a
+     clamp is not a crop: it puts the ellipsis at the end of the last line
+     and then lets the next one paint underneath it anyway. */
+  --hwc-name-lines: 2;     /* the case study's name */
+  --hwc-desc-lines: 3;     /* the sentence under it */
+
+  position: fixed;
+  z-index: 71;
+  top: 50%;
+  left: 50%;
+  width: min(var(--hwc-w), 94vw);
+  height: min(88vh, var(--hwc-h));
+
+  /* THREE ROWS, AND THE MIDDLE ONE IS THE ONLY ONE THAT GIVES. The header
+     and the footer are told their height; the body takes what is left, so
+     the panel is the same size whichever state is showing and whatever is
+     in it. That is what stops the password screen resizing the panel around
+     its own middle on the way in. */
+  display: grid;
+  grid-template-rows: var(--hwc-band) minmax(0, 1fr) var(--hwc-foot);
+
+  /* The uneven corners are the hand's, not the ruler's: four radii that do
+     not match is what a rectangle drawn by eye looks like. Same trick as
+     the drawer's close button, so the page keeps one voice. */
+  border-radius: 24px 20px 26px 21px;
+  border: 1.4px solid var(--cs-fire);
+  background: var(--cs-bg-1);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -46%) scale(0.98);
+  transition: opacity 320ms ease, transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.hw-catalogue-open #hw-catalogue-scrim { opacity: 1; pointer-events: auto; }
+body.hw-catalogue-open #hw-catalogue {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* WHICH STATE IS SHOWING. Both live in the middle row; one of them is
+   hidden. Nothing is built or torn down moving between them, so coming back
+   to the catalogue returns you to the panel you left. */
+#hw-catalogue[data-hw-state='company'] #hw-catalogue-gate { display: none; }
+#hw-catalogue[data-hw-state='gate'] #hw-catalogue-company-state { display: none; }
+
+#hw-catalogue-company-state {
+  grid-row: 2;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+@keyframes hw-catalogue-wrong {
+  0%, 100% { transform: translate(-50%, -50%); }
+  20%      { transform: translate(calc(-50% - 7px), -50%); }
+  60%      { transform: translate(calc(-50% + 7px), -50%); }
+}
+#hw-catalogue.is-wrong { animation: hw-catalogue-wrong 420ms ease; }
+
+/* ---------------------------------------------------------------------------
+   THE HEADER BAND
+   ---------------------------------------------------------------------------
+   ITS PADDING IS NOT THE BODY'S, and that is from the sheet rather than an
+   oversight: the words in the band sit 18 from the edge while the cards sit
+   44 in. The band is a bar with its own tighter air; the body is a page with
+   a margin. Both numbers are named above, so bringing them into line is one
+   edit if that is ever wanted.
+   --------------------------------------------------------------------------- */
+/* THE HEADER PANEL HOLDS EXACTLY TWO THINGS: the block of writing, and the
+   close button. Nothing else goes in here - that is the point of giving it a
+   name rather than calling it "the top bit".
+
+   THE SPACE BETWEEN THEM IS AUTO, and auto is a real instruction rather than
+   a figure: the close button is told to take all the room there is on its
+   left, so it sits against the right edge whatever the company is called.
+   A fixed gap would have had to be re-guessed every time the name changed. */
+#hw-catalogue-header-panel {
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  padding-inline: var(--hwc-band-pad);
+  background: var(--cs-bg-2);
+  border-block-end: 1.4px solid var(--cs-fire);
+}
+
+/* THE TWO LINES SIT ON THE BAND'S MIDDLE as one block, rather than each
+   finding its own level. `align-self: center` centres the pair against the
+   band's horizontal centre line, so the writing stays put when the band's
+   height changes and when the second line swaps for a longer case study
+   name on the password screen. */
+#hw-catalogue-title-and-subtext {
+  align-self: center;
+  min-width: 0;
+}
+
+/* AUTO, ON THIS SIDE. See the note on the panel above. */
+#hw-catalogue-close { margin-inline-start: auto; }
+
+
+#hw-catalogue-company {
+  margin: 0;
+  font-family: var(--t-catalogue-company-hand);
+  font-size: var(--t-catalogue-company);
+  line-height: var(--t-catalogue-company-lh);
+  letter-spacing: var(--t-catalogue-company-ls);
+  font-weight: var(--t-catalogue-company-w);
+  color: var(--cs-text-1);
+}
+
+#hw-catalogue-subtitle {
+  margin: var(--hwc-title-gap) 0 0;
+  font-family: var(--t-catalogue-subtitle-hand);
+  font-size: var(--t-catalogue-subtitle);
+  line-height: var(--t-catalogue-subtitle-lh);
+  letter-spacing: var(--t-catalogue-subtitle-ls);
+  font-weight: var(--t-catalogue-subtitle-w);
+  color: var(--cs-text-2);
+}
+
+/* ---------- the close control ----------
+   A 44px circle on the band: a ring of mist with a wash of the same colour
+   inside it. 44 is also the smallest square a finger reliably hits, so the
+   sheet's size and the touch target happen to agree. */
+#hw-catalogue-close {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  color: var(--cs-mist-ink);
+  background: color-mix(in srgb, var(--cs-mist) 16%, transparent);
+  border: 2px solid var(--cs-mist-ink);
+  border-radius: 999px;
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+#hw-catalogue-close svg { width: 22px; height: 22px; }
+#hw-catalogue-close:hover,
+#hw-catalogue-close:focus-visible {
+  background: color-mix(in srgb, var(--cs-mist) 30%, transparent);
+  transform: scale(1.04);
+}
+
+/* ---------------------------------------------------------------------------
+   THE BODY, AND THE ONE ROW OF CARDS
+   ---------------------------------------------------------------------------
+   ONE ROW, SCROLLED SIDEWAYS. Two cards fill the panel exactly as drawn; a
+   third and a fourth are reached by scrolling across rather than by making
+   the cards smaller or the panel taller. The proportions on the sheet are
+   therefore the proportions for ever, however many case studies there are.
+   --------------------------------------------------------------------------- */
+/* THE SCROLLBAR ALONG THE BOTTOM, AND WHY THERE WAS ONE AT ALL.
+
+   Two cards, the gutter between them and the air at either side added up
+   to three pixels MORE than the panel's inside - so the row overflowed by
+   three pixels, and a browser answers an overflow of three pixels with the
+   same full-width bar it would give an overflow of three hundred. Nothing
+   could be scrolled to; the bar was just sitting there.
+
+   It is your sheet's own arithmetic: 44 + 410 + 28 + 410 + 42 is 934, and
+   934 is the panel's OUTSIDE - the line around it takes the rest. So the
+   air at the sides comes down from 44 to 41. Three pixels of padding is
+   invisible; a scrollbar across the bottom of a sheet is not.
+
+   The bar is still there when it is earned - a third and fourth case study
+   genuinely do not fit - and then it is the site's own bar: `dc-scroll`,
+   the same one the drawers and the explains panel wear, with the track
+   left transparent and the thumb drawn in the accent set just below. */
+#hw-catalogue-body {
+  /* the same green the rule between two cards is drawn in, at its -ink
+     strength so it deepens on the pale page instead of washing out */
+  --dc-accent: var(--cs-forest-ink, var(--cs-text-2));
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 15px var(--hwc-body-pad) 16px;
+  /* a card at a time, so a sideways flick never leaves you between two */
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+}
+
+#hw-catalogue-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  align-items: stretch;
+  /* HALF THE GUTTER HERE AND HALF ON THE CARD, with the rule between them -
+     which is how the line ends up down the MIDDLE of the gutter rather than
+     against one of the two cards it separates. */
+  gap: calc((var(--hwc-gut) - 2px) / 2);
+  min-width: min-content;
+  height: 100%;
+}
+
+/* THE CARD IS SQUARE, SO THE ROW DOES NOT STRETCH IT. Left to itself the
+   item would take the full height of the body - which is four pixels more
+   than 410 once the panel's own border is counted - and the card with it.
+   Four pixels is nothing to look at and everything to a sheet drawn in
+   squares, and it is the dividing rule beside it that would give the game
+   away by being taller than the thing it divides. */
+.hw-catalogue-item {
+  display: flex;
+  align-items: flex-start;
+  scroll-snap-align: start;
+}
+/* every card but the first carries the rule that divides it from the one
+   before, so there is never a line at either end of the row */
+.hw-catalogue-item + .hw-catalogue-item {
+  align-self: stretch;
+  border-inline-start: 2px solid color-mix(in srgb, var(--cs-forest) 62%, transparent);
+  padding-inline-start: calc((var(--hwc-gut) - 2px) / 2);
+}
+
+/* ---------------------------------------------------------------------------
+   ONE CARD
+   ---------------------------------------------------------------------------
+   410 square, and square on purpose: the drawing is 181 square at the top
+   left, the writing sits beside it, and the impacts take the panel
+   underneath. 15 + 181 + 15 + 182 + 16 is the 409 the sheet draws.
+
+   THE DRAWING'S ROW AND ITS COLUMN ARE THE SAME KNOB, so it is square here
+   by construction rather than by two numbers that happen to agree. The
+   sheet measures 181 across and 182 down, which is a pixel of drawing
+   rather than an intention; the spare pixel goes to the impact panel
+   underneath, where nobody will ever find it.
+   --------------------------------------------------------------------------- */
+.hw-case-card {
+  flex: 0 0 var(--hwc-card);
+  width: var(--hwc-card);
+  height: var(--hwc-card);
+  display: grid;
+  grid-template-columns: var(--hwc-fig) minmax(0, 1fr);
+  grid-template-rows: var(--hwc-fig) minmax(0, 1fr);
+  column-gap: 19px;
+  row-gap: var(--hwc-card-pad);
+  padding: var(--hwc-card-pad);
+  text-align: left;
+  cursor: pointer;
+  /* NO FILL AT REST. The card is the page it sits on, and the only filled
+     thing inside it is the impact panel - so what you see is a drawing, a
+     name and one block of colour, rather than a box inside a box. */
+  background: transparent;
+  border: 0;
+  border-radius: 18px 14px 20px 15px;
+  transition: background-color 260ms ease, transform 200ms ease,
+              box-shadow 200ms ease;
+}
+
+/* ON HOVER THE CARD TAKES THE PANEL'S OWN FILL, which is the whole trick:
+   the two shapes are suddenly the same colour, the edge between them stops
+   being an edge, and the card reads as ONE object rather than as a panel
+   sitting on a card. Fading it in over about a quarter of a second is what
+   makes it read as a thing lighting up rather than as a colour being
+   switched on. */
+.hw-case-card:hover { background: var(--cs-bg-2); }
+
+/* A CARD THE KEYBOARD IS ON LIGHTS UP THE SAME WAY, because to someone
+   tabbing through, focus IS the pointer - and a keyboard that moves without
+   anything changing colour is a keyboard you cannot follow.
+
+   NOT WHILE THE PANEL IS STILL HOLDING ITS RING BACK, though. On opening,
+   the script puts focus on the first card before anyone has asked for it;
+   lighting that card up would leave it looking permanently hovered, which
+   is the opposite of the bare card this was changed to be. The moment a key
+   is pressed the attribute comes off and this rule starts applying. */
+#hw-catalogue:not([data-hw-quiet-focus]) .hw-case-card:focus-visible {
+  background: var(--cs-bg-2);
+}
+/* THE LIFT, AND THE SAME TRAP THE FILL FELL INTO. This rule used to name
+   `:focus-visible` on its own - which meant the first card, the one the
+   panel puts focus on when it opens, was ALREADY two pixels up and already
+   carrying its shadow before anyone had touched it. Hovering it then did
+   nothing at all, because it was in the hovered position to begin with.
+   The movement was not broken; it had been spent before you arrived.
+
+   So the keyboard half is held back exactly as the fill is, until a key is
+   actually pressed. Everything is in one rule now rather than two, so the
+   lift and the fill cannot drift apart again. */
+.hw-case-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--hw-sky) 55%, transparent);
+}
+#hw-catalogue:not([data-hw-quiet-focus]) .hw-case-card:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--hw-sky) 55%, transparent);
+}
+
+/* ---- the drawing ----
+
+   THE BOX IS NOW BARE: no fill, no stroke. A drawn picture arrives with its
+   own edges, and a frame painted around it is a second edge the drawing did
+   not ask for - it reads as the picture being mounted rather than as the
+   picture being there. The rounded corner stays, because that is the shape
+   the drawing is cut to rather than a line around it.
+
+   THE WAITING BOX IS THE ONE EXCEPTION, and it has to be: with nothing in
+   it and nothing around it there is no box at all, only a file name adrift
+   in the middle of a card. So an EMPTY slot - and only an empty one - keeps
+   a faint wash and a dashed edge, the same manners a picture slot keeps
+   inside a case study. It is drawn in the page's own line colour rather
+   than in sun, so it reads as a placeholder waiting rather than as a
+   decision about colour; the moment the drawing loads, `is-empty` comes off
+   and both disappear. */
+.hw-case-card-figure {
+  grid-column: 1;
+  grid-row: 1;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 16px 13px 17px 14px;
+}
+.hw-case-card-figure.is-empty {
+  background: color-mix(in srgb, var(--cs-line) 16%, transparent);
+  border: 1.6px dashed color-mix(in srgb, var(--cs-line) 62%, transparent);
+}
+.hw-case-card-figure img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* UNTIL THE DRAWING ARRIVES the box says which file it is waiting for,
+   which is the same manners the picture slots keep inside a case study. */
+/* THE LABEL TAKES THE SUN'S OWN INK, not the page's quiet text colour, and
+   that is a contrast decision rather than a stylistic one. The box it sits
+   in is a wash of sun over the page, which is pale on the cream page and
+   DARK on the near-black one - so a single grey that reads on one of them
+   cannot read on the other. `--cs-sun-ink` flips with the mode exactly as
+   the fill does: deep amber on the light box, bright amber on the dark one.
+   The quiet grey measured 3.11 against the dark fill, which is below the
+   4.5 a line of small text has to clear, and the sun's own ink only got it
+   to 4.24 - close, and close is a fail. The page's primary text colour
+   clears both comfortably, because it is the one colour in the palette
+   that is already guaranteed to read against the page the wash is made
+   from. */
+.hw-case-card-slot {
+  padding: 8px;
+  font-family: var(--hw-body);
+  font-size: 0.72rem;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--cs-text-1);
+  word-break: break-word;
+}
+
+/* ---- the name and the line under it ---- */
+.hw-case-card-says {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  align-self: start;
+}
+
+.hw-case-card-name {
+  margin: 0;
+  font-family: var(--t-catalogue-name-hand);
+  font-size: var(--t-catalogue-name);
+  line-height: var(--t-catalogue-name-lh);
+  letter-spacing: var(--t-catalogue-name-ls);
+  font-weight: var(--t-catalogue-name-w);
+  color: var(--cs-fire-ink);
+  /* TWO LINES, AND THE THIRD IS AN ELLIPSIS rather than a clipped word. The
+     card is a fixed 410 square because the sheet draws it that way, so a
+     name longer than the room it has must end somewhere - and ending it
+     honestly beats letting it run under the drawing. */
+  max-height: calc(var(--hwc-name-lines) * var(--t-catalogue-name-lh) * 1em);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.hw-case-card-desc {
+  margin: 14px 0 0;
+  font-family: var(--t-catalogue-desc-hand);
+  font-size: var(--t-catalogue-desc);
+  line-height: var(--t-catalogue-desc-lh);
+  letter-spacing: var(--t-catalogue-desc-ls);
+  font-weight: var(--t-catalogue-desc-w);
+  color: var(--cs-text-2);
+  max-height: calc(var(--hwc-desc-lines) * var(--t-catalogue-desc-lh) * 1em);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--hwc-desc-lines);
+  line-clamp: var(--hwc-desc-lines);
+  overflow: hidden;
+}
+
+/* ---- the business impact panel ---- */
+.hw-case-card-impacts,
+.hw-case-card-state {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-height: 0;
+  padding: 14px 16px;
+  /* THE FILL THE CARD USED TO HAVE. It has not been deleted, it has moved
+     one level in - which is why the hover above can hand it back and have
+     the two merge rather than cross-fade into something new. */
+  background: var(--cs-bg-2);
+  border-radius: 14px 11px 15px 12px;
+}
+
+.hw-case-card-impacts {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  row-gap: 12px;
+}
+
+.hw-case-card-impacts-title {
+  margin: 0;
+  font-family: var(--t-catalogue-impact-title-hand);
+  font-size: var(--t-catalogue-impact-title);
+  line-height: var(--t-catalogue-impact-title-lh);
+  letter-spacing: var(--t-catalogue-impact-title-ls);
+  font-weight: var(--t-catalogue-impact-title-w);
+  color: var(--cs-fire-ink);
+}
+
+.hw-case-card-impact-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  min-height: 0;
+}
+
+/* TWO BOXES PER IMPACT, AND A HEIGHT AS WELL AS A CLAMP.
+
+   A CLAMP ALONE IS NOT A CROP. `line-clamp` puts the ellipsis on the fifth
+   line, but inside a `<button>` the browser does not also shrink the box to
+   those five lines - so a sixth line was being drawn underneath an ellipsis
+   that had already said the writing had ended. It looked exactly like a bug
+   and was one.
+
+   So the number of lines is said TWICE: once as a clamp, which is what puts
+   the ellipsis there, and once as a height, which is what actually stops the
+   sixth line existing. They are the same number and they are next to each
+   other, which is the only way to keep them in step.
+
+   The cell is the grid item and the paragraph inside it does the clamping,
+   because a grid item is blockified and a blockified box cannot be the
+   `-webkit-box` the clamp needs. */
+.hw-case-card-impact {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.hw-case-card-impact + .hw-case-card-impact {
+  border-inline-start: 1.2px solid color-mix(in srgb, var(--cs-mist) 30%, transparent);
+  padding-inline-start: 14px;
+}
+
+.hw-case-card-impact-text {
+  --hwc-lines: 5;
+  margin: 0;
+  font-family: var(--t-catalogue-impact-hand);
+  font-size: var(--t-catalogue-impact);
+  line-height: var(--t-catalogue-impact-lh);
+  letter-spacing: var(--t-catalogue-impact-ls);
+  font-weight: var(--t-catalogue-impact-w);
+  color: var(--cs-mist-ink);
+  max-height: calc(var(--hwc-lines) * var(--t-catalogue-impact-lh) * 1em);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--hwc-lines);
+  line-clamp: var(--hwc-lines);
+  overflow: hidden;
+}
+.hw-case-card-impact-lead { font-weight: var(--t-catalogue-impact-lead-w); }
+
+/* ---------------------------------------------------------------------------
+   A CASE STUDY THAT IS NOT UP YET
+   ---------------------------------------------------------------------------
+   THE BADGE TAKES THE IMPACT PANEL'S ROOM rather than being added anywhere,
+   so both states of a card are the same size to the pixel. A badge squeezed
+   in beside the name would make one card taller than its neighbour, which
+   reads as a layout fault rather than as a difference in status.
+
+   The drawing wears the same hatching an unarrived picture wears everywhere
+   else on this site, so "not here yet" looks the same in both places.
+   --------------------------------------------------------------------------- */
+.hw-case-card.is-coming-soon { cursor: default; }
+.hw-case-card.is-coming-soon:hover,
+.hw-case-card.is-coming-soon:focus-visible { transform: none; box-shadow: none; }
+
+/* ---------------------------------------------------------------------------
+   A FOCUS RING THAT WAITS TO BE ASKED FOR
+   ---------------------------------------------------------------------------
+   SOMETHING HAS TO HOLD FOCUS when a modal opens, or the keyboard is still
+   out on the page behind it and Tab walks off into the worlds. So the panel
+   moves focus to the first case study - the thing you came here to press.
+
+   BUT A RING DRAWN AROUND IT STRAIGHT AWAY IS AN ANSWER TO A QUESTION
+   NOBODY ASKED. Someone who opened this with a mouse is not navigating by
+   keyboard and does not need to be told where the keyboard is; the dashed
+   outline just looks like the card is stuck.
+
+   So the ring is held back for exactly as long as nobody has touched a key.
+   The script puts `data-hw-quiet-focus` on the panel when IT moved focus,
+   and takes it off the moment a key is pressed - at which point the ring
+   appears and behaves normally for the rest of the visit. Nothing is taken
+   away from anyone navigating by keyboard; it is only not volunteered to
+   someone who is not. */
+#hw-catalogue[data-hw-quiet-focus] :focus-visible { outline: none; }
+
+/* THE HATCHING NEEDS SOMETHING TO BE DRAWN OVER, and the box is bare now -
+   so a card that is not up yet gets a quiet fill back, just here. It is
+   `position: relative` because the hatching is laid over it as a layer
+   rather than mixed into it; keeping them separate means the drawing
+   underneath is dimmed rather than tinted when it finally arrives.
+
+   NO BORDER COLOUR IS NAMED ANY MORE. The box only has a border while it is
+   still waiting for its file, and that border is the placeholder's, drawn
+   in the page's line colour - overriding it here would have put a sun-
+   coloured edge back on exactly the card that is meant to be quiet. */
+.hw-case-card.is-coming-soon .hw-case-card-figure {
+  position: relative;
+  background: var(--cs-bg-3);
+}
+.hw-case-card.is-coming-soon .hw-case-card-figure::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-42deg,
+              color-mix(in srgb, var(--cs-text-2) 55%, transparent) 0 1.2px,
+              transparent 1.2px 11px);
+  opacity: 0.5;
+}
+.hw-case-card.is-coming-soon .hw-case-card-slot { position: relative; z-index: 1; }
+.hw-case-card.is-coming-soon .hw-case-card-name { color: var(--cs-text-2); }
+
+.hw-case-card-state {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 10px;
+}
+
+.hw-case-card-badge {
+  font-family: var(--hw-body);
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  color: var(--cs-sun-ink);
+  background: color-mix(in srgb, var(--cs-sun) 18%, transparent);
+  border: 1.2px solid color-mix(in srgb, var(--cs-sun) 52%, transparent);
+  border-radius: 999px;
+}
+
+.hw-case-card-state-says {
+  margin: 0;
+  font-family: var(--hw-body);
+  font-size: 15px;
+  line-height: 1.32;
+  color: var(--cs-text-2);
+}
+
+/* ---------------------------------------------------------------------------
+   THE FOOTER BAND
+   ---------------------------------------------------------------------------
+   It belongs to both states. On the catalogue it holds one word; on the
+   password screen it becomes that screen's action bar, so there is never a
+   second row of buttons under this one competing for the same job.
+   --------------------------------------------------------------------------- */
+#hw-catalogue-foot {
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-inline: var(--hwc-band-pad);
+  background: var(--cs-bg-1);
+  border-block-start: 1.4px solid var(--cs-fire);
+}
+
+#hw-catalogue[data-hw-state='company'] #hw-catalogue-gate-back,
+#hw-catalogue[data-hw-state='company'] #hw-catalogue-gate-go { display: none; }
+#hw-catalogue[data-hw-state='gate'] #hw-catalogue-cancel { display: none; }
+#hw-catalogue[data-hw-state='gate'] #hw-catalogue-gate-go { margin-inline-start: auto; }
+
+#hw-catalogue-cancel {
+  font-family: var(--t-catalogue-action-hand);
+  font-size: var(--t-catalogue-action);
+  line-height: var(--t-catalogue-action-lh);
+  font-weight: var(--t-catalogue-action-w);
+  letter-spacing: var(--t-catalogue-action-ls);
+  text-transform: uppercase;
+  padding: 6px 2px;
+  border: 0;
+  background: none;
+  color: var(--cs-text-1);
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+#hw-catalogue-cancel:hover,
+#hw-catalogue-cancel:focus-visible { color: var(--cs-fire-ink); }
+
+/* ---------------------------------------------------------------------------
+   THE PASSWORD STATE
+   ---------------------------------------------------------------------------
+   The modal's other face. It sits in the same middle row the cards use, so
+   the frame around it - band, rules, footer - never moves; the header's
+   second line changes to the name of the case study you pressed, and the
+   footer's one word becomes two buttons.
+   --------------------------------------------------------------------------- */
+#hw-catalogue-gate {
+  grid-row: 2;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 22px var(--hwc-body-pad);
+}
+
+#hw-catalogue-gate-lead,
+#hw-catalogue-gate-note {
+  margin: 0;
+  font-family: var(--hw-body);
+  font-size: var(--hw-step--1);
+  line-height: 1.55;
+  color: var(--cs-text-2);
+  max-width: 62ch;
+}
+#hw-catalogue-gate-lead {
+  margin-bottom: 10px;
+  font-size: var(--hw-step-0);
+  color: var(--cs-text-1);
+}
+
+#hw-catalogue-gate-input {
+  margin-top: 18px;
+  width: min(320px, 100%);
+  font-family: var(--hw-body);
+  font-size: var(--hw-step-0);
+  padding: 11px 14px;
+  color: var(--cs-text-1);
+  background: var(--cs-bg-2);
+  border: 1.4px solid color-mix(in srgb, var(--hw-chalk) 26%, transparent);
+  border-radius: 13px 10px 14px 11px;
+}
+#hw-catalogue-gate-input::placeholder {
+  color: var(--cs-text-2);
+  opacity: 0.8;
+}
+#hw-catalogue-gate-input:focus-visible {
+  outline: 2px solid var(--cs-fire);
+  outline-offset: 2px;
+}
+
+#hw-catalogue-gate-say {
+  margin: 10px 0 0;
+  min-height: 1.2em;
+  font-family: var(--hw-body);
+  font-size: var(--hw-step--1);
+  color: var(--cs-fire-ink);
+}
+
+/* ---- the two controls, which live in the shared footer ---- */
+#hw-catalogue-gate-back {
+  font-family: var(--t-catalogue-action-hand);
+  font-size: var(--t-catalogue-action);
+  line-height: var(--t-catalogue-action-lh);
+  font-weight: var(--t-catalogue-action-w);
+  border: 0;
+  background: none;
+  padding: 4px 2px;
+  color: var(--cs-text-2);
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+#hw-catalogue-gate-back:hover,
+#hw-catalogue-gate-back:focus-visible { color: var(--cs-text-1); }
+
+/* THE ONE FILLED CONTROL IN HERE, and the one place a colour is a
+   background rather than a thing to read. The label takes --cs-on-fill,
+   which is the colour the palette keeps for exactly this.
+
+   LIGHT MODE NEEDED A DEEPER FILL. On the dark page the label is near-black
+   on fire and there is no argument; on the pale page it is cream on fire,
+   and that measured 3.46 to 1 - legal for a big heading, not for a 15px
+   button label. The fill drops to the -ink strength of the same colour
+   there, which reads as the same button a shade deeper and takes the cream
+   label to 6.06. Found by tools/contrast-check.js, not by eye. */
+#hw-catalogue-gate-go {
+  font-family: var(--t-catalogue-action-hand);
+  font-size: var(--t-catalogue-action);
+  line-height: var(--t-catalogue-action-lh);
+  font-weight: var(--t-catalogue-action-w);
+  letter-spacing: var(--t-catalogue-action-ls);
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 13px 10px 14px 11px;
+  background: var(--cs-fire);
+  color: var(--cs-on-fill);
+  cursor: pointer;
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+:root[data-cs-mode='light'] #hw-catalogue-gate-go { background: var(--cs-fire-ink); }
+
+#hw-catalogue-gate-go:hover { transform: translateY(-1px); }
+#hw-catalogue-gate-go:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+/* ---------------------------------------------------------------------------
+   PHONES: THE MODAL BECOMES A SHEET
+   ---------------------------------------------------------------------------
+   The panel can no longer be 934 wide, so the thing that gives is the number
+   of cards you can see - not the size of one. A card keeps its square shape
+   at whatever width the screen allows and the row still scrolls sideways,
+   which is the same gesture as on a desktop rather than a second design.
+   --------------------------------------------------------------------------- */
+@media (max-width: 820px) {
+  #hw-catalogue {
+    --hwc-band: 84px;
+    --hwc-foot: 76px;
+    --hwc-band-pad: 16px;
+    --hwc-body-pad: 16px;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: auto;
+    right: 0;
+    height: auto;
+    max-height: 88vh;
+    grid-template-rows: var(--hwc-band) minmax(0, 1fr) var(--hwc-foot);
+    transform: translateY(102%);
+    border-radius: 20px 16px 0 0;
+  }
+  body.hw-catalogue-open #hw-catalogue { transform: translateY(0); }
+  @keyframes hw-catalogue-wrong {
+    0%, 100% { transform: translateY(0); }
+    20%      { transform: translate(-7px, 0); }
+    60%      { transform: translate(7px, 0); }
+  }
+
+  /* THE SEVEN TYPE ROLES TAKE THEIR PHONE SIZE. One line each, and each
+     one is the `-phone` knob from block 2c of common/type-scale.css - so a
+     phone size is changed there with everything else, never here. */
+  #hw-catalogue-company      { font-size: var(--t-catalogue-company-phone); }
+  #hw-catalogue-subtitle     { font-size: var(--t-catalogue-subtitle-phone); }
+  .hw-case-card-name         { font-size: var(--t-catalogue-name-phone); }
+  .hw-case-card-desc         { font-size: var(--t-catalogue-desc-phone); }
+  .hw-case-card-impacts-title{ font-size: var(--t-catalogue-impact-title-phone); }
+  .hw-case-card-impact-text  { font-size: var(--t-catalogue-impact-phone); }
+  #hw-catalogue-cancel,
+  #hw-catalogue-gate-back,
+  #hw-catalogue-gate-go      { font-size: var(--t-catalogue-action-phone); }
+
+  /* -----------------------------------------------------------------
+     THE ROW BECOMES A COLUMN, AND THE SCROLL TURNS WITH IT
+     -----------------------------------------------------------------
+     A sideways scroll is the right answer on a wide sheet and the wrong
+     one on a phone: the thumb's natural stroke is up and down, and a row
+     that has to be flicked across is a row most people never find the
+     end of. So below 820 the cards stack and the body scrolls
+     vertically - one gesture, the one the hand was already making.
+
+     THE CARD STOPS BEING SQUARE. That is the one proportion from the
+     sheet a phone cannot keep. Stacked, a card is a picture, two
+     paragraphs and a panel in a column; held to a square it has to crush
+     one of them, and what got crushed was the impact panel - its writing
+     was being cut off half way down a line, which is the one kind of
+     clipping that reads as broken rather than as deliberate.
+
+     THE DRAWING STAYS SQUARE THOUGH, always, in both directions. It is
+     the one shape a reader will compare between the phone and the desk,
+     and a picture that is square in one place and letterboxed in the
+     other is two different crops of the same artwork. Everything else -
+     the order, the air, the colours - is the same design. */
+  #hw-catalogue-body {
+    padding-block: 14px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-snap-type: y proximity;
+    overscroll-behavior-y: contain;
+  }
+  #hw-catalogue-list {
+    flex-direction: column;
+    min-width: 0;
+    height: auto;
+    gap: calc((var(--hwc-gut) - 2px) / 2);
+  }
+  /* THE DIVIDING RULE TURNS WITH THE ROW. It is the same line, still
+     carried by every card but the first, still sitting in the middle of
+     the gap - it has simply become horizontal, because the two things it
+     separates are now above and below rather than left and right. */
+  .hw-catalogue-item {
+    align-items: stretch;
+    width: 100%;
+  }
+  .hw-catalogue-item + .hw-catalogue-item {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+    border-block-start: 2px solid color-mix(in srgb, var(--cs-forest) 62%, transparent);
+    padding-block-start: calc((var(--hwc-gut) - 2px) / 2);
+  }
+  .hw-case-card {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    row-gap: 12px;
+  }
+  /* SQUARE, AND SAID AS A RATIO RATHER THAN AS A HEIGHT, so it stays
+     square at every width a phone can be - and so a rotation or a bigger
+     handset changes how big the drawing is, never what shape it is.
+
+     THE THREE CAPS ARE THERE BECAUSE A SQUARE GROWS IN TWO DIRECTIONS.
+     A drawing that fills the width of a phone held upright is a good
+     size; the same rule on a small phone turned on its side makes a
+     square taller than the whole screen, and you would scroll past a
+     picture to reach the words. So it takes whichever is smallest of:
+
+         100%      the room the card has
+         420px     never wider than the card is on a desk
+         62vh      never so tall that it buries the writing beneath it
+
+     and centres itself when it is the smaller of the three, so it reads
+     as a deliberate size rather than as a picture that failed to fill. */
+  .hw-case-card-figure {
+    grid-column: 1;
+    width: min(100%, 420px, 62vh);
+    margin-inline: auto;
+    aspect-ratio: 1 / 1;
+    height: auto;
+  }
+  .hw-case-card-says { grid-column: 1; grid-row: 2; }
+  /* ONE LINE FEWER ON A PHONE, and said through the same knob so the
+     clamp and the height can never disagree with each other. */
+  .hw-case-card-desc { margin-top: 8px; --hwc-desc-lines: 2; }
+  .hw-case-card-impacts,
+  .hw-case-card-state { grid-row: 3; padding: 12px 14px; }
+  .hw-case-card-impacts { grid-template-rows: auto auto; }
+  .hw-case-card-impact-row { gap: 10px; }
+  .hw-case-card-impact-text { --hwc-lines: 4; }
+  .hw-case-card-impact + .hw-case-card-impact { padding-inline-start: 10px; }
+
+  #hw-catalogue-gate { padding: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hw-catalogue, #hw-catalogue-scrim { transition-duration: 1ms; }
+  #hw-catalogue.is-wrong { animation: none; }
+  .hw-case-card:hover, .hw-case-card:focus-visible { transform: none; }
+}

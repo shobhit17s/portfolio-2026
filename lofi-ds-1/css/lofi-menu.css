@@ -1,0 +1,78 @@
+﻿/* lofi-menu.css — SURFACE. The ACTIONS menu.
+
+   A list of THINGS TO DO, grouped under headings, hanging off a button.
+
+   NOT THE SAME BLOCK AS `combo`, even though both are a panel under a
+   trigger. A menu is a list of verbs: pressing one DOES something and the
+   menu closes for good. A combo is a list of nouns: pressing one CHOOSES
+   something and the trigger then shows what you chose. Different jobs,
+   different keyboard behaviour, different markup - so two blocks. Merging
+   them is the classic mistake that leaves you with a component nobody can
+   describe in a sentence. */
+
+.lofi-menu { position: relative; display: inline-block; }
+
+/* THE TRIGGER GOES DARK WHILE THE MENU IS OPEN. On the reference sheet
+   the ACTIONS button inverts - cream text on deep ink - which says "this
+   is the thing the panel belongs to" without an arrow or a tail. */
+.lofi-menu-trigger.is-open {
+  background: var(--lofi-ink);
+  color: var(--lofi-canvas);
+}
+
+.lofi-menu-panel {
+  position: absolute;
+  top: calc(100% + var(--lofi-s2));
+  right: 0;
+  z-index: 40;
+  min-width: 240px;
+  background: var(--lofi-canvas);
+  border: var(--lofi-stroke);
+  border-radius: var(--lofi-r-lg);
+  padding: var(--lofi-s3) 0;
+  box-shadow: 0 10px 24px rgba(63, 87, 87, 0.14);
+}
+.lofi-menu-panel[hidden] { display: none; }
+
+/* A GROUP HEADING IS NOT A MENU ITEM. It is in fire, smaller, and cannot
+   be pressed or focused - so a reader scanning with a keyboard goes
+   straight from one verb to the next. */
+.lofi-menu-group {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 700;
+  font-size: var(--lofi-t-sm);
+  color: var(--lofi-fire);
+  padding: var(--lofi-s2) var(--lofi-s4);
+  margin: 0;
+}
+
+.lofi-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-lg);
+  color: var(--lofi-ink);
+  background: none;
+  border: 0;
+  padding: var(--lofi-s2) var(--lofi-s4);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.lofi-menu-item:hover,
+.lofi-menu-item.is-active { background: var(--lofi-surface); }
+.lofi-menu-item[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+.lofi-menu-divide {
+  height: 1px;
+  background: var(--lofi-line);
+  opacity: 0.6;
+  margin: var(--lofi-s2) var(--lofi-s4);
+  border: 0;
+}
+

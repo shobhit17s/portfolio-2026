@@ -1,0 +1,59 @@
+﻿/* lofi-stage.css — SHELL. A fixed canvas that scales, instead of a page
+   that reflows.
+
+   =========================================================================
+   WHY A PROTOTYPE SHOULD NOT BE RESPONSIVE
+   =========================================================================
+
+   Everything else on this site bends to fit. A prototype must not, and the
+   reason is worth saying plainly: a prototype is a PICTURE OF A DECISION.
+   It was drawn for a 1440 x 1024 screen, and that is the composition being
+   proposed - this many columns, this table wide enough to read, this
+   toolbar on one line. Let it reflow into a 900px slide and the reader is
+   looking at a layout nobody designed and judging the idea by it.
+
+   So the whole thing is built at exactly 1440 x 1024 and then SCALED as
+   one object, the way a slide is scaled. Small, but the real arrangement.
+
+   The case-study engine already does this for prototypes it embeds, with
+   `renderWidth`. This does it from the inside, so the page is right
+   wherever it is opened - in a slide, in a tab of its own, full screen.
+
+   =========================================================================
+   WHAT THIS MEANS FOR WRITING ONE
+   =========================================================================
+
+   Write in plain pixels. 1440 wide is the only width there is, so there
+   are no breakpoints, no percentages that need thinking about, and no
+   "what happens on a phone" - the answer is "the same thing, smaller".
+
+   AND NO SCROLLBARS. The canvas is exactly as tall as it is allowed to be,
+   so nothing can overflow the window. A scrollbar inside a prototype is a
+   detail of the browser, not of the design, and it should never appear in
+   a screenshot of someone's idea. */
+
+html.lofi-stage-host,
+body.lofi-stage-host {
+  height: 100%;
+  overflow: hidden;      /* the canvas fits exactly, so nothing to scroll */
+  margin: 0;
+}
+
+.lofi-stage-fit {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--lofi-canvas);
+}
+
+.lofi-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--lofi-stage-w, 1440px);
+  height: var(--lofi-stage-h, 1024px);
+  transform-origin: top left;
+  /* the scale and the centring are set by lofi-stage.js, because both
+     depend on a window size that does not exist until there is a window */
+}
+

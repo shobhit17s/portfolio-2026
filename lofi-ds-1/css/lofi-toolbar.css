@@ -1,0 +1,45 @@
+﻿/* lofi-toolbar.css — SHELL. The row above the content.
+
+   Meta on the left, controls on the right, with thin dividers between
+   groups of controls. It is its own block rather than a use of .lofi-bar
+   because every screen in the reference has one and they all have to line
+   up with each other. */
+
+.lofi-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lofi-s4);
+  flex-wrap: wrap;
+}
+
+.lofi-toolbar-meta {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-size: var(--lofi-t-md);
+  color: var(--lofi-ink);
+  margin: 0;
+}
+/* the value inside "CURRENCY: USD ($)" — quieter than its label */
+.lofi-toolbar-meta b { font-weight: 400; }
+.lofi-toolbar-sep { opacity: 0.4; margin: 0 var(--lofi-s2); }
+
+.lofi-toolbar-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--lofi-s3);
+  flex-wrap: wrap;
+}
+
+/* AN UPRIGHT HAIRLINE BETWEEN GROUPS OF CONTROLS. In the reference it
+   separates "which view" from "what to do" - two different kinds of
+   question that happen to sit in the same row. */
+.lofi-toolbar-divide {
+  width: 1px;
+  align-self: stretch;
+  min-height: 28px;
+  background: var(--lofi-line-soft);
+  opacity: 0.7;
+}
+

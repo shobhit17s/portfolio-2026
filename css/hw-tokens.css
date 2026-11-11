@@ -1,0 +1,111 @@
+﻿/* hw-tokens.css — the landing page's own names for the site's colours.
+
+   THE COLOURS THEMSELVES ARE NOT HERE ANY MORE. They live in
+   system/css/cs-tokens.css, which this page now loads first, because the
+   landing page and the case studies are one website and should not each keep
+   a private palette that can drift out of step.
+
+   What is left here is a mapping: the names the landing page already uses,
+   pointing at the site's tokens. That keeps every rule in hw-layout.css and
+   hw-base.css working untouched, and it means light mode arrives for free -
+   cs-tokens redefines its values under data-cs-mode='light', and everything
+   below follows. */
+:root {
+  /* The paper we are drawing on: the site's SECONDARY background, whichever
+     mode the reader has chosen. Not the primary - that is the colour a page
+     of writing sits on, and out here the writing floats over a drawing. The
+     secondary reads one step further back, which is what space should be.
+
+     Everything on the landing page that washes the sky behind something
+     reads this one name, so this line is the only place that decides. */
+  --hw-sky:        var(--cs-bg-2);
+  --hw-sky-deep:   var(--cs-bg-2);
+  --hw-ink:        var(--cs-bg-2);
+  --hw-chalk:      var(--cs-text-1);
+  --hw-chalk-soft: color-mix(in srgb, var(--cs-text-1) 82%, var(--cs-text-2));
+  --hw-chalk-dim:  var(--cs-text-2);
+
+  /* ---- one accent per world, from the site's six ----
+
+     TWO NAMES FOR EACH, and the difference matters. The site's palette now
+     carries three strengths of every colour (see the long note in
+     system/css/cs-tokens.css): the colour itself for fills and drawn lines,
+     and a levelled version for text, so a label never comes out too faint to
+     read on a pale page.
+
+         --hw-<world>        the colour. Planet tints, washes, drawn strokes.
+         --hw-<world>-ink    the same colour, safe as TEXT on either mode.
+
+     The ones without -ink are not "wrong" - they are the right choice for
+     anything that is looked at rather than read. */
+  --hw-moss:       var(--cs-forest-on-bg);   /* about    */
+  --hw-ochre:      var(--cs-sun-on-bg);      /* work     */
+  --hw-peri:       var(--cs-mist-on-bg);     /* play     */
+  --hw-coral:      var(--cs-fire-on-bg);     /* contact  */
+  --hw-accent:       var(--hw-moss);
+
+  --hw-moss-ink:   var(--cs-forest-ink);
+  --hw-ochre-ink:  var(--cs-sun-ink);
+  --hw-peri-ink:   var(--cs-mist-ink);
+  --hw-coral-ink:  var(--cs-fire-ink);
+  --hw-accent-ink: var(--hw-moss-ink);
+
+  /* the saturated originals, for a planet's own colour and the sky wash */
+  --hw-moss-vivid:  var(--cs-forest);
+  --hw-ochre-vivid: var(--cs-sun);
+  --hw-peri-vivid:  var(--cs-mist);
+  --hw-coral-vivid: var(--cs-fire);
+
+  /* ---- type ----
+     The families and the scale come from common/type.css, which the case
+     study reads too. The page's own design pixel is set below; every size on
+     the page is that pixel times a number from the shared scale, so the
+     landing page and a case study are set from one ruler. */
+  --hw-display: var(--t-display-face);
+  --hw-body:    var(--t-body-face);
+  --hw-hand:    var(--t-hand-face);
+
+  /* one design pixel for this page: grows with the window, but never so far
+     down that running text stops being comfortable */
+  /* The landing page's own design pixel. It was re-scaled by three quarters
+     when the type scale grew, so that everything on THIS page renders at the
+     size it always did - the bigger numbers in common/type.css were for the
+     case study slides, which were the ones reading small. Change this one
+     line to make the whole landing page larger or smaller. */
+  --t-u: clamp(0.42px, 0.225vw + 0.255px, 0.51px);
+
+  --hw-step--1: var(--t-size-meta);
+  --hw-step-0:  var(--t-size-body-sm);
+  --hw-step-1:  var(--t-size-body);
+  --hw-step-2:  var(--t-size-h2);
+  --hw-step-3:  var(--t-size-display);
+
+  /* rhythm */
+  --hw-gutter: clamp(20px, 4vw, 46px);
+  --hw-panel-w: 23rem;
+
+  /* how many screens of scrolling the whole journey takes */
+  --hw-travel-length: 4.4;
+}
+
+/* the page quietly takes on the colour of whichever world you are at */
+/* WHICH WORLD IS IN THE VIEWPORT DECIDES THE PAGE'S ACCENT.
+   js/hw-scroll.js writes data-hw-world on <body> as you travel, and these
+   four lines are the whole of what that attribute does. Anything that should
+   take the colour of the world you are looking at reads --hw-accent (or
+   -ink for words, -vivid for a saturated fill) and follows for free - the
+   mark in the masthead, the rail, the drawer. */
+body[data-hw-world='home'] {
+  --hw-accent: var(--hw-moss);  --hw-accent-ink: var(--hw-moss-ink);  --hw-accent-vivid: var(--hw-moss-vivid);
+}
+body[data-hw-world='work'] {
+  --hw-accent: var(--hw-ochre); --hw-accent-ink: var(--hw-ochre-ink); --hw-accent-vivid: var(--hw-ochre-vivid);
+}
+body[data-hw-world='play'] {
+  --hw-accent: var(--hw-peri);  --hw-accent-ink: var(--hw-peri-ink);  --hw-accent-vivid: var(--hw-peri-vivid);
+}
+body[data-hw-world='signal'] {
+  --hw-accent: var(--hw-coral); --hw-accent-ink: var(--hw-coral-ink); --hw-accent-vivid: var(--hw-coral-vivid);
+}
+
+

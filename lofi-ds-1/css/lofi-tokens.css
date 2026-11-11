@@ -1,0 +1,127 @@
+﻿/* lofi-tokens.css — every colour, size and typeface lofi-DS-1 knows about.
+
+   =========================================================================
+   WHAT THIS FILE IS FOR
+   =========================================================================
+
+   Nothing else in this system writes a colour or a measurement. Every other
+   file reads a name from here. That is the whole point of a design system:
+   change `--lofi-neg` once and every negative cell, legend swatch and chart
+   band in every prototype changes with it.
+
+   If you ever find yourself typing a hex code outside this file, that is
+   the system failing - tell me and I will add the token.
+
+   =========================================================================
+   WHERE THESE COLOURS CAME FROM
+   =========================================================================
+
+   They were sampled out of the reference screens rather than matched by
+   eye. Five of them turn out to be the portfolio's own accent family,
+   already in system/css/cs-tokens.css under different names:
+
+       #849E59   forest      #E49204   sun       #8F4471   mist
+       #D3644A   fire        #3A768B   water
+
+   That is not a coincidence worth undoing - it means a prototype built
+   with this system sits inside a case study slide looking like it belongs
+   there. Where a token here has a twin in the portfolio, the twin is named
+   in the comment beside it. */
+
+:root {
+
+  /* ---------- the surfaces, lightest first ---------- */
+  --lofi-canvas:      #FCF9D9;   /* the page itself                        */
+  --lofi-surface:     #F3EAC7;   /* a tab, a resting control               */
+  --lofi-surface-2:   #E4E4C8;   /* a quieter fill                         */
+
+  /* ---------- the bands across the top ---------- */
+  --lofi-nav:         #C59EA4;   /* the dusty rose band the nav sits on    */
+  --lofi-module:      #BFCB98;   /* the olive band under it                */
+  --lofi-module-2:    #DEE2B9;   /* its pale twin, for quieter bars        */
+
+  /* ---------- panels and washes ---------- */
+  --lofi-panel-green: #E3EDCF;   /* a pale green block: page head, chart   */
+  --lofi-pos:         #CBE2CA;   /* significant POSITIVE                   */
+  --lofi-neg:         #F2D4B5;   /* significant NEGATIVE                   */
+  --lofi-tint:        #CBD8C5;   /* a widget's own body tint               */
+  --lofi-yellow:      #F5DFA3;   /* a chosen row in a list                 */
+
+  /* ---------- lines and ink ---------- */
+  --lofi-ink:         #3F5757;   /* all text, unless it is saying something */
+  --lofi-ink-soft:    #6E8280;   /* a second line, a disabled thing         */
+  --lofi-line:        #B9824E;   /* the ochre outline on everything         */
+  --lofi-line-soft:   #D0AB7E;   /* a rule between rows                     */
+
+  /* ---------- the five that mean something ---------- */
+  --lofi-forest:      #849E59;   /* cs-forest - good, growth, confirm      */
+  --lofi-sun:         #E49204;   /* cs-sun    - attention, a chosen rail   */
+  --lofi-mist:        #8F4471;   /* cs-mist   - selection, a scrubber      */
+  --lofi-fire:        #D3644A;   /* cs-fire   - a warning, a badge         */
+  --lofi-water:       #3A768B;   /* cs-water  - data: bars, plotted series */
+
+  /* ---------- on-colour text ---------- */
+  --lofi-on-dark:     #FCF9D9;   /* cream, for text on fire/water/mist     */
+
+  /* =======================================================================
+     TYPE
+     =======================================================================
+
+     Three faces, each with one job, and every one of them has a fallback
+     that is already loaded somewhere in this portfolio.
+
+       label   the drawn face. ALL CAPS, for anything that names something -
+               nav items, column heads, buttons, tabs.
+       data    a rounded sans. Numbers and anything a reader scans rather
+               than reads. Mixed case.
+       prose   the handwriting face, for actual sentences.
+
+     `font_kk_version_1` is the portfolio's second drawn face. It is not loaded by
+     this file, because a prototype should not have to carry a 20 KB font
+     to show a button. Link `common/type.css` from a prototype that wants
+     it; without it, Shantell Sans stands in and nothing breaks. */
+  --lofi-face-label: 'font_kk_version_1', 'Shantell Sans', 'Bradley Hand', 'Segoe Print', cursive;
+  --lofi-face-data:  'Varela Round', 'Nunito', 'Trebuchet MS', Arial, sans-serif;
+  --lofi-face-prose: 'Caveat', 'Bradley Hand', cursive;
+
+  /* A SMALL SCALE, ON PURPOSE. Five sizes is enough for a lo-fi screen,
+     and five means a prototype cannot drift into having nine. */
+  --lofi-t-xs:   11px;   /* a sub-label under a column head */
+  --lofi-t-sm:   13px;   /* table cells, secondary labels   */
+  --lofi-t-md:   15px;   /* the default                     */
+  --lofi-t-lg:   19px;   /* a widget's name, a page tab     */
+  --lofi-t-xl:   28px;   /* a page title                    */
+
+  --lofi-track:  0.06em; /* letter-spacing for the caps face */
+
+  /* =======================================================================
+     SPACE AND SHAPE
+     =======================================================================
+
+     One 4px step, used everywhere, so nothing is ever "about 10 pixels". */
+  --lofi-s1: 4px;
+  --lofi-s2: 8px;
+  --lofi-s3: 12px;
+  --lofi-s4: 16px;
+  --lofi-s5: 24px;
+  --lofi-s6: 32px;
+  --lofi-s7: 48px;
+
+  /* THE RADII ARE WHERE THE LO-FI FEELING LIVES. The reference has no hard
+     corner anywhere: everything is generously rounded, which is what makes
+     a flat palette read as drawn rather than as a spreadsheet. */
+  --lofi-r-sm:  6px;     /* a cell wash, a swatch        */
+  --lofi-r-md: 10px;     /* a button, a tab              */
+  --lofi-r-lg: 16px;     /* a card, a panel              */
+  --lofi-r-xl: 22px;     /* the page panel               */
+  --lofi-r-pill: 999px;  /* a search field, a badge      */
+
+  /* ---------- strokes ----------
+     ONE PLACE FOR EVERY OUTLINE WEIGHT. This is also the seam a drawn
+     treatment would be fitted along later: every border in this system is
+     `var(--lofi-stroke)`, so replacing it is one edit rather than ninety. */
+  --lofi-stroke:      2px solid var(--lofi-line);
+  --lofi-stroke-soft: 1px solid var(--lofi-line-soft);
+  --lofi-stroke-ink:  2px solid var(--lofi-ink);
+}
+

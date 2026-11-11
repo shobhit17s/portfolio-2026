@@ -1,0 +1,233 @@
+﻿/* lofi-controls.css — buttons, selects, fields, badges.
+
+   ONE SHAPE LANGUAGE: everything a reader can press is a rounded rectangle
+   with a 2px ochre outline or a pale fill, and everything they can type
+   into is a full pill. That one rule is enough to tell "press me" from
+   "write in me" without a single icon. */
+
+/* ===================== buttons ===================== */
+.lofi-btn {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-md);
+  color: var(--lofi-ink);
+  background: var(--lofi-pos);
+  border: 0;
+  border-radius: var(--lofi-r-md);
+  padding: var(--lofi-s3) var(--lofi-s4);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lofi-s2);
+  white-space: nowrap;
+}
+.lofi-btn:hover  { filter: brightness(0.96); }
+.lofi-btn:active { transform: translateY(1px); }
+
+/* AN OUTLINED BUTTON for something that is an aside rather than the point
+   of the screen - SNAPSHOT sitting in the corner of a chart. */
+.lofi-btn--quiet {
+  background: var(--lofi-surface);
+  border: var(--lofi-stroke-ink);
+}
+
+/* A LINK-SHAPED BUTTON, for the second thing in a pair. Underlined because
+   an underline is the one affordance that survives being the only thing in
+   a corner with no box around it. */
+.lofi-btn--link {
+  background: none;
+  border: 0;
+  padding: var(--lofi-s2) 0;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.lofi-btn--link:hover { color: var(--lofi-fire); }
+
+/* A FILLED, INVERTED BUTTON. Used for a control that is currently DOING
+   something rather than waiting to be pressed - ACTIONS while its menu is
+   open, ADJUST PARAMETERS while its drawer is open. The sun-coloured text
+   is the kit's loudest pairing and is reserved for exactly this. */
+.lofi-btn--dark {
+  background: var(--lofi-ink);
+  color: var(--lofi-sun);
+}
+.lofi-btn--dark:hover { filter: brightness(1.15); }
+
+.lofi-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+/* ===================== a labelled control =====================
+   A caption above a control, which is what the parameters drawer is made
+   of. Its own block rather than a variant of `field`, because `field` is
+   a thing you TYPE into and this is a wrapper round anything at all. */
+.lofi-field-group { display: grid; gap: var(--lofi-s2); }
+.lofi-field-group > .lofi-field-label {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-sm);
+  color: var(--lofi-ink);
+}
+.lofi-field-group > .lofi-select,
+.lofi-field-group > .lofi-combo,
+.lofi-field-group > .lofi-combo > .lofi-combo-trigger { width: 100%; }
+
+/* AN ICON-ONLY BUTTON. Square, no fill until you touch it. Used for the
+   kebab at the end of an inventory row - a control that has to be there
+   on every row and so must take almost no room and almost no attention.
+
+   IT STILL HAS A NAME. `aria-label` is not optional on one of these: a
+   button whose whole content is three dots says nothing at all to anyone
+   not looking at it. */
+.lofi-btn--icon {
+  background: none;
+  padding: var(--lofi-s2);
+  width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--lofi-r-sm);
+}
+.lofi-btn--icon:hover { background: var(--lofi-surface); filter: none; }
+.lofi-btn--icon.is-open,
+.lofi-btn--icon.lofi-btn--dark { background: var(--lofi-ink); color: var(--lofi-canvas); }
+.lofi-btn--icon svg { width: 20px; height: 20px; }
+
+/* ===================== an inline link =====================
+   A word inside a row that goes somewhere. Fire, underlined, and in the
+   drawn face like every other label - which is what makes a grid of them
+   read as a list of doors rather than as data. */
+.lofi-link {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-sm);
+  color: var(--lofi-fire);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lofi-link:hover { color: var(--lofi-ink); }
+.lofi-link[disabled],
+.lofi-link.is-off {
+  color: var(--lofi-ink-soft);
+  text-decoration: none;
+  cursor: default;
+  opacity: 0.65;
+}
+
+/* an icon inside a button or a field */
+.lofi-icon { width: 1.1em; height: 1.1em; flex: none; display: inline-block; }
+
+/* ===================== select ===================== */
+/* A NATIVE <select> WITH ITS ARROW TAKEN OFF and ours drawn in the
+   background. Native because a hand-built dropdown has to re-implement
+   keyboard support, scrolling, and the phone's own picker - three things
+   that are already correct and that a prototype should not spend its
+   budget on. */
+.lofi-select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lofi-s3);
+}
+.lofi-select-label {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-sm);
+  color: var(--lofi-ink);
+}
+.lofi-select {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-md);
+  color: var(--lofi-ink);
+  background-color: var(--lofi-canvas);
+  border: var(--lofi-stroke);
+  border-radius: var(--lofi-r-pill);
+  padding: var(--lofi-s2) var(--lofi-s6) var(--lofi-s2) var(--lofi-s4);
+  cursor: pointer;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right var(--lofi-s4) center;
+  background-size: 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 5l6 6 6-6' fill='none' stroke='%233F5757' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* the same shape, filled, for the orange sidebar header in the reference */
+.lofi-select--onsun {
+  background-color: var(--lofi-yellow);
+  border: 0;
+  border-radius: var(--lofi-r-md);
+}
+
+/* ===================== search field ===================== */
+.lofi-field {
+  display: flex;
+  align-items: center;
+  gap: var(--lofi-s2);
+  background: var(--lofi-canvas);
+  border: var(--lofi-stroke-ink);
+  border-radius: var(--lofi-r-pill);
+  padding: var(--lofi-s2) var(--lofi-s4);
+}
+.lofi-field input {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-size: var(--lofi-t-md);
+  color: var(--lofi-ink);
+  background: none;
+  border: 0;
+  outline: none;
+  flex: 1;
+  min-width: 0;
+}
+.lofi-field input::placeholder { color: var(--lofi-ink-soft); }
+
+/* ===================== badge ===================== */
+.lofi-badge {
+  display: inline-block;
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 700;
+  font-size: var(--lofi-t-sm);
+  color: var(--lofi-on-dark);
+  background: var(--lofi-fire);
+  border-radius: var(--lofi-r-pill);
+  padding: var(--lofi-s1) var(--lofi-s3);
+}
+.lofi-badge--good { background: var(--lofi-forest); }
+.lofi-badge--note { background: var(--lofi-water); }
+
+/* ===================== focus =====================
+   ONE VISIBLE FOCUS RING FOR THE WHOLE SYSTEM, and it is the mist colour
+   rather than the ochre so it can never be mistaken for an outline the
+   component already had. `:focus-visible` rather than `:focus`, so a mouse
+   press does not leave a ring behind. */
+.lofi-btn:focus-visible,
+.lofi-tab:focus-visible,
+.lofi-ptab:focus-visible,
+.lofi-nav-tab:focus-visible,
+.lofi-select:focus-visible,
+.lofi-menu-item:focus-visible,
+.lofi-combo-item:focus-visible,
+.lofi-combo-trigger:focus-visible,
+.lofi-segmented-btn:focus-visible,
+.lofi-link:focus-visible,
+.lofi-field:focus-within,
+.lofi-table td.is-clickable:focus-visible {
+  outline: 3px solid var(--lofi-mist);
+  outline-offset: 2px;
+}
+

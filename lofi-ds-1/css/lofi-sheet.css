@@ -1,0 +1,40 @@
+﻿/* lofi-sheet.css — SHELL. The big soft block the content sits on.
+
+   In the reference this is the yellow area that stands for "the rendered
+   spreadsheet" - the viewport a projection, a loader or a result appears
+   in. It is a surface, not a container with opinions: it has a colour, a
+   radius and room inside, and nothing else. */
+
+/* IT FILLS WHAT IS LEFT. The body of a widget is the part the reader came
+   for, so it takes every pixel the panels above it did not - rather than
+   being 260 tall and leaving a band of empty widget underneath. The
+   min-height is a floor for when there is nothing above it to subtract. */
+.lofi-sheet {
+  background: var(--lofi-yellow);
+  border-radius: var(--lofi-r-lg);
+  padding: var(--lofi-s5);
+  /* `height: 100%` was here and it was wrong in a column. It means "as tall
+     as the whole box", which on a sheet with a toolbar above it means "as
+     tall as the box, PLUS the toolbar" - and that extra is exactly what ran
+     off the bottom edge. Being the column's filling child is the right way
+     to say it: as tall as whatever is LEFT. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+/* the floor only applies where there is nothing above to subtract */
+.lofi-sheet:only-child { min-height: 160px; }
+
+/* the same block in the quieter green, for a chart or an insight */
+.lofi-sheet--green { background: var(--lofi-panel-green); }
+
+/* and an empty one, for a note about what WOULD be here */
+.lofi-sheet--note {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--lofi-ink);
+}
+

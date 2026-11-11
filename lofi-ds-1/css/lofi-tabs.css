@@ -1,0 +1,143 @@
+﻿/* lofi-tabs.css — the two kinds of tab, and why there are two.
+
+   THE REFERENCE USES THEM AT DIFFERENT DEPTHS, and the difference is not
+   decoration - it is how a reader knows which of two tab rows they are
+   looking at when both are on screen at once.
+
+   SECTION TABS (.lofi-tabs)         the outer row: LATEST PROJECTION |
+   a word with a rule under it,      PROJECTION INVENTORY | CASE COMPARISON
+   the chosen one underlined thickly RESULTS ✕. Quiet. Can be closed.
+
+   PANEL TABS (.lofi-ptabs)          the inner row: REVENUE | EBITDA |
+   little folder tabs with a fill,   LEVERAGE | CASHFLOW. Louder, and
+   attached to the thing below them  visibly joined to the panel beneath. */
+
+/* ===================== section tabs ===================== */
+.lofi-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--lofi-s4);
+  flex-wrap: wrap;
+}
+
+.lofi-tab {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-lg);
+  color: var(--lofi-ink);
+  background: none;
+  border: 0;
+  border-bottom: var(--lofi-stroke-soft);
+  padding: var(--lofi-s2) var(--lofi-s3);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lofi-s3);
+  white-space: nowrap;
+}
+.lofi-tab:hover { color: var(--lofi-fire); }
+
+.lofi-tab[aria-selected="true"] {
+  border-bottom: 3px solid var(--lofi-ink);
+}
+
+/* THE ✕ IS A BUTTON INSIDE A BUTTON, which HTML will not allow - so it is
+   a span the script listens to, and it carries its own accessible name.
+   Only a chosen tab shows one: closing a tab you are not looking at is a
+   decision nobody asked to make. */
+.lofi-tab-close {
+  font-size: 0.9em;
+  line-height: 1;
+  opacity: 0.85;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: var(--lofi-r-sm);
+}
+.lofi-tab-close:hover { opacity: 1; color: var(--lofi-fire); }
+.lofi-tab[aria-selected="false"] .lofi-tab-close { display: none; }
+
+/* ===================== panel tabs ===================== */
+.lofi-ptabs {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--lofi-s1);
+  flex-wrap: wrap;
+  /* the chosen tab's fill runs into the panel below, so there is no line
+     between them - the tab and its contents are one object */
+  margin-bottom: -2px;
+  position: relative;
+  z-index: 1;
+}
+
+.lofi-ptab {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-md);
+  color: var(--lofi-ink);
+  background: var(--lofi-module-2);
+  border: 0;
+  border-radius: var(--lofi-r-md) var(--lofi-r-md) 0 0;
+  padding: var(--lofi-s2) var(--lofi-s4);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.lofi-ptab:hover { background: var(--lofi-panel-green); }
+
+.lofi-ptab[aria-selected="true"] {
+  background: var(--lofi-panel-green);
+  box-shadow: inset 0 -3px 0 0 var(--lofi-ink);
+}
+
+/* WHAT THE TABS ARE ATTACHED TO.
+
+   NO OUTLINE. It had a green line all the way round, which was doing the
+   same job twice: the tabs above it are already filled, and a filled tab
+   running into a plain field below it reads as one object without any help.
+   The line only added a second rectangle inside a widget that already has
+   one, and on the insights view - which is nothing but words - it boxed in
+   a page of text for no reason.
+
+   The chosen tab's fill is what joins them now, so the radius stays (the
+   body's top-left corner is square, where the first tab sits) and the line
+   goes.
+
+   IT IS ALSO A COLUMN THAT FILLS. The body is the thing that should grow
+   into whatever height the widget has left, and whichever lens is showing
+   inside it should in turn fill the body - see the column rule in
+   lofi-shell.css. */
+.lofi-ptab-body {
+  border-radius: 0 var(--lofi-r-lg) var(--lofi-r-lg) var(--lofi-r-lg);
+  padding: var(--lofi-s4);
+  background: var(--lofi-canvas);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+/* WHICHEVER VIEW IS SHOWING TAKES THE BODY'S HEIGHT. The hidden ones are
+   out of the layout altogether, so they take none of it - which is why
+   this can be stated once for all of them rather than per view.
+
+   ONLY WHEN THE BODY IS ITSELF FILLING. `.lofi-fill` on the body is the
+   signal that it has been given a height to divide up. Without it - on a
+   documentation page, in a loose block of the kit gallery - the body is
+   just as tall as what is inside it, and the views inside it should be
+   too. Handing out height nobody has is what makes a component collapse
+   to nothing. */
+.lofi-ptab-body.lofi-fill > :not([hidden]) {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.lofi-ptab-body > [hidden] { display: none; }
+
+/* A PANE THAT IS NOT SHOWING IS `hidden`, not display:none in a class.
+   `hidden` is the browser's own word for it, so a pane is hidden to a
+   screen reader and to the tab order at the same time, and the script has
+   one property to set rather than a class to keep in step. */
+.lofi-pane[hidden] { display: none; }
+

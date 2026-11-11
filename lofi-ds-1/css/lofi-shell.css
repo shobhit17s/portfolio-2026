@@ -1,0 +1,264 @@
+﻿/* lofi-shell.css — the furniture every screen sits inside.
+
+       ┌──────────────────────────────────────────────┐
+       │  ▁▔▔▔▁  ▁▔▔▔▁  ▁▔▔▔▁                          │  .lofi-nav
+       ├──────────────────────────────────────────────┤
+       │  MODULE NAME                                 │  .lofi-module
+       ├──────────────────────────────────────────────┤
+       │ ╭──────────────────────────────────────────╮ │
+       │ │                                          │ │  .lofi-panel
+       │ │   whatever the screen is                 │ │
+       │ ╰──────────────────────────────────────────╯ │
+       └──────────────────────────────────────────────┘
+
+   Three bands and a panel. Every reference screen is these four things
+   with something different in the middle. */
+
+/* THE WHOLE SCREEN IS EXACTLY AS TALL AS THE CANVAS, NEVER TALLER.
+
+   `min-height: 100%` was the wrong word. It says "at least as tall as the
+   canvas", which lets a long table or a tall chart push the screen past
+   the bottom edge of the window - and on a fixed 1440 x 1024 canvas there
+   is no bottom edge to push to, so the content simply disappears off it.
+
+   `height: 100%` says "exactly as tall as the canvas". Now the height is
+   a fact handed DOWN from the canvas rather than a total added UP from the
+   contents, which is the rule the whole file follows from here: every
+   widget is given its height, and whatever is inside it fits. */
+.lofi-app {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  background: var(--lofi-canvas);
+}
+
+/* ---------- 1 · the nav band ---------- */
+/* THE TABS SIT ON THE BAND RATHER THAN IN IT - they are rounded at the top
+   only and run off the bottom edge, which is what makes them read as
+   folder tabs rather than as buttons in a row. */
+/* THE TABS ARE CENTRED ON THE BAND, not pushed to one end. The band is
+   the width of the window and the tabs are a short row inside it, so
+   left-aligning them leaves a long empty stretch that reads as a mistake.
+   Centred, the band becomes a frame for them. */
+.lofi-nav {
+  background: var(--lofi-nav);
+  padding: var(--lofi-s3) var(--lofi-s5) 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--lofi-s2);
+}
+
+.lofi-nav-tab {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-md);
+  color: var(--lofi-ink);
+  background: var(--lofi-canvas);
+  border: 0;
+  border-radius: var(--lofi-r-md) var(--lofi-r-md) 0 0;
+  padding: var(--lofi-s3) var(--lofi-s4);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lofi-s2);
+  white-space: nowrap;
+}
+.lofi-nav-tab:hover { background: var(--lofi-surface); }
+
+/* THE CHOSEN ONE IS MARKED UNDERNEATH, not filled in. A filled tab fights
+   the band it sits on; a line under it reads as "you are here" without
+   adding a sixth colour to the top of the screen. */
+.lofi-nav-tab[aria-current="page"],
+.lofi-nav-tab.is-on { box-shadow: inset 0 -4px 0 0 var(--lofi-mist); }
+
+.lofi-nav-tab .lofi-caret { font-size: 0.8em; opacity: 0.75; }
+
+/* ---------- 2 · the module band ---------- */
+.lofi-module {
+  background: var(--lofi-module);
+  border-top: 2px solid var(--lofi-forest);
+  border-bottom: 2px solid var(--lofi-forest);
+  padding: var(--lofi-s3) var(--lofi-s5);
+}
+.lofi-module-name {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 700;
+  font-size: var(--lofi-t-lg);
+  color: var(--lofi-ink);
+  margin: 0;
+}
+
+/* ---------- 3 · the page panel ---------- */
+/* THREE MEASUREMENTS, AND EACH ONE IS A DIFFERENT GAP.
+
+       16   between the widget's own border and the window round it
+       24   inside the widget, on all four sides
+       16   between the widget's stacked panels
+
+   They were all 24 before, which made the widget look as though it were
+   floating rather than fitted, and left the tab row sitting in the middle
+   of a lot of nothing. */
+.lofi-page {
+  padding: var(--lofi-s4);          /* 16 - the gap round the widget */
+  min-height: 0;
+  /* the last word on overflow. Anything that still fails to fit is cut off
+     at the edge of the page rather than drawn over the canvas - a visible
+     mistake inside the frame, instead of an invisible one outside it. */
+  overflow: hidden;
+}
+
+.lofi-panel {
+  border: var(--lofi-stroke);
+  border-radius: var(--lofi-r-xl);
+  background: var(--lofi-canvas);
+  padding: var(--lofi-s5);          /* 24 - inside the widget */
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  gap: var(--lofi-s4);              /* 16 - between stacked panels */
+}
+
+/* ---------- 4 · HOW HEIGHT IS SHARED OUT: THE COLUMN ----------
+
+   This is the one rule the whole kit now runs on, and it is worth saying
+   in plain words because every "it overflows the bottom" bug is this rule
+   being broken somewhere up the chain.
+
+   A WIDGET IS GIVEN ITS HEIGHT. It is never the sum of what is inside it.
+   The canvas is 1024 tall, the page is what is left under the two bands,
+   the widget is the page less its margin - each of those is a fact handed
+   down from above, decided before anything is drawn.
+
+   SO THE CONTENTS HAVE TO DIVIDE UP A FIXED AMOUNT. In a column of things,
+   most of them want their natural height - a toolbar, a tab row, a legend,
+   a line of small print. Exactly ONE of them should swallow whatever is
+   left over: the table, the chart, the body of the thing. That one is
+   marked `lofi-fill`.
+
+   WHY A FLEX COLUMN AND NOT A GRID. It used to be a grid with
+   `grid-template-rows: auto 1fr`, which says "the SECOND child fills".
+   That works only while there are exactly two children, and the moment a
+   third appeared - a toolbar, a loader and a result - the third landed in
+   an automatic row, took its height from its own contents, and ran off the
+   bottom of the widget. A flex column has no row list to keep in step:
+   every child is its natural height until one is marked to fill, and it
+   does not matter whether there are two children or six, or which of them
+   are hidden at the time.
+
+   THE RULE IS A CHAIN, AND IT BREAKS AT THE FIRST MISSING LINK. For a
+   table at the bottom of four nested boxes to fill, every box above it
+   must itself be filling. One `auto` anywhere in the chain and everything
+   below it goes back to being as tall as its own contents.
+
+   `min-height: 0` on every link is the other half. A flex child refuses by
+   default to shrink below its contents, which quietly re-introduces the
+   same overflow; zero lets the given height win. */
+/* THE THREE WORDS THIS RULE IS WRITTEN IN.
+
+     .lofi-col    "I am a column." Lay my children out top to bottom.
+                  `.lofi-panel`, `.lofi-stack` and a showing `.lofi-pane`
+                  are columns already; put this on anything else that holds
+                  a stack of things, such as one view inside a tab body.
+
+     .lofi-fill   "I take whatever height is left." Put it on exactly ONE
+                  child of a column - the table, the chart, the body. It
+                  also makes that child a column itself, because the thing
+                  that fills almost always has its own stack inside it.
+
+     (nothing)    every other child keeps its natural height.
+
+   `data-lofi-fill` does the same as the class, for a view that is being
+   switched by script and would rather set an attribute. */
+.lofi-panel,
+.lofi-stack,
+.lofi-col,
+.lofi-fill,
+.lofi-panel > .lofi-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* THE ONE CHILD THAT EATS THE LEFTOVER HEIGHT.
+
+   `flex: 1 1 auto`, not `1 1 0`, and the difference matters in exactly one
+   situation that comes up a lot: a column whose own height has NOT been
+   settled - a documentation page, say, that simply runs down the screen.
+
+   `0` says "start me at nothing and grow me into the leftover". In a box
+   with no settled height there IS no leftover, so the thing starts at
+   nothing and stays there: the component vanishes.
+
+   `auto` says "start me at my natural height and grow me into the leftover
+   if there is any". Inside a widget it behaves exactly the same - it still
+   swallows the spare room - and on a loose page it is simply itself. One
+   rule that is right in both places. */
+.lofi-fill,
+[data-lofi-fill] {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* the showing pane is always the widget's filling child */
+.lofi-panel > .lofi-pane { flex: 1 1 auto; gap: var(--lofi-s4); }
+
+/* EVERY OTHER CHILD KEEPS ITS OWN HEIGHT - it neither grows into spare
+   room nor is squeezed out of the room it needs.
+
+   `:where()` is doing something specific and worth knowing about. It wraps
+   the list so this rule counts for NOTHING in the "which rule wins"
+   contest - so a component that says of itself "I am the thing that fills"
+   (`.lofi-table-wrap`, `.lofi-sheet`, `.lofi-chart`) simply wins, with no
+   `!important` anywhere and no need for this file to list every component
+   that might ever fill. The default is set here; the exceptions declare
+   themselves where they live. */
+:where(.lofi-panel, .lofi-stack, .lofi-col, .lofi-fill, .lofi-pane) > * {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+/* HIDDEN BEATS EVERYTHING. This one needs the blunt instrument.
+
+   `hidden` is the browser's own way of saying "not here", and the browser
+   applies it with the weakest rule it has. The moment this file says a box
+   is `display: flex`, that weak rule loses and a hidden view appears -
+   which is how you get three views stacked on top of each other inside one
+   tab body. `!important` here means `hidden` cannot be overruled by
+   accident from anywhere in the kit, which is exactly what it should mean. */
+[hidden] { display: none !important; }
+
+/* a box with one child only has one place for the height to go */
+.lofi-panel > :only-child,
+.lofi-panel > .lofi-pane > :only-child,
+.lofi-stack > :only-child { flex: 1 1 auto; min-height: 0; }
+
+/* a pale green block - the page head on the dashboard, the frame round a
+   chart, the strip holding a note and a dropdown */
+.lofi-block {
+  background: var(--lofi-panel-green);
+  border-radius: var(--lofi-r-lg);
+  padding: var(--lofi-s4) var(--lofi-s5);
+}
+
+/* the row that holds a note on the left and a control on the right */
+.lofi-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lofi-s4);
+  flex-wrap: wrap;
+}
+
+.lofi-stack  { gap: var(--lofi-s4); }
+.lofi-stack--tight { gap: var(--lofi-s3); }
+/* a stack whose LAST child should eat the leftover height. Kept for the
+   common case where the filling child is simply the bottom one and there
+   is nothing to name. */
+.lofi-stack--fill > :last-child { flex: 1 1 auto; min-height: 0; }
+

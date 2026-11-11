@@ -1,0 +1,239 @@
+﻿/* lofi-table.css — the data table, which is most of what this system is.
+
+   Seven of the eleven reference screens are a table. It has to do five
+   things that an ordinary HTML table does not:
+
+     1  a fixed left column of row names, divided from the data by a
+        thick ochre rule
+     2  column heads that can be GROUPED - "PROJECTED / FINANCIALS /
+        DELTA" repeated per quarter, or one "FINANCIALS" spanning four
+     3  a sub-label under a head (FYE 2025, AS OF: Q1 2025)
+     4  a per-cell WASH saying the number is significantly good or bad
+     5  one cell SELECTED, outlined, without the wash underneath it moving
+
+   All five are classes on ordinary <table> markup. Nothing here needs a
+   script; lofi-table.js only adds clicking. */
+
+/* THE GRID TAKES THE REST OF THE WIDGET, AND SCROLLS INSIDE IT.
+
+   Two things in one rule. `flex: 1 1 auto` makes the wrap the filling child
+   of whatever column it is in, so a table at the bottom of a widget grows
+   down to the widget's edge instead of stopping at the height of its own
+   rows and leaving a band of empty field under it.
+
+   `overflow: auto` is the other half, and it is what keeps that promise
+   honest: a table with forty rows in a box with room for twelve scrolls
+   WITHIN the box. Before, the wrap only ever scrolled sideways, so extra
+   rows had nowhere to go but through the bottom of the widget. */
+.lofi-table-wrap {
+  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* THE HEAD STAYS PUT while the rows move under it - otherwise scrolling a
+   comparison table means losing the years off the top and counting
+   columns to work out what you are looking at. */
+.lofi-table-wrap > .lofi-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--lofi-canvas);
+}
+
+/* AND THE ROWS SHARE OUT WHAT IS LEFT.
+
+   The wrap filling the widget was only half of it. A table inside a tall
+   box still stopped at the height of its own rows, so the grid sat in the
+   top third with a field of empty yellow under it - the thing the note
+   calls "the rest of the height available to it within the widget".
+
+   `height: 100%` on the table hands that leftover to the rows, which is
+   the one place in CSS where a percentage height really does divide
+   itself up: the head keeps the height it needs and every body row grows
+   by the same amount. Five rows in a tall box become five comfortable
+   rows rather than five cramped ones and a gap.
+
+   IT IS SAFE WHEN THERE ARE MANY ROWS. A table whose rows already need
+   more than 100% simply keeps its own height - a percentage never shrinks
+   a table below its contents - and the wrap, which scrolls, takes it from
+   there. So the same rule covers five rows and fifty.
+
+   The rows are then centred, because text sitting at the top of a row
+   twice its own height reads as a mistake rather than as a decision. */
+.lofi-table-wrap > .lofi-table { height: 100%; }
+.lofi-table-wrap > .lofi-table tbody td,
+.lofi-table-wrap > .lofi-table tbody th { vertical-align: middle; }
+
+/* the kebab column is a fixed width and never stretches with the rest */
+.lofi-table-wrap > .lofi-table tbody td.lofi-table-actions { vertical-align: middle; }
+
+.lofi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--lofi-face-data);
+  font-size: var(--lofi-t-sm);
+  color: var(--lofi-ink);
+}
+
+/* ---------- heads ---------- */
+.lofi-table th {
+  text-align: left;
+  vertical-align: bottom;
+  padding: var(--lofi-s3) var(--lofi-s3);
+  font-weight: 400;
+}
+
+/* a head that NAMES something is in the drawn face; a head that is just a
+   year is data and stays in the sans. That is why `.lofi-label` is put on
+   heads one at a time rather than on every th. */
+/* THE DRAWN FACE READS SMALLER THAN THE SANS AT THE SAME PIXEL SIZE - its
+   capitals are narrow and its strokes are thin, so a label set to match a
+   number beside it comes out looking like a whisper. Every label in this
+   system is therefore set one step up from the data it sits with. That is
+   not a fudge; it is what makes two faces look like one size. */
+.lofi-table th.lofi-label { font-size: var(--lofi-t-md); }
+
+/* the small second line under a head */
+.lofi-sub {
+  display: block;
+  font-family: var(--lofi-face-data);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  font-size: var(--lofi-t-xs);
+  color: var(--lofi-ink-soft);
+  margin-top: 2px;
+}
+
+/* the rule under the whole head block */
+.lofi-table thead tr:last-child th { border-bottom: 2px solid var(--lofi-line); }
+
+/* a grouped head spanning several columns, centred over them */
+.lofi-table th.lofi-group {
+  text-align: center;
+  border-bottom: var(--lofi-stroke-soft);
+}
+
+/* ---------- body ---------- */
+.lofi-table td {
+  padding: var(--lofi-s3);
+  border-bottom: var(--lofi-stroke-soft);
+  white-space: nowrap;
+}
+.lofi-table tbody tr:last-child td { border-bottom: 2px solid var(--lofi-line); }
+
+/* THE ROW-NAME COLUMN. `.lofi-rowhead` on the first cell of every row - it
+   carries the drawn face and the thick divider that separates names from
+   numbers. The divider is on the RIGHT of the name cell rather than the
+   left of the first data cell, so adding a column never moves it. */
+.lofi-table .lofi-rowhead {
+  font-family: var(--lofi-face-label);
+  font-size: var(--lofi-t-md);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  border-right: 2px solid var(--lofi-line);
+  padding-right: var(--lofi-s5);
+}
+.lofi-table thead .lofi-rowhead { border-right: 2px solid var(--lofi-line); }
+
+/* a divider between groups of columns, e.g. between Q1 and Q2 */
+.lofi-table .lofi-divide { border-left: 2px solid var(--lofi-line); }
+
+/* ---------- the two washes ---------- */
+/* A WASH IS A BACKGROUND, NOT A TEXT COLOUR. The number keeps reading in
+   the same ink as every other number, which is what lets a reader compare
+   two cells where one is washed and one is not. Colour alone never carries
+   the meaning: the legend names it, and `title` on the cell says it too. */
+.lofi-cell--pos { background: var(--lofi-pos); }
+.lofi-cell--neg { background: var(--lofi-neg); }
+
+/* a delta that is itself bad news is said twice - washed AND in fire */
+.lofi-delta--neg { color: var(--lofi-fire); }
+.lofi-delta--pos { color: var(--lofi-forest); }
+
+/* nothing to report */
+.lofi-cell--na { color: var(--lofi-ink-soft); }
+
+/* ---------- selection ---------- */
+/* AN OUTLINE RATHER THAN A FILL, so the wash underneath still shows. A
+   selected cell that changed colour would be a cell that stopped saying
+   whether its number was good or bad, which is the one thing the table is
+   for. `outline-offset: -2px` keeps the box inside the cell so it does not
+   nudge its neighbours. */
+.lofi-table td.is-selected {
+  outline: 2px solid var(--lofi-line);
+  outline-offset: -2px;
+  border-radius: var(--lofi-r-sm);
+}
+
+.lofi-table tbody tr:hover td { background-image: linear-gradient(rgba(63,87,87,0.04), rgba(63,87,87,0.04)); }
+.lofi-table td.is-clickable { cursor: pointer; }
+
+/* ---------- a chosen ROW ----------
+   The inventory marks the row you are acting on, not a cell in it. Yellow
+   fill plus an ochre rule top and bottom, which is loud enough to find
+   again after a menu has been open over it. */
+.lofi-table tbody tr.is-active > td {
+  background: var(--lofi-yellow);
+  border-top: 2px solid var(--lofi-line);
+  border-bottom: 2px solid var(--lofi-line);
+}
+
+/* ---------- the actions column ----------
+   A narrow column at the right end holding one control per row, fenced
+   off by the same thick rule that fences the row names at the other end.
+   Both ends of a grid row are "not data", and they are marked the same
+   way so a reader learns the rule once. */
+.lofi-table .lofi-table-actions {
+  width: 1%;
+  white-space: nowrap;
+  border-left: 2px solid var(--lofi-line);
+  text-align: center;
+  padding: var(--lofi-s2);
+}
+
+/* THE MENU MUST NOT BE CLIPPED BY THE TABLE'S SCROLLER. A wrap that can
+   scroll sideways also cuts off anything that hangs out of it, and a menu
+   on the last row hangs out of it by definition. `--open` turns the
+   clipping off for a table that has row menus and does not need to
+   scroll; lofi-menu.js handles the case where it does, by lifting the
+   panel out to the window. */
+/* THE ONE WRAP THAT MUST NOT SCROLL. A row here carries a kebab menu that
+   opens downwards, and a scrolling box would clip it. It still FILLS the
+   widget like any other grid - it simply lets anything that does not fit
+   show rather than hiding it, which for a saved list of a dozen rows is
+   the right trade. (The menu itself knows how to get out of a tight spot:
+   when there is no room below, it re-anchors against the canvas instead.) */
+.lofi-table-wrap--open { overflow: visible; }
+
+/* ---------- the legend ---------- */
+.lofi-legend {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--lofi-s5);
+  flex-wrap: wrap;
+  margin-top: var(--lofi-s4);
+  flex: 0 0 auto;             /* a legend is its own height, never stretched */
+}
+.lofi-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lofi-s2);
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-sm);
+}
+.lofi-swatch {
+  width: 20px; height: 20px;
+  border-radius: var(--lofi-r-sm);
+  background: var(--lofi-surface-2);
+  flex: none;
+}
+.lofi-swatch--pos  { background: var(--lofi-pos); }
+.lofi-swatch--neg  { background: var(--lofi-neg); }
+.lofi-swatch--line { height: 4px; border-radius: 2px; }
+

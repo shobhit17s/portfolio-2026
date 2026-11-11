@@ -1,0 +1,61 @@
+﻿/* lofi-modal.css — SURFACE. The export dialog.
+
+   A green title bar, a body holding a preview, a footer with the actions.
+   Centred over a dimmed page.
+
+   THE TITLE BAR IS A BAND, NOT A HEADING WITH PADDING. It runs the full
+   width of the dialog and keeps its own colour, which is what makes the
+   dialog read as a little window rather than as a card that happens to be
+   floating. */
+
+.lofi-modal {
+  position: fixed;
+  z-index: 70;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(900px, calc(100vw - var(--lofi-s7)));
+  max-height: calc(100vh - var(--lofi-s7));
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--lofi-canvas);
+  border-radius: var(--lofi-r-lg);
+  overflow: hidden;
+  box-shadow: 0 18px 40px rgba(63, 87, 87, 0.26);
+}
+.lofi-modal[hidden] { display: none; }
+
+.lofi-modal-head {
+  background: var(--lofi-panel-green);
+  border-bottom: 2px solid var(--lofi-forest);
+  padding: var(--lofi-s4) var(--lofi-s5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lofi-s4);
+}
+.lofi-modal-title {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 700;
+  font-size: var(--lofi-t-lg);
+  margin: 0;
+}
+
+.lofi-modal-body {
+  padding: var(--lofi-s5);
+  overflow: auto;
+  min-height: 0;
+}
+
+.lofi-modal-foot {
+  border-top: 2px solid var(--lofi-forest);
+  padding: var(--lofi-s4) var(--lofi-s5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lofi-s4);
+}
+/* a footer with only one action puts it on the right */
+.lofi-modal-foot--end { justify-content: flex-end; }
+

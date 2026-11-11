@@ -1,0 +1,261 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lofi-DS-1</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Shantell+Sans:wght@400;600;700&family=Varela+Round&display=swap">
+<link rel="stylesheet" href="css/lofi-face.css">
+<link rel="stylesheet" href="css/lofi-tokens.css">
+<link rel="stylesheet" href="css/lofi-base.css">
+<link rel="stylesheet" href="css/lofi-shell.css">
+<link rel="stylesheet" href="css/lofi-tabs.css">
+<link rel="stylesheet" href="css/lofi-table.css">
+<link rel="stylesheet" href="css/lofi-ledger.css">
+<link rel="stylesheet" href="css/lofi-controls.css">
+<style>
+  /* GALLERY ONLY. Nothing here is part of the system - it is the furniture
+     of this one page, so that the system's own files stay free of it. */
+  .g-sec { padding: var(--lofi-s6) var(--lofi-s5); max-width: 1200px; margin: 0 auto; }
+  .g-sec h2 { font-family: var(--lofi-face-label); text-transform: uppercase;
+              letter-spacing: var(--lofi-track); font-size: var(--lofi-t-lg);
+              margin: 0 0 var(--lofi-s2); }
+  .g-sec p.g-note { margin: 0 0 var(--lofi-s4); color: var(--lofi-ink-soft); max-width: 60ch; }
+  .g-row { display: flex; gap: var(--lofi-s4); flex-wrap: wrap; align-items: center; }
+  .g-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--lofi-s3); }
+  .g-chip { border-radius: var(--lofi-r-md); border: var(--lofi-stroke-soft); overflow: hidden; }
+  .g-chip i { display: block; height: 52px; }
+  .g-chip b { display: block; font-family: var(--lofi-face-data); font-weight: 400;
+              font-size: var(--lofi-t-xs); padding: 6px 8px; background: var(--lofi-canvas); }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+         background: var(--lofi-surface); padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="lofi-app" id="lofi-app">
+
+  <!-- ========== the nav band ========== -->
+  <nav class="lofi-nav" id="lofi-nav" aria-label="Main">
+    <button type="button" class="lofi-nav-tab">Surveillance</button>
+    <button type="button" class="lofi-nav-tab" aria-current="page">Clients</button>
+    <button type="button" class="lofi-nav-tab">Portfolios <span class="lofi-caret" aria-hidden="true">▾</span></button>
+    <button type="button" class="lofi-nav-tab">Create &amp; manage <span class="lofi-caret" aria-hidden="true">▾</span></button>
+    <button type="button" class="lofi-nav-tab">Analyze <span class="lofi-caret" aria-hidden="true">▾</span></button>
+  </nav>
+
+  <!-- ========== the module band ========== -->
+  <div class="lofi-module" id="lofi-module">
+    <h1 class="lofi-module-name">lofi-DS-1 · the kit</h1>
+  </div>
+
+  <main id="lofi-gallery">
+
+    <section class="g-sec">
+      <h2>The palette</h2>
+      <p class="g-note">Sampled out of your reference screens. Five of them are the
+        portfolio's own accents under different names, so a prototype built with
+        this kit sits inside a case-study slide looking like it belongs there.</p>
+      <div class="g-swatches" id="lofi-palette"></div>
+    </section>
+
+    <section class="g-sec">
+      <h2>Type</h2>
+      <p class="g-note">Three faces, one job each. Everything that <em>names</em> something
+        is the drawn face in capitals; everything that is <em>data</em> is the rounded
+        sans in mixed case; sentences are the handwriting face.</p>
+      <p class="lofi-label" style="font-size:var(--lofi-t-xl)">Label · drawn face, caps</p>
+      <p style="font-size:var(--lofi-t-lg)">Data · 485 · 14.0% · 3.5x · -2.1 PP</p>
+      <p class="lofi-prose">Prose — the base case assumes moderate demand and a gradual recovery.</p>
+    </section>
+
+    <section class="g-sec">
+      <h2>Controls</h2>
+      <div class="g-row">
+        <button type="button" class="lofi-btn">+ Add attribute</button>
+        <button type="button" class="lofi-btn lofi-btn--quiet">Snapshot</button>
+        <button type="button" class="lofi-btn lofi-btn--link">Secondary</button>
+        <button type="button" class="lofi-btn" disabled>Disabled</button>
+        <span class="lofi-badge">95% confidence</span>
+        <span class="lofi-badge lofi-badge--good">On plan</span>
+      </div>
+      <div class="g-row" style="margin-top:var(--lofi-s4)">
+        <span class="lofi-select-wrap">
+          <label class="lofi-select-label" for="g-attr">Financial attribute</label>
+          <select class="lofi-select" id="g-attr">
+            <option>Revenue</option><option>EBITDA</option><option>Leverage</option>
+          </select>
+        </span>
+        <span class="lofi-field" style="min-width:240px">
+          <svg class="lofi-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13.5 13.5 18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input type="search" placeholder="Search" aria-label="Search">
+        </span>
+      </div>
+    </section>
+
+    <section class="g-sec">
+      <h2>Section tabs</h2>
+      <p class="g-note">The outer row. Quiet, underlined, and the chosen one can be closed.</p>
+      <div class="lofi-tabs" role="tablist" aria-label="Section">
+        <button type="button" class="lofi-tab" role="tab" aria-controls="g-pane-1" aria-selected="false">Latest projection</button>
+        <button type="button" class="lofi-tab" role="tab" aria-controls="g-pane-2" aria-selected="false">Projection inventory</button>
+        <button type="button" class="lofi-tab" role="tab" aria-controls="g-pane-3" aria-selected="true">Case comparison results
+          <span class="lofi-tab-close" role="button" tabindex="0" aria-label="Close this section">✕</span></button>
+      </div>
+      <div id="g-pane-1" class="lofi-pane" role="tabpanel" hidden style="padding:var(--lofi-s4) 0">The latest projection would go here.</div>
+      <div id="g-pane-2" class="lofi-pane" role="tabpanel" hidden style="padding:var(--lofi-s4) 0">The inventory would go here.</div>
+      <div id="g-pane-3" class="lofi-pane" role="tabpanel" style="padding:var(--lofi-s4) 0">
+
+        <h2 style="margin-top:var(--lofi-s5)">Panel tabs, and a table</h2>
+        <p class="g-note">The inner row, visibly joined to what it controls. The table below
+          shows every state at once: grouped heads, a sub-label, both washes, a delta said
+          twice, a not-applicable column, and one selected cell.</p>
+
+        <div class="lofi-ptabs" role="tablist" aria-label="Attribute">
+          <button type="button" class="lofi-ptab" role="tab" aria-selected="true">Revenue</button>
+          <button type="button" class="lofi-ptab" role="tab" aria-selected="false">EBITDA</button>
+          <button type="button" class="lofi-ptab" role="tab" aria-selected="false">Leverage</button>
+          <button type="button" class="lofi-ptab" role="tab" aria-selected="false">Cashflow</button>
+        </div>
+        <div class="lofi-ptab-body">
+          <p class="lofi-note" style="margin-bottom:var(--lofi-s4)">Note: threshold is set at (+/-)15%</p>
+          <div class="lofi-table-wrap">
+            <table class="lofi-table" id="lofi-demo-table" data-lofi-threshold="15">
+              <thead>
+                <tr>
+                  <th class="lofi-rowhead lofi-label" rowspan="2">Attributes</th>
+                  <th class="lofi-group lofi-label lofi-divide" colspan="2">Q1 <span class="lofi-sub">as of: Q1 2025</span></th>
+                  <th class="lofi-group lofi-label lofi-divide" colspan="2">Q2 <span class="lofi-sub">as of: Q2 2025</span></th>
+                  <th class="lofi-group lofi-label lofi-divide" colspan="2">Q3 <span class="lofi-sub">as of: Q3 2025</span></th>
+                  <th class="lofi-group lofi-label lofi-divide" rowspan="2">Q4</th>
+                </tr>
+                <tr>
+                  <th class="lofi-divide">Financials</th><th>Delta</th>
+                  <th class="lofi-divide">Financials</th><th>Delta</th>
+                  <th class="lofi-divide">Financials</th><th>Delta</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="lofi-rowhead">Revenue</td>
+                  <td class="lofi-divide">485</td><td data-lofi-delta="-3">−15</td>
+                  <td class="lofi-divide">455</td><td data-lofi-delta="-9">−45</td>
+                  <td class="lofi-divide">420</td><td data-lofi-delta="-16" class="lofi-delta--neg">−80</td>
+                  <td class="lofi-divide lofi-cell--na">N/A</td>
+                </tr>
+                <tr>
+                  <td class="lofi-rowhead">EBITDA</td>
+                  <td class="lofi-divide">64</td><td data-lofi-delta="-8">−6</td>
+                  <td class="lofi-divide">54</td><td data-lofi-delta="-23" class="lofi-delta--neg">−16</td>
+                  <td class="lofi-divide">43</td><td data-lofi-delta="-38" class="lofi-delta--neg">−27</td>
+                  <td class="lofi-divide lofi-cell--na">N/A</td>
+                </tr>
+                <tr>
+                  <td class="lofi-rowhead" data-lofi-invert>Leverage</td>
+                  <td class="lofi-divide">3.9x</td><td data-lofi-delta="11">+0.4x</td>
+                  <td class="lofi-divide">4.6x</td><td data-lofi-delta="31" class="lofi-delta--neg">+1.1x</td>
+                  <td class="lofi-divide is-clickable">5.8x</td><td data-lofi-delta="66" class="lofi-delta--neg is-clickable">+2.3x</td>
+                  <td class="lofi-divide lofi-cell--na">N/A</td>
+                </tr>
+                <tr>
+                  <td class="lofi-rowhead">Margin</td>
+                  <td class="lofi-divide">13.2%</td><td data-lofi-delta="-6">−0.8 PP</td>
+                  <td class="lofi-divide">11.9%</td><td data-lofi-delta="-15" class="lofi-delta--neg">−2.1 PP</td>
+                  <td class="lofi-divide">16.4%</td><td data-lofi-delta="17" class="lofi-delta--pos">+2.4 PP</td>
+                  <td class="lofi-divide lofi-cell--na">N/A</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="lofi-legend">
+            <span class="lofi-legend-item"><i class="lofi-swatch lofi-swatch--pos"></i> Significant positive deviation</span>
+            <span class="lofi-legend-item"><i class="lofi-swatch lofi-swatch--neg"></i> Significant negative deviation</span>
+          </div>
+        </div>
+
+        <p class="g-note" style="margin-top:var(--lofi-s4)">
+          The washes above are not written into the markup — each delta cell carries
+          <code>data-lofi-delta</code> and the table carries <code>data-lofi-threshold="15"</code>.
+          Leverage is marked <code>data-lofi-invert</code>, so its <em>rising</em> numbers wash
+          as bad news while Margin's wash as good. Try the two clickable Leverage cells.
+        </p>
+      </div>
+    </section>
+
+      <h2 style="margin-top:var(--lofi-s6)">A ledger</h2>
+      <p class="g-note">The other kind of grid. A <b>table</b> shows a finding and washes the
+        cells that carry it; a <b>ledger</b> is a document to look things up in, so it has
+        many sections, a head of years per section, an indented sub-row where one line is a
+        reading of the line above, and no colour at all. Two sections of a credit model are
+        below, drawn from data rather than written in the markup.</p>
+      <div class="lofi-ledger" id="lofi-demo-ledger" style="max-height:420px"></div>
+
+  </main>
+</div>
+
+<script src="js/lofi-tabs.js"></script>
+<script src="js/lofi-ledger.js"></script>
+<script src="js/lofi-table.js"></script>
+<script src="js/lofi-main.js"></script>
+<script>
+/* GALLERY ONLY — prints the palette from the tokens themselves, so this
+   page can never fall out of step with the system it documents. */
+(function () {
+  var names = ['canvas','surface','surface-2','nav','module','module-2','panel-green',
+               'pos','neg','tint','yellow','ink','ink-soft','line','line-soft',
+               'forest','sun','mist','fire','water'];
+  var box = document.getElementById('lofi-palette');
+  var cs = getComputedStyle(document.documentElement);
+  names.forEach(function (n) {
+    var v = cs.getPropertyValue('--lofi-' + n).trim();
+    var el = document.createElement('div');
+    el.className = 'g-chip';
+    el.innerHTML = '<i style="background:' + v + '"></i><b>--lofi-' + n + '<br>' + v + '</b>';
+    box.appendChild(el);
+  });
+  document.addEventListener('lofi:cell', function (e) {
+    console.log('cell chosen:', e.detail.value);
+  });
+
+  /* the ledger demo — two sections, so the page shows the shape without
+     carrying a whole credit model around */
+  LOFI.drawLedger(document.getElementById('lofi-demo-ledger'), {
+    years: [2026, 2027, 2028, 2029, 2030],
+    sections: [
+      { id: 'summary', no: 1, name: 'Financial summary', rows: [
+        { key: 'revenue', label: 'Revenue', format: 'num' },
+        { key: 'growth',  label: 'Revenue % growth', format: 'pct', sub: true },
+        { key: 'ebitda',  label: 'EBITDA', format: 'num' },
+        { key: 'margin',  label: 'EBITDA % margin', format: 'pct', sub: true },
+        { key: 'ni',      label: 'Net income', format: 'num', rule: true }
+      ] },
+      { id: 'leverage', no: 2, name: 'Debt & leverage', rows: [
+        { key: 'debt',  label: 'Closing debt', format: 'num' },
+        { key: 'cash',  label: 'Cash balance', format: 'num' },
+        { key: 'net',   label: 'Net debt', format: 'num', rule: true },
+        { key: 'gross', label: 'Gross leverage', format: 'x', sub: true },
+        { key: 'repay', label: 'Scheduled debt repayment', format: 'num' }
+      ] }
+    ],
+    values: {
+      summary: {
+        revenue: [420.0, 445.2, 472.4, 501.6, 533.2],
+        growth:  [null, 6.0, 6.1, 6.2, 6.3],
+        ebitda:  [58.8, 62.3, 67.1, 72.2, 77.9],
+        margin:  [14.0, 14.0, 14.2, 14.4, 14.6],
+        ni:      [20.4, 23.0, 26.5, 30.3, 34.3]
+      },
+      leverage: {
+        debt:  [220.0, 208.0, 196.0, 184.0, 172.0],
+        cash:  [36.3, 46.1, 53.1, 63.4, 77.1],
+        net:   [183.7, 161.9, 142.9, 120.6, 94.9],
+        gross: [3.74, 3.34, 2.92, 2.55, 2.21],
+        repay: [-10.0, -12.0, -12.0, -12.0, -12.0]
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>
+

@@ -1,0 +1,531 @@
+﻿/* ============================================================================
+   type-scale.css — THE KNOBS. Every size, every floor, every hand.
+
+   THIS IS THE FILE TO OPEN WHEN YOU WANT THE TEXT BIGGER, SMALLER, OR IN A
+   DIFFERENT HAND. Nothing else in the project is allowed to invent a font
+   size, and nothing else in this file does anything but set the numbers
+   below. Change one and every surface changes with it: the landing page,
+   every case study, the drawer, the password screen.
+
+   It used to live at the top of type.css, three hundred lines up from the
+   bottom and immediately after sixteen kilobytes of carried font on a
+   single line. The numbers were always editable; they were just impossible
+   to find. So they moved here, on their own, where the whole file fits on
+   one screen.
+
+   type.css reads this file for you - the first line in it is an @import of
+   this one - so there is nothing to add to any page. A new case study gets
+   it by linking type.css exactly as every page already does.
+
+   IF THIS FILE GOES MISSING the whole site drops to the browser's default
+   16px, everywhere, at once. That is deliberate. The alternative was to
+   keep a second copy of every number in type.css as a safety net, and a
+   second copy is a thing that drifts: you would change a size here, see no
+   effect, and have no way of knowing why. Loudly broken beats quietly
+   wrong. The two files travel together in every bundle.
+
+   ----------------------------------------------------------------------------
+   THREE KINDS OF KNOB, IN THE THREE BLOCKS BELOW
+   ----------------------------------------------------------------------------
+
+       1  THE HANDS      which actual typeface each name means
+       2  THE SIZES      how big each role is on a full 1920-wide slide
+       3  THE FLOORS     the real pixel size that role will never go below
+
+   and a fourth, folded into block 2 and 3's table:
+
+       4  THE HAND PER ROLE   which of the three hands that role is set in
+
+   ----------------------------------------------------------------------------
+   WHY A SIZE IS A PLAIN NUMBER AND NOT A PIXEL
+   ----------------------------------------------------------------------------
+   A slide is 1920 units wide however many real pixels it is drawn into. The
+   sizes below are in those units, and each surface multiplies them by its
+   own design pixel. So `88` means "88 on a full-size slide", and on a
+   1200-wide window it comes out at 55 real pixels, and on a phone it stops
+   at the floor rather than disappearing.
+
+   THE FLOOR IS THE IMPORTANT HALF. Without one, body text drawn into a
+   390px phone came out at 12 real pixels and a caption at 10. Each role is
+   written as a clamp: never below its floor, never above its design size,
+   scaling in between.
+
+   TO MAKE EVERYTHING ON THE SITE BIGGER BY A TENTH, multiply every number
+   in block 2 by 1.1. To make one role bigger, change one line.
+   ========================================================================= */
+
+:root {
+
+  /* =======================================================================
+     1 - THE HANDS
+     =======================================================================
+     Four names, and what each one actually is. A role below asks for one of
+     these names, never for a font directly, so swapping a face here swaps
+     it everywhere that role is used.
+
+     The stack after each name is NOT a substitute for the whole face. A
+     browser falls back one CHARACTER at a time, and only for characters the
+     first font does not contain - see the note at the foot of type.css for
+     which those are.
+
+     `font_kk_version_1` is the second drawn face. It is not written into
+     type.css: it lives in common/face-kk.css, which only the case studies
+     link, because a font written into a stylesheet is downloaded whether
+     anything uses it or not. The name is declared here all the same, so a
+     rule anywhere can ask for it and simply fall back on a page that did
+     not link the face. */
+
+  --t-display-face: 'Shobhit Regal', 'Shantell Sans', 'Bradley Hand', 'Segoe Print', cursive;
+  --t-body-face: 'Varela Round', 'Nunito', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif;
+  --t-hand-face: 'Caveat', 'Bradley Hand', cursive;
+  --t-kk-face: 'font_kk_version_1', 'Shantell Sans', 'Bradley Hand', 'Segoe Print', cursive;
+
+
+  /* =======================================================================
+     2 - THE SIZES, and 4 - THE HAND EACH ROLE IS SET IN
+     =======================================================================
+     THESE ARE THE ROLES THAT DO NOT YET HAVE ONE OF YOUR NAMES. Your
+     typography sheet names ten things; block 2b below is those ten. What
+     is left here is everything the sheet does not mention, still wearing
+     the abstract names the site used before.
+
+     FIVE OF THEM ARE STILL WAITING FOR A NAME FROM YOU:
+
+         h1         an impact line, and a quote
+         lead       a lead paragraph on an ordinary slide (NOT the case
+                    study's tagline any more - that is its own role now)
+         body       running text
+         body-sm    dense or secondary text
+         meta       small print, counters, labels
+
+     and two are structural rather than nameable on their own:
+
+         h2         the drawer's title and a panel heading
+         h3         a tile's name, a grid's column heads, and anything else
+                    that was a sub-heading before your sheet split the
+                    sub-headings into three named ones
+
+     FOUR OF THEM NOW HAVE NO USERS LEFT, and are kept only so that nothing
+     breaks if something still asks: `display`, `title`, `chapter`, and the
+     `lead` role's old job on the hero. Their work moved to the named roles
+     in block 2b. Say the word and they go.
+
+     Eleven roles. Everything written anywhere on the site is one of them.
+
+         display    the hero title at the top of a study
+         h1         an impact line, and a quote (they are set the same)
+         title      a slide's own heading, on every template
+         h2         the drawer's title, the hero's second line, a panel
+                    heading that stands in for a slide title
+         h3         a sub-heading: a tile's name, a persona's section
+                    titles, a grid's column heads
+         lead       a lead paragraph
+         body       running text
+         body-sm    dense or secondary text
+         caption    the line under a picture
+         meta       small print, counters, labels
+         chapter    a chapter mark - the heading on a chapter-name-graphics
+                    slide, which names a stretch of slides rather than one
+
+     `title` AND `h1` ARE THE SAME NUMBER, which is the point of having
+     both. A slide's heading now reads at impact size; if you ever want it
+     a step down again, change `--t-title` alone and the impact lines stay
+     where they are. Before this they shared the `h2` role, so there was no
+     way to move one without moving the drawer title with it. */
+
+  /*               size   hand it is set in                                */
+  --t-display: 132;
+  --t-display-hand: var(--t-display-face);
+  --t-h1: 88;
+  --t-h1-hand: var(--t-display-face);
+  --t-title: 88;
+  --t-title-hand: var(--t-display-face);
+  --t-h2: 56;
+  --t-h2-hand: var(--t-display-face);
+  --t-h3: 40;
+  --t-h3-hand: var(--t-display-face);
+  --t-lead: 40;
+  --t-lead-hand: var(--t-body-face);
+  --t-body: 30;
+  --t-body-hand: var(--t-body-face);
+  --t-body-sm: 25;
+  --t-body-sm-hand: var(--t-body-face);
+  --t-caption: 32;
+  --t-caption-hand: var(--t-hand-face);
+  --t-meta: 24;
+  --t-meta-hand: var(--t-hand-face);
+
+  /* THE ELEVENTH ROLE, AND WHY IT IS NOT JUST `title`.
+
+     A chapter mark is the one heading on the page that is not announcing a
+     slide - it is announcing a STRETCH of them. It wore the `title` role
+     because at the time that was the only heading role there was, which
+     meant a chapter could not be made louder than the slide headings under
+     it without making every slide heading louder too.
+
+     IT STARTS AT EXACTLY WHAT IT HAD, so nothing moves until you move it:
+     88, the display face, the same floor. Raise it and only the chapter
+     marks grow.
+
+     IT IS ALSO THE ONE ROLE WHOSE LETTERS HAVE SOMETHING MOVING INSIDE
+     THEM, which is a reason to want it bigger: the clouds get more room to
+     read as clouds at a larger size, and this is the knob for that half of
+     the problem - `--cs-chap-cloud-size` is the other half. */
+  --t-chapter: 88;
+  --t-chapter-hand: var(--t-display-face);
+
+  /* WHY CAPTION AND META LOOK BIG IN THAT LIST. Both are set in Caveat, a
+     handwritten face with a small x-height: at the same nominal size it
+     READS about 15% smaller than the rounded body face beside it. A 32
+     caption next to 30 body does not compete with the body - it reads a
+     shade smaller, which is what a caption should do. Sizes measure the
+     box, not the legibility.
+
+     SO IF YOU MOVE A ROLE TO A DIFFERENT HAND, CHECK ITS SIZE AGAIN. Put
+     caption into the body face at 32 and it will suddenly be louder than
+     the body text under it. The two columns in that table are not
+     independent of each other, and that is the one trap in this file. */
+
+
+  /* =======================================================================
+     2b - THE TEN NAMED ROLES, from your typography sheet
+     =======================================================================
+     These are the names on `typography-specs`, and each one does exactly
+     what the sheet says it does and nothing else. They are the roles you
+     will reach for; the block above is what the site used before it had
+     your names, and is still carrying everything your sheet does not
+     mention (see the note under it).
+
+         case-study-title          the title of the case study. Only that.
+         case-study-tagline        the line right under that title
+         case-study-pills          the pills naming a study's characteristics
+         accordion-header          the header of an accordion
+         slide-title               a slide's own heading, full width, every
+                                   template EXCEPT rule-title - see
+                                   chapter-name
+         carousel-header           the line over a carousel that changes
+                                   with the picture: the "question" on a
+                                   title-steps slide
+         explains-section-header   a section heading INSIDE the explains
+                                   component, the one with its own scroll
+         section-header            a section heading anywhere else:
+                                   context-1, context-2, sections, and the
+                                   cards of a numbered grid
+         caption                   anything under a picture, a carousel, a
+                                   prototype or a carousel of prototypes
+         chapter-name              a chapter mark: the chapter-name-graphics
+                                   slides and the rule-title template
+
+     THE VALUES BELOW ARE PLACEHOLDERS, as you asked. Seven of them are
+     exactly what those elements are set at today, so nothing moves until
+     you move it. Three are the choices you made when I asked:
+
+       chapter-name     132, not 88. The rule-title dividers keep what they
+                        had and the chapter-name-graphics slides come UP to
+                        meet them - which also gives the clouds inside those
+                        letters more room to read as clouds.
+       carousel-header  the same as section-header, so every header below a
+                        slide title is one size. It was body size in the
+                        body hand; it is now a heading, in a heading's hand.
+       case-study-      its own role, split from the lead paragraphs it used
+       tagline          to share with, so you can move one without the
+                        other.
+
+     `caption` IS NOT REPEATED HERE. It already had your name and your
+     value, down in block 2; moving it would have been two lines doing one
+     job. It is the one role on your sheet that needed nothing. */
+
+  /*                          size   hand it is set in                     */
+  --t-case-study-title: 132;
+  --t-case-study-title-hand: var(--t-display-face);
+  --t-case-study-tagline: 40;
+  --t-case-study-tagline-hand: var(--t-body-face);
+  /* THE ROUNDED FACE, NOT THE HANDWRITTEN ONE. The pills were the only
+     thing on the site asking a colour file for a font rather than a role,
+     and what that happened to resolve to was the BODY face - not the
+     handwritten one the `meta` role uses, which is what you would guess
+     from their size. They keep what they have; see the open question. */
+  --t-case-study-pills: 24;
+  --t-case-study-pills-hand: var(--t-body-face);
+  --t-accordion-header: 40;
+  --t-accordion-header-hand: var(--t-display-face);
+  --t-slide-title: 88;
+  --t-slide-title-hand: var(--t-display-face);
+  --t-carousel-header: 40;
+  --t-carousel-header-hand: var(--t-display-face);
+  --t-explains-section-header: 40;
+  --t-explains-section-header-hand: var(--t-display-face);
+  --t-section-header: 40;
+  --t-section-header-hand: var(--t-display-face);
+  --t-chapter-name: 132;
+  --t-chapter-name-hand: var(--t-display-face);
+
+
+
+  /* =======================================================================
+     2c - THE CASE STUDY CATALOGUE, the modal on the landing page
+     =======================================================================
+     SEVEN NAMES, ONE PLACE. These are the seven pieces of writing in the
+     case study catalogue, and each one is a complete setting on a single
+     line: the hand it is set in, how big it is on a desk, how big it is on
+     a phone, and its line height, tracking and weight.
+
+     WHY THESE CARRY THEIR OWN TYPESETTING when every other role keeps its
+     line height and tracking over in type.css: the catalogue is a sheet
+     drawn at a fixed size - 934 by 656 - rather than a page that scales
+     with the window, so its type is in real pixels rather than in scale
+     units. Splitting seven roles across two files, with one half in a unit
+     the other half does not use, would be two places to look and one of
+     them wrong. Everything the catalogue sets is here.
+
+     THE HANDS YOU CAN POINT THESE AT - any of the four from block 1:
+
+         var(--t-display-face)   Shobhit Regal, your own thin drawn face
+         var(--t-body-face)      Varela Round, the rounded reading face
+         var(--t-hand-face)      Caveat, the quick handwritten one
+         var(--t-kk-face)        font_kk_version_1, the second drawn face
+
+     THE SIZES BELOW ARE MEASURED OFF YOUR SHEET rather than chosen. The
+     reference was rendered at one PDF point to one pixel and the ink of
+     each line measured against the same words set here, so "the company
+     name is 38" means your drawing's company name is 38 and not that 38
+     looked about right.
+
+     A PHONE SIZE IS NOT A FLOOR. The roles above clamp smoothly between a
+     ceiling and a floor because they scale with the window. These do not
+     scale at all, so each one simply has a second value that takes over
+     below 820 pixels - a step, not a slide.
+
+                             the hand it is set in                  desk  phone   lh     tracking  weight  */
+  --t-catalogue-company-hand: var(--t-display-face);
+  --t-catalogue-company: 38px;
+  --t-catalogue-company-phone: 28px;
+  --t-catalogue-company-lh: 1.1;
+  --t-catalogue-company-ls: 0.01em;
+  --t-catalogue-company-w: 400;
+
+  --t-catalogue-subtitle-hand: var(--t-body-face);
+  --t-catalogue-subtitle: 20px;
+  --t-catalogue-subtitle-phone: 17px;
+  --t-catalogue-subtitle-lh: 1.2;
+  --t-catalogue-subtitle-ls: 0.01em;
+  --t-catalogue-subtitle-w: 400;
+
+  /* THE ONE THAT WAS TOO SMALL. Your sheet sets the case study's name at
+     30 and lets it wrap to two lines; it was at 24 here, which is why it
+     read as a label rather than as the card's title. */
+  --t-catalogue-name-hand: var(--t-kk-face);
+  --t-catalogue-name: 32px;
+  --t-catalogue-name-phone: 24px;
+  --t-catalogue-name-lh: 1.1;
+  --t-catalogue-name-ls: 0.02em;
+  --t-catalogue-name-w: 400;
+
+  --t-catalogue-desc-hand: var(--t-body-face);
+  --t-catalogue-desc: 21px;
+  --t-catalogue-desc-phone: 17px;
+  --t-catalogue-desc-lh: 1.3;
+  --t-catalogue-desc-ls: 0;
+  --t-catalogue-desc-w: 400;
+
+  --t-catalogue-impact-title-hand: var(--t-kk-face);
+  --t-catalogue-impact-title: 24px;
+  --t-catalogue-impact-title-phone: 15px;
+  --t-catalogue-impact-title-lh: 1.2;
+  --t-catalogue-impact-title-ls: 0.01em;
+  --t-catalogue-impact-title-w: 400;
+
+  /* The bold "Impact#1:" at the head of a line is the same role at a
+     heavier weight - one knob, because they are one sentence. */
+  --t-catalogue-impact-hand: var(--t-body-face);
+  --t-catalogue-impact: 20px;
+  --t-catalogue-impact-phone: 13px;
+  --t-catalogue-impact-lh: 1.32;
+  --t-catalogue-impact-ls: 0;
+  --t-catalogue-impact-w: 400;
+  --t-catalogue-impact-lead-w: 700;
+
+  /* CANCEL, BACK, UNLOCK & VIEW - every piece of writing in the band at
+     the foot, so the three never drift apart. */
+  --t-catalogue-action-hand: var(--t-body-face);
+  --t-catalogue-action: 20px;
+  --t-catalogue-action-phone: 17px;
+  --t-catalogue-action-lh: 1.2;
+  --t-catalogue-action-ls: 0.06em;
+  --t-catalogue-action-w: 400;
+
+
+  /* =======================================================================
+     2e - THE LANDING PAGE, the four worlds you travel through
+     =======================================================================
+     NINE NAMES, ONE PLACE, and they pair one-to-one with the words in
+     common/landing-copy.js: what a thing SAYS is there, how big it is and
+     what hand it is set in is here. Neither file has to know about the
+     other.
+
+     THE LAST TWO ARE PAINTED ONTO A DRAWING rather than laid out as writing
+     on a page, and that is worth knowing because it changes what they can
+     do. A canvas cannot read a stylesheet - it wants a plain font string -
+     so js/hw-config.js asks the browser what these resolve to and copies
+     the answers across once the page has loaded. Everything still changes
+     from here; it simply goes the long way round. For the same reason those
+     two take a PLAIN PIXEL SIZE rather than a scale unit: there is no
+     element to scale against.
+
+     THE HANDS, same four as always:
+
+         var(--t-display-face)   Shobhit Regal, your own thin drawn face
+         var(--t-body-face)      Varela Round, the rounded reading face
+         var(--t-hand-face)      Caveat, the quick handwritten one
+         var(--t-kk-face)        font_kk_version_1, the second drawn face
+
+                              the hand it is set in                    desk   phone   lh    tracking weight */
+
+  /* the name, top left, that takes you home */
+  --t-hw-wordmark-hand: var(--t-kk-face);
+  --t-hw-wordmark: 64;
+  --t-hw-wordmark-min: 20px;
+  --t-hw-wordmark-lh: 1.25;
+  --t-hw-wordmark-ls: -0.02em;
+  --t-hw-wordmark-w: 500;
+
+  /* the smaller line under it */
+  --t-hw-subtext-hand: var(--t-body-face);
+  --t-hw-subtext: 32;
+  --t-hw-subtext-min: 15px;
+  --t-hw-subtext-lh: 1.3;
+  --t-hw-subtext-ls: 0;
+  --t-hw-subtext-w: 500;
+
+  /* "About Me", "Case Studies", "Experiments", "Get In Touch" */
+  --t-hw-panel-title-hand: var(--t-display-face);
+  --t-hw-panel-title: 96;
+  --t-hw-panel-title-min: 26px;
+  --t-hw-panel-title-lh: 1.2;
+  --t-hw-panel-title-ls: -0.03em;
+  --t-hw-panel-title-w: 500;
+
+  /* the paragraphs under each of those */
+  --t-hw-panel-body-hand: var(--t-body-face);
+  --t-hw-panel-body: 40;
+  --t-hw-panel-body-min: 16px;
+  --t-hw-panel-body-lh: 1.5;
+  --t-hw-panel-body-ls: 0;
+  --t-hw-panel-body-w: 400;
+
+  /* "Speed of spin" */
+  --t-hw-spin-label-hand: var(--t-kk-face);
+  --t-hw-spin-label: 25;
+  --t-hw-spin-label-min: 15px;
+  --t-hw-spin-label-lh: 1.3;
+  --t-hw-spin-label-ls: 0;
+  --t-hw-spin-label-w: 400;
+
+  /* "Slow", "Normal", "Fast" */
+  --t-hw-spin-btn-hand: var(--t-kk-face);
+  --t-hw-spin-btn: 32;
+  --t-hw-spin-btn-min: 15px;
+  --t-hw-spin-btn-lh: 1;
+  --t-hw-spin-btn-ls: 0;
+  --t-hw-spin-btn-w: 400;
+
+  /* "scroll to travel" beside a planet on a desk */
+  --t-hw-scroll-hand: var(--t-kk-face);
+  --t-hw-scroll: 40;
+  --t-hw-scroll-min: 15px;
+  --t-hw-scroll-lh: 1.3;
+  --t-hw-scroll-ls: 0;
+  --t-hw-scroll-w: 400;
+
+  /* "scroll down to visit other planets" along the foot of a phone. ITS OWN
+     ROLE, not a phone size of the one above, because on a phone it is not
+     an aside any more - it is the only instruction on the screen, and it
+     has to carry that. Bigger, and tracked out a little. */
+  --t-hw-scroll-phone-hand: var(--t-kk-face);
+  --t-hw-scroll-phone: 30;
+  --t-hw-scroll-phone-min: 17px;
+  --t-hw-scroll-phone-lh: 1.3;
+  --t-hw-scroll-phone-ls: 0.02em;
+  --t-hw-scroll-phone-w: 500;
+
+  /* ---- the two painted onto the drawing (plain pixels - see the note) ----
+
+     THE NAME THAT APPEARS WHEN YOU POINT AT A DOOR. */
+  --t-hw-hover-hand: var(--t-kk-face);
+  --t-hw-hover: 18px;
+  --t-hw-hover-phone: 18px;
+
+  /* A DIAGRAMMATIC LABEL, the kind that is always there - "she naps all
+     day" beside the leopard. Set a touch larger than the hover name on
+     purpose: a hover name is read in the half second your cursor is on
+     something, and this one is part of the picture. */
+  --t-hw-diagram-hand: var(--t-kk-face);
+  --t-hw-diagram: 18px;
+  --t-hw-diagram-phone: 19px;
+
+
+  /* THE NAV BAR at the bottom of the screen*/
+  --t-hw-nav-hand: var(--t-kk-face);
+  /* which typeface */
+  --t-hw-nav: 30;
+  --t-hw-nav-min: 20px;
+  --t-hw-nav-lh: 1;
+  --t-hw-nav-ls: 0;
+  --t-hw-nav-w: 400;
+
+  /* =======================================================================
+     3 - THE FLOORS
+     =======================================================================
+     A real pixel size the role will never go below, whatever happens to
+     the window. This is what the first version of the scale was missing
+     and why everything was unreadable on a phone.
+
+     A floor is not a phone-only rule - it is simply the bottom of the
+     clamp - but a phone is where it bites. Raise one and small screens get
+     that role bigger without touching the laptop at all. */
+
+  --t-display-min: 36px;
+  --t-h1-min: 28px;
+  --t-title-min: 28px;
+  --t-h2-min: 24px;
+  --t-h3-min: 20px;
+  --t-lead-min: 20px;
+  --t-body-min: 17px;
+  --t-body-sm-min: 16px;
+  --t-caption-min: 18px;
+  --t-meta-min: 15px;
+  --t-chapter-min: 28px;
+
+  /* ---- the floors for the ten named roles ---- */
+  --t-case-study-title-min: 36px;
+  --t-case-study-tagline-min: 20px;
+  --t-case-study-pills-min: 15px;
+  --t-accordion-header-min: 20px;
+  --t-slide-title-min: 28px;
+  --t-carousel-header-min: 20px;
+  --t-explains-section-header-min: 20px;
+  --t-section-header-min: 20px;
+  --t-chapter-name-min: 36px;
+}
+
+/* ============================================================================
+   WHAT THESE KNOBS DO NOT REACH, so you are not left hunting
+
+   THE HAND PER ROLE reaches everything set through a ROLE: every heading,
+   paragraph, caption and label a template draws, and anything wearing a
+   `.t-` class. It does NOT reach the page's own furniture - the password
+   screen, the loader, the light/dark switch, the prototype frame's chrome.
+   Those ask for one of the three hands in block 1 directly, because they
+   are not a role in the story; they are the building. Change a hand in
+   block 1 and they follow; change a role's hand in block 2 and they do not.
+
+   LINE HEIGHT, TRACKING AND WEIGHT are in type.css, under "how each role is
+   set", a few lines below where this file is imported. They are typesetting
+   rather than scale: tracking has to ease off as type gets smaller, and
+   getting that wrong is a different kind of mistake from picking a size.
+   Say the word and they can move here too.
+
+   COLOUR is not here either. A role's colour depends on the surface it is
+   on and on the study's two accents, so it lives with the colour tokens in
+   system/css/cs-tokens.css.
+   ========================================================================= */

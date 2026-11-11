@@ -1,0 +1,61 @@
+﻿/* lofi-drawer.css — SURFACE. The ADJUST PARAMETERS panel.
+
+   A full-height panel against the left edge, over a dimmed page. Title
+   bar, a column of labelled controls, a footer with CANCEL and APPLY.
+
+   WHY A DRAWER AND NOT A MODAL. The reference puts it against the edge
+   and leaves the table visible beside it, which is the whole point: you
+   are adjusting the thing you can still see. A centred dialog would cover
+   the answer you are tuning. That is the question to ask whenever you
+   reach for one of these two - "does the reader need to watch what they
+   are changing?"
+
+   NOTHING IS APPLIED UNTIL `APPLY`. A drawer that updated live would be a
+   filter bar, not a form, and would need no footer at all. */
+
+.lofi-drawer {
+  position: fixed;
+  z-index: 70;
+  top: 0; bottom: 0; left: 0;
+  width: min(420px, 90vw);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--lofi-panel-green);
+  box-shadow: 10px 0 30px rgba(63, 87, 87, 0.22);
+}
+.lofi-drawer[hidden] { display: none; }
+
+/* against the other edge, for a drawer that belongs to something on the right */
+.lofi-drawer--right { left: auto; right: 0; box-shadow: -10px 0 30px rgba(63,87,87,0.22); }
+
+.lofi-drawer-head {
+  background: var(--lofi-pos);
+  padding: var(--lofi-s4) var(--lofi-s5);
+}
+.lofi-drawer-title {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 700;
+  font-size: var(--lofi-t-lg);
+  margin: 0;
+}
+
+.lofi-drawer-body {
+  padding: var(--lofi-s5);
+  overflow: auto;
+  min-height: 0;
+  display: grid;
+  gap: var(--lofi-s5);
+  align-content: start;
+}
+
+.lofi-drawer-foot {
+  border-top: 2px solid var(--lofi-fire);
+  padding: var(--lofi-s4) var(--lofi-s5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lofi-s4);
+}
+
