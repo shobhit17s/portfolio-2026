@@ -1,0 +1,124 @@
+/* lofi-coach.css — CONTROL. A nudge that says what to press next.
+
+   WHAT IT IS FOR. A prototype has one path through it and no way of
+   saying so. A reader opens it, sees a toolbar of six controls, presses
+   the wrong one, nothing happens, and decides the prototype is broken
+   when in fact they simply had not found the door. The coach mark is the
+   sign on the door.
+
+       <div class="lofi-coach lofi-coach--below-end" id="cc-coach-1" hidden>
+         <p class="lofi-coach-says">Start here. Open <b>Actions</b>.</p>
+         <button type="button" class="lofi-coach-skip" data-lofi-coach-skip>Skip</button>
+       </div>
+
+   IT IS POSITIONED BY ITS PARENT, not by script. The bubble is absolutely
+   placed inside whatever it is dropped into, so it is put next to the
+   thing it is pointing at by being put INSIDE the thing it is pointing
+   at. No measuring, and - the reason that matters here - nothing to go
+   wrong when the whole canvas is scaled by a transform, which is where
+   every measured-position tooltip in a prototype like this falls over.
+
+   SUN, NOT MIST. Mist is "a person chose this"; the coach is the kit
+   speaking in its own voice, over the top of the design, and sun is the
+   kit's colour for "look here". It is deliberately the one thing on
+   screen that does not look like part of the product.
+   =========================================================================== */
+
+.lofi-coach {
+  position: absolute;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: var(--lofi-s3);
+  width: max-content;
+  max-width: 260px;
+  background: var(--lofi-sun);
+  color: var(--lofi-on-dark);
+  border-radius: var(--lofi-r-lg);
+  padding: var(--lofi-s3) var(--lofi-s4);
+  box-shadow: 0 10px 22px rgba(63, 87, 87, 0.22);
+  /* IT MUST NOT SWALLOW THE PRESS IT IS ASKING FOR. The bubble sits over
+     the toolbar, and a reader aiming at the button under it would hit the
+     bubble instead. The skip button turns pointer events back on for
+     itself alone. */
+  pointer-events: none;
+}
+.lofi-coach[hidden] { display: none; }
+
+.lofi-coach-says {
+  margin: 0;
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-sm);
+  line-height: 1.35;
+}
+.lofi-coach-says b { font-weight: 700; text-decoration: underline; }
+
+.lofi-coach-skip {
+  pointer-events: auto;
+  flex: 0 0 auto;
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-size: var(--lofi-t-xs);
+  font-weight: 700;
+  color: var(--lofi-on-dark);
+  background: rgba(63, 87, 87, 0.22);
+  border: 0;
+  border-radius: var(--lofi-r-pill);
+  padding: var(--lofi-s1) var(--lofi-s3);
+  cursor: pointer;
+}
+.lofi-coach-skip:hover { background: rgba(63, 87, 87, 0.38); }
+
+/* ---------- THE POINTER ----------
+   A small square turned 45 degrees, tucked under the edge the bubble is
+   hanging from. One rule per side, named for where the BUBBLE is rather
+   than for where the arrow points, because that is how it reads when you
+   are writing the markup. */
+.lofi-coach::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  background: var(--lofi-sun);
+  transform: rotate(45deg);
+}
+
+.lofi-coach--below,
+.lofi-coach--below-end { top: calc(100% + 10px); }
+.lofi-coach--below      { left: 50%; translate: -50% 0; }
+.lofi-coach--below-end  { right: 0; }
+.lofi-coach--below::after,
+.lofi-coach--below-end::after { top: -5px; }
+.lofi-coach--below::after     { left: 50%; margin-left: -6px; }
+.lofi-coach--below-end::after { right: 28px; }
+
+.lofi-coach--above { bottom: calc(100% + 10px); left: 50%; translate: -50% 0; }
+.lofi-coach--above::after { bottom: -5px; left: 50%; margin-left: -6px; }
+
+.lofi-coach--left { right: calc(100% + 10px); top: 50%; translate: 0 -50%; }
+.lofi-coach--left::after { right: -5px; top: 50%; margin-top: -6px; }
+
+.lofi-coach--right { left: calc(100% + 10px); top: 50%; translate: 0 -50%; }
+.lofi-coach--right::after { left: -5px; top: 50%; margin-top: -6px; }
+
+/* ---------- THE RING ON THE THING ITSELF ----------
+   The bubble says what to press; this says exactly which pixels. Put
+   `is-coached` on the control. It is an outline rather than a border so
+   it costs no layout - a button that grows by 3px when the tour starts
+   would shove the toolbar sideways. */
+.is-coached {
+  outline: 3px solid var(--lofi-sun);
+  outline-offset: 3px;
+  border-radius: var(--lofi-r-md);
+  animation: lofi-coach-breathe 1.6s ease-in-out infinite;
+}
+@keyframes lofi-coach-breathe {
+  0%, 100% { outline-color: var(--lofi-sun); }
+  50%      { outline-color: rgba(228, 146, 4, 0.25); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-coached { animation: none; }
+}

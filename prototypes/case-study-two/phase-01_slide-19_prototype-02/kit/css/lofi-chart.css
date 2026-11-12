@@ -1,0 +1,162 @@
+/* lofi-chart.css — CONTENT. The trend view.
+
+   A multi-series line chart with upright markers you can drag along the
+   years. Drawn as one SVG by lofi-chart.js; everything here is colour and
+   weight.
+
+   THE LINES ARE THICK AND ROUNDED - 6 units with round caps and joins.
+   That is not decoration: a lo-fi chart is read for its SHAPE, not its
+   values, and a thin line invites someone to try to read a number off it.
+   Thick lines say "this is the gist". */
+
+/* THE CHART IS AS BIG AS THE BOX IT IS GIVEN, IN BOTH DIRECTIONS.
+
+   It used to be `width: 100%; height: auto`, which means "as wide as the
+   box, and then as tall as that width makes me". The drawing has a fixed
+   shape, so a wide box made a tall chart - and on a widget whose height
+   was already settled, that extra height went straight through the bottom
+   edge.
+
+   Now the box decides both. The script reads the box it has been given and
+   builds the drawing's own grid to that shape, so the picture fills the
+   space exactly with nothing stretched: see `measure()` in lofi-chart.js. */
+.lofi-chart {
+  display: block;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 120px;
+}
+.lofi-chart svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.lofi-chart-axis   { stroke: var(--lofi-pos); stroke-width: 3; fill: none; }
+.lofi-chart-grid   { stroke: var(--lofi-pos); stroke-width: 1.5; fill: none; opacity: 0.9; }
+
+.lofi-chart-line {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lofi-chart-tick {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-size: 11px;
+  fill: var(--lofi-ink);
+}
+.lofi-chart-name {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-size: 15px;
+  font-weight: 700;
+  fill: var(--lofi-ink);
+}
+
+/* THE SCRUBBER. An upright through every series at one year, with a
+   triangle at each end so it reads as a handle rather than as grid. */
+.lofi-chart-scrub      { stroke: var(--lofi-mist); stroke-width: 3; cursor: ew-resize; }
+.lofi-chart-scrub-cap  { fill: var(--lofi-mist); cursor: ew-resize; }
+.lofi-chart-scrub-knot { fill: var(--lofi-mist); }
+.lofi-chart-scrub-hit  { fill: transparent; cursor: ew-resize; }
+.lofi-chart-scrub-hit:focus-visible { outline: 3px solid var(--lofi-mist); }
+
+.lofi-chart-legend {
+  flex: 0 0 auto;
+  display: flex;
+  /* CENTRED, as the sheet of 3 November draws it. Pushed to one end it
+     read as a footnote to the readout panel beside it; centred under the
+     plot it reads as a key to the plot, which is what it is. */
+  justify-content: center;
+  gap: var(--lofi-s5);
+  flex-wrap: wrap;
+  margin-top: var(--lofi-s3);
+}
+.lofi-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lofi-s2);
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 600;
+  font-size: var(--lofi-t-sm);
+}
+.lofi-chart-legend-item i {
+  width: 22px; height: 16px;
+  border-radius: var(--lofi-r-sm);
+  flex: none;
+}
+
+/* the arrowheads on the two axes - see the note in lofi-chart.js */
+.lofi-chart-axis-head {
+  stroke: var(--lofi-pos);
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- THE READOUT BESIDE THE CHART ----------
+
+   What the scrubber is pointing at, in words and figures. The sheet of
+   3 November puts it to the right of the plot: the year at the top, then
+   each case with its value set large and its delta against the base set
+   small beside it.
+
+   WHY THE VALUE IS BIG AND THE DELTA IS SMALL. The value is what the
+   company does; the delta is a reading of it against another column. The
+   same decision the grid cell makes, for the same reason - and making
+   the two agree is what stops the chart and the table feeling like two
+   different products. */
+.lofi-chart-readout {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--lofi-s5);
+  padding-left: var(--lofi-s5);
+  min-width: 190px;
+}
+.lofi-chart-readout-when {
+  margin: 0;
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-size: var(--lofi-t-md);
+  color: var(--lofi-mist);
+}
+.lofi-chart-readout-row { display: flex; flex-direction: column; gap: 2px; }
+.lofi-chart-readout-name {
+  font-family: var(--lofi-face-label);
+  font-size: var(--lofi-t-md);
+  color: var(--lofi-ink-soft);
+}
+.lofi-chart-readout-figs { display: flex; align-items: baseline; gap: var(--lofi-s3); }
+.lofi-chart-readout-value {
+  font-family: var(--lofi-face-data);
+  font-size: 34px;
+  line-height: 1;
+  color: var(--lofi-ink);
+  font-variant-numeric: tabular-nums;
+}
+.lofi-chart-readout-delta {
+  font-family: var(--lofi-face-data);
+  font-size: var(--lofi-t-sm);
+  color: var(--lofi-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* the chart and its readout side by side */
+.lofi-chart-pair {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+}
+.lofi-chart-pair > .lofi-chart { flex: 1 1 auto; min-width: 0; }

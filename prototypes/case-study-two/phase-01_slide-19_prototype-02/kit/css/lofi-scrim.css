@@ -1,0 +1,19 @@
+/* lofi-scrim.css — SURFACE. The dimming behind a modal or a drawer.
+
+   ITS OWN BLOCK ON PURPOSE. Both the export dialog and the parameters
+   drawer dim the page behind them, and in the reference they dim it the
+   same amount - so the dimming is a thing in its own right, used by two
+   blocks, rather than a detail copied into each of them.
+
+   It is olive rather than black. Black over a cream page reads as a
+   photograph going dark; a wash of the page's own green reads as the page
+   stepping back, which is what the reference draws. */
+
+.lofi-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(132, 158, 89, 0.42);
+  backdrop-filter: saturate(0.75);
+}
+.lofi-scrim[hidden] { display: none; }

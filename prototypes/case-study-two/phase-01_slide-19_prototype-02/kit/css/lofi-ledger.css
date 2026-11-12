@@ -1,0 +1,143 @@
+/* lofi-ledger.css — CONTENT. A model, read down the page.
+
+   A LEDGER IS NOT A TABLE, and the difference is why this is its own block
+   rather than a variant of `lofi-table`.
+
+   A table answers a question: here are the cases, here is how they differ.
+   It has one head, one body, and a legend saying what the colours mean.
+
+   A LEDGER IS A DOCUMENT. It is the whole model, in sections, each with
+   its own heading and its own head row of years, read top to bottom the
+   way a spreadsheet is read. Nothing in it is highlighted, because nothing
+   in it is the answer - the reader is looking something up, not being
+   shown a finding.
+
+       SECTION #1: FINANCIAL SUMMARY          <- .lofi-ledger-head
+       ┌─────────────────┬──────────────────┐
+       │ METRIC          │ 2026  2027  2028 │ <- a year head per section
+       ├─────────────────┼──────────────────┤
+       │ Revenue         │  420   445   472 │
+       │   Revenue % growth │  —    6.0   6.1│ <- indented: a reading of
+       │ EBITDA          │ 58.8  62.3  67.1 │    the row above it
+       └─────────────────┴──────────────────┘
+
+   THE FIRST COLUMN IS THE DOCUMENT'S SPINE. It is wider than the rest,
+   it does not scroll away sideways, and a heavy upright separates it from
+   the figures - that upright is the single thing that makes ten columns of
+   numbers readable, because it tells the eye where a row begins. */
+
+/* THE SCROLLING BODY. The ledger is longer than any widget, so it is the
+   part that scrolls while the toolbar and the tabs above it stay put. It
+   is a filling child by nature - a ledger always wants the rest of the
+   room. */
+.lofi-ledger {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--lofi-s6);
+  padding-right: var(--lofi-s2);
+}
+.lofi-ledger > * { flex: 0 0 auto; }
+
+/* ---------- a section ---------- */
+.lofi-ledger-section { display: block; }
+
+.lofi-ledger-head {
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-weight: 700;
+  font-size: var(--lofi-t-lg);
+  color: var(--lofi-ink);
+  margin: 0 0 var(--lofi-s4);
+}
+/* the number is quieter than the name - "SECTION #2" is an address, the
+   words after it are the thing itself */
+.lofi-ledger-no { color: var(--lofi-ink-soft); }
+
+/* ---------- the grid itself ---------- */
+.lofi-ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--lofi-face-data);
+  font-size: var(--lofi-t-sm);
+  color: var(--lofi-ink);
+  table-layout: fixed;
+}
+
+/* THE SPINE. A third of the width for the names and the rest shared out
+   between the years, which keeps every section's columns in line with
+   every other section's - ten sections that each measured themselves
+   would stair-step down the page. */
+.lofi-ledger-table col.lofi-ledger-spine { width: 26%; }
+
+.lofi-ledger-table th,
+.lofi-ledger-table td {
+  padding: var(--lofi-s3);
+  text-align: right;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* the year head */
+.lofi-ledger-table thead th {
+  font-weight: 400;
+  color: var(--lofi-ink);
+  border-bottom: 2px solid var(--lofi-line);
+  /* THE HEAD OF EVERY SECTION STAYS PUT as that section scrolls past, and
+     steps aside for the next one. `position: sticky` on a row inside a
+     scrolling box does exactly this with no script at all. */
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--lofi-canvas);
+}
+
+/* the spine cells: left-aligned, in the drawn face, one step larger than
+   the figures beside them for the reason the type note in lofi-table.css
+   gives */
+/* the selector is written long on purpose: the rule above aligns every
+   cell right, and the spine has to win against it */
+.lofi-ledger-table .lofi-ledger-metric {
+  text-align: left;
+  font-family: var(--lofi-face-label);
+  text-transform: uppercase;
+  letter-spacing: var(--lofi-track);
+  font-size: var(--lofi-t-md);
+  white-space: normal;
+  border-right: 3px solid var(--lofi-line);
+}
+
+/* A SUB-ROW IS A READING OF THE ROW ABOVE IT - a margin, a growth rate, a
+   day count. It is indented and set quieter, so the eye can skim the
+   top-level lines and drop into the detail only when it wants to. */
+.lofi-ledger-table .lofi-ledger-metric--sub {
+  padding-left: var(--lofi-s6);
+  color: var(--lofi-ink-soft);
+}
+.lofi-ledger-row--sub td { color: var(--lofi-ink-soft); }
+
+/* a hairline between rows, and a heavier one above a row that adds its
+   section up */
+.lofi-ledger-table tbody tr > * { border-bottom: 1px solid var(--lofi-line-soft); }
+.lofi-ledger-table tbody tr:last-child > * { border-bottom: 0; }
+.lofi-ledger-row--rule > * { border-top: 2px solid var(--lofi-line); }
+
+/* A FIGURE THAT DOES NOT EXIST gets an em dash, not a blank. A blank cell
+   reads as a bug - "the number failed to arrive" - where a dash reads as
+   a decision: there is no growth rate in the first year because there is
+   nothing before it. */
+.lofi-ledger-none { color: var(--lofi-ink-soft); }
+
+/* a negative figure is simply negative; this is a model, not a scorecard,
+   so nothing here is washed red or green */
+.lofi-ledger-neg { color: var(--lofi-ink); }
+
+/* the short fade when one case is swapped for another - see the note on
+   `swapLedger` in lofi-ledger.js for why it is there at all */
+@media (prefers-reduced-motion: no-preference) {
+  .lofi-ledger-section { transition: opacity 140ms ease; }
+  .lofi-ledger.is-swapping .lofi-ledger-section { opacity: 0.3; }
+}
